@@ -25,9 +25,9 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -82,7 +82,14 @@ public class Application extends Controller {
         }
         Date datetime = InputChecker.getAndValidateTime(params.get("time"), "time");
         if (datetime == null) {
-            datetime = new GregorianCalendar(KnownProvider.getTimeZone(provider_object)).getTime();
+            DateFormat now = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
+            now.setTimeZone(KnownProvider.getTimeZone(provider_object));
+            String localeDate = now.format(new Date());
+            try {
+                datetime = now.parse(localeDate);
+            } catch (ParseException e) {
+                datetime = new Date();
+            }
         }
         boolean isTimeAsDeparture = InputChecker.getAndValidateBoolean(params.get("timeAsDeparture"), true);
         //now, all parameters got handled. Did there occur an error?
@@ -93,10 +100,6 @@ public class Application extends Controller {
                 renderArgs.put(param.replace("[]", ""), (param.endsWith("[]") ? allParams.get(param) : allParams.get(param)[0]));
             }
             Validation.keep();
-//            for (int i = 0; i < Validation.errors().size(); i++) {
-//                Error error = Validation.errors().get(i);
-//                flash.error(error.message());
-//            }
             render("Application/selectTimetable.html");
         } else {
             //If everything is fine, create the desired timetables and print them out

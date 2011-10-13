@@ -21,16 +21,16 @@ import de.schildbach.pte.dto.Connection.Part;
 import de.schildbach.pte.dto.Connection.Trip;
 import de.schildbach.pte.dto.Location;
 import groovy.lang.Closure;
+import models.KnownProvider;
+import play.mvc.Scope;
 import play.templates.GroovyTemplate.ExecutableTemplate;
 import play.templates.JavaExtensions;
 
 import java.io.PrintWriter;
 import java.security.InvalidParameterException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: Laurin
@@ -167,6 +167,26 @@ public class FastTags extends play.templates.FastTags {
         }
         //If there was an error with the parameters...
         throw new InvalidParameterException("Default argument should be a list of Connection Parts.");
+    }
+
+    /**
+     * It prints out the current time
+     *
+     * @param args     ignored
+     * @param body     ignored
+     * @param out      used to return the result
+     * @param template used for getting the provider for which the time will be generated
+     * @param fromLine ignored
+     */
+    public static void _getCurrentTime(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        DateFormat now = new SimpleDateFormat("d.M.yy HH:mm");
+        try {
+            now.setTimeZone(KnownProvider.getById(((Scope.Params) template.getBinding().getVariable("params")).get("provider")).timeZone);
+        } catch (Exception e) {
+            now.setTimeZone(TimeZone.getTimeZone("CET"));
+            out.print("CET ");
+        }
+        out.print(now.format(new Date()));
     }
 
     /**

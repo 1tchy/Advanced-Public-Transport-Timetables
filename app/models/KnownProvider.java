@@ -19,7 +19,9 @@ package models;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.SbbProvider;
 
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 
 /**
@@ -50,15 +52,16 @@ public class KnownProvider {
      */
     private static boolean initialized = false;
     /**
-     * the list of all known providers
+     * the list of all known providers by its id
      */
-    private static HashSet<KnownProvider> all = new HashSet<KnownProvider>();
+    private static Map<String, KnownProvider> all = new HashMap<String, KnownProvider>();
 
     private KnownProvider(NetworkProvider provider, String humanName, String id, TimeZone timeZone) {
         this.provider = provider;
         this.humanName = humanName;
         this.id = id.toLowerCase();
         this.timeZone = timeZone;
+        all.put(this.id, this);
     }
 
     /**
@@ -67,8 +70,7 @@ public class KnownProvider {
     private static void initialize() {
         if (initialized) return;
         initialized = true;
-        all.add(new KnownProvider(new SbbProvider("MJXZ841ZfsmqqmSymWhBPy5dMNoqoGsHInHbWJQ5PTUZOJ1rLTkn8vVZOZDFfSe"), "SBB", "sbb", TimeZone.getTimeZone("Europe/Zurich")));
-
+        new KnownProvider(new SbbProvider("MJXZ841ZfsmqqmSymWhBPy5dMNoqoGsHInHbWJQ5PTUZOJ1rLTkn8vVZOZDFfSe"), "SBB", "sbb", TimeZone.getTimeZone("Europe/Zurich"));
     }
 
     /**
@@ -76,9 +78,9 @@ public class KnownProvider {
      *
      * @return list of all known providers
      */
-    public static HashSet<KnownProvider> all() {
+    public static Collection<KnownProvider> all() {
         initialize();
-        return all;
+        return all.values();
     }
 
     /**
@@ -90,12 +92,21 @@ public class KnownProvider {
     public static NetworkProvider get(String id) {
         assert id.toLowerCase().equals(id) : "The ID of a provider must be lowercase!";
         initialize();
-        for (KnownProvider provider : all) {
-            if (provider.id.equals(id)) {
-                return provider.provider;
-            }
-        }
-        return null;
+        KnownProvider knownProvider = all.get(id);
+        if (knownProvider == null) return null;
+        return knownProvider.provider;
+    }
+
+    /**
+     * Gets a known providers by its ID
+     *
+     * @param id The ID of a provider (must be lowercase)
+     * @return a known providers or null
+     */
+    public static KnownProvider getById(String id) {
+        assert id.toLowerCase().equals(id) : "The ID of a provider must be lowercase!";
+        initialize();
+        return all.get(id);
     }
 
     /**
@@ -106,7 +117,7 @@ public class KnownProvider {
      */
     public static String get(NetworkProvider provider) {
         initialize();
-        for (KnownProvider kp : all) {
+        for (KnownProvider kp : all.values()) {
             if (kp.provider.equals(provider)) {
                 return kp.humanName;
             }
@@ -122,7 +133,7 @@ public class KnownProvider {
      */
     public static TimeZone getTimeZone(NetworkProvider provider) {
         initialize();
-        for (KnownProvider kp : all) {
+        for (KnownProvider kp : all.values()) {
             if (kp.provider.equals(provider)) {
                 return kp.timeZone;
             }
