@@ -1,0 +1,129 @@
+*{
+* Copyright 2011, L. Murer.
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}*
+
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+<div class="content">
+    <a href="@{Application.index()}">Bahnanbieter w&auml;hlen</a>
+</div>
+
+<div class="content">
+
+    <h1>Schritt 2 - Fahrplanabfrage</h1>
+
+    #{ifErrors}
+    <h3>Fehler</h3>
+    <ul>
+        #{errors}
+        <li>
+            ${error.raw()}
+        </li>
+        #{/errors}
+    </ul>
+    #{/ifErrors}
+
+    <form action="@{Application.showTimetable(params.provider)}" method="GET">
+        <table border="0">
+            <tr>
+                <td>
+                    <label for="newstart">Von:</label>
+                </td>
+                <td id="start">
+                    #{list items:start, as:'s'}
+                    #{if s != ""}
+                    <input type="text" name="start[]" value="${s}" onkeyup="check('start');"/>
+                    #{/if}
+                    #{/list}
+                    <input id="newstart" type="text" name="start[]" value="" onkeyup="check('start');"/>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>Link: <a
+                            href="javascript:alert('Diese Auswahl legt fest, wie die Abfahrts- und die Zielhaltestellen behandelt werden sollen.\nVariante 1: Es werden Verbindungen f&uuml;r alle Abfahrtshaltestellen zu allen Zielhaltestellen gesucht.\nVariante 2: Es werden nur Verbindungen zwischen den Abfahrtshaltestellen und den darunter eingetragenen Zielhaltestellen gesucht.\n                  (Es m&uuml;ssen gleich viele Abfahrts- wie Zielhaltestelle angegeben werden.)')">[?]</a></label>
+                </td>
+                <td>
+                    <input type="radio" id="crossoverYes" name="crossover" value="true"#{if crossover!='false'}
+                    checked#{/if}>
+                    <label for="crossoverYes"><img src="/public/images/mix.png"
+                                                   alt="A&rarr;X | B&rarr;X | A&rarr;Y | B&rarr;Y"
+                                                   title="A&rarr;X | B&rarr;X | A&rarr;Y | B&rarr;Y"></label>
+                    <input type="radio" id="crossoverNo" name="crossover" value="false"#{if crossover=='false'}
+                    checked#{/if}>
+                    <label for="crossoverNo"><img src="/public/images/straight.png"
+                                                  alt="A&rarr;X | B&rarr;Y"
+                                                  title="A&rarr;X | B&rarr;Y"></label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="newstop">Nach:</label>
+                </td>
+                <td>
+                    <div id="stop">
+                        #{list items:stop, as:'s'}#{if s != ""}
+                        <input type="text" name="stop[]" value="${s}" onkeyup="check('stop');"/>
+                        #{/if}#{/list}
+                        <input id="newstop" type="text" name="stop[]" value="" onkeyup="check('stop');"/>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="time">Zeit:</label>
+                </td>
+                <td>
+                    <input id="time" type="time" name="time"
+                           value="#{if time?.size()>3}${time}#{/if}#{else}${new Date().format('HH:mm')}#{/else}"
+                           maxlength="5" style="width:26pt;"/>
+                    <input id="timeAsDeparture" type="checkbox" name="timeAsDeparture" value="true"#{if
+                    timeAsDeparture!='false'}
+                    checked#{/if}/><label for="timeAsDeparture">als Abfahrtszeit</label>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align:center;">
+                    <button type="submit"> Submit</button>
+                </td>
+            </tr>
+        </table>
+
+    </form>
+
+    <script type="text/javascript">
+        function check(whatToCheck) {
+            inputs = document.getElementById(whatToCheck).getElementsByTagName("input");
+            emptyField = -1;
+            for (var i = inputs.length - 1; i >= 0; i--) {
+                if (inputs[i].value == "") {
+                    if (emptyField == i + 1) {
+                        document.getElementById(whatToCheck).removeChild(inputs[emptyField]);
+                    }
+                    emptyField = i;
+                }
+            }
+            if (emptyField == -1) {
+                field = document.createElement("input")
+                field.setAttribute("type", "text");
+                field.setAttribute("name", whatToCheck + "[]");
+                field.setAttribute("onkeyup", "check('" + whatToCheck + "');");
+                document.getElementById(whatToCheck).appendChild(field);
+            }
+        }
+    </script>
+</div>

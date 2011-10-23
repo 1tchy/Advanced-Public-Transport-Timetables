@@ -1,0 +1,30 @@
+Advanced Public Transport Timetables
+
+Diese Webapplikation kann spezialisierte Abfragen für den Öffentlichen Verkehr durchführen.
+Momentan:
+   1. Mehrere Verbindungen: Verbindungsabfrage mit der von einer oder mehreren Abfahrthaltestellen zu einer oder mehreren Zielhaltestellen eine Fahrplantabelle getätigt werden kann. Beispielsweise:
+        - Ich suche eine Verbindung von Maschwanden nach Luzern. Soll ich den Zug ab Mettmenstetten oder ab Mühlau nehmen?
+        - Ich komme mit dem Zug in Zürich HB an. Um nach Hause zu kommen, soll ich das Tram nach Zürich Birchstrasse nehmen oder eine S-Bahn nach Zürich Oerlikon?
+
+
+
+Sie entstand im Rahmen eines Miniprojekts an der Fachhochschule Rapperswil, Schweiz durch L. Murer.
+
+
+
+Sie wird unter der GPLv3 zur Verfügung gestellt:
+
+Copyright $today.year, L. Murer.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.

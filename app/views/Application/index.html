@@ -1,0 +1,59 @@
+*{
+* Copyright 2011, L. Murer.
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+}*
+
+#{extends 'main.html' /}
+#{set title:'Home' /}
+
+<div class="content">
+
+    <h1>Advanced Public Transport Timetables</h1>
+
+    <p>Auf dieser Seite können Sie spezialisierte Abfragen für den Öffentlichen Verkehr durchführen.</p>
+    <ol>
+        <li><b>Mehrere Verbindungen:</b> Verbindungsabfrage mit der von einer oder mehreren Abfahrthaltestellen zu einer
+            oder mehreren Zielhaltestellen eine Fahrplantabelle getätigt werden kann. Beispielsweise:
+            <ul>
+                <li>Ich suche eine Verbindung von Maschwanden nach Luzern. Soll ich den Zug ab Mettmenstetten oder ab
+                    Mühlau nehmen?
+                </li>
+                <li>Ich komme mit dem Zug in Zürich HB an. Um nach Hause zu kommen, soll ich das Tram nach Zürich
+                    Birchstrasse nehmen oder eine S-Bahn nach Zürich Oerlikon?
+                </li>
+            </ul>
+        </li>
+    </ol>
+
+    <h3>Um eine Anfrage zu Starten, Schritt 1 - Bahnanbieter wählen:</h3>
+
+
+    Liste der Bahnanbieter: <select size="1" onchange="window.location.href=this.value">
+        <option value="">-------- Wählen --------</option>
+        #{list items:provider, as:'s'}
+        <option value="@{Application.selectTimetable(s.id)}">${s.humanName}</option>
+        #{/list}
+    </select>
+
+    <noscript>
+        <ul>
+            <li>
+                #{list items:provider, as:'s'}
+                <a href="@{Application.selectTimetable(s.id)}">${s.humanName}</a>
+                #{/list}
+            </li>
+        </ul>
+    </noscript>
+</div>
