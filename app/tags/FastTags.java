@@ -127,25 +127,25 @@ public class FastTags extends play.templates.FastTags {
                             isWalking = true;
                             continue;
                         }
-                        out.print("\t\t<td>");
+                        out.print("\t\t<td style='padding:0 10px;'>");
                         //If the last station was the same as this one, no need to display its name again (as it's the second part of the line in the output view)
                         if (lastStationName.equals(getLocation(via.departure)) && (via instanceof Trip)) {
                             //make simple output (with Track and Time only)
                             Trip trip = (Trip) via;
                             String gleis = trip.departurePosition;
                             if (gleis != null && gleis.length() > 0) {
-                                out.print("umsteigen auf Gleis " + gleis + " (" + getTime(trip.departureTime) + ")");
+                                out.print("umsteigen auf</td>\n\t\t<td>Gleis " + gleis + " (" + getTime(trip.departureTime) + ")");
                             } else {
-                                out.print(", Weiterfahrt " + getTime(trip.departureTime));
+                                out.print(", Weiterfahrt</td>\n\t\t<td>" + getTime(trip.departureTime));
                             }
                         } else {
                             //if it's not simple to display...
                             if (isWalking) { //if we walked to here
                                 isWalking = false;
-                                out.print("Fussweg nach ");
+                                out.print("Fussweg nach</td>\n\t\t<td>");
                             } else {
                                 //or use a general description
-                                out.print("umsteigen auf ");
+                                out.print("umsteigen auf</td>\n\t\t<td>");
                             }
                             //and the target departure to change to
                             out.print(getPartOfPart(via, true) + "</td>");
