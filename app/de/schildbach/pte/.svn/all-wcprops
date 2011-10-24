@@ -1,0 +1,431 @@
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/!svn/ver/806/trunk/src/de/schildbach/pte
+END
+TleaProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/TleaProvider.java
+END
+NphProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/723/trunk/src/de/schildbach/pte/NphProvider.java
+END
+MvgProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/MvgProvider.java
+END
+NetworkProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/803/trunk/src/de/schildbach/pte/NetworkProvider.java
+END
+MariborProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/MariborProvider.java
+END
+TlemProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/TlemProvider.java
+END
+RmvProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/784/trunk/src/de/schildbach/pte/RmvProvider.java
+END
+VorProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/VorProvider.java
+END
+SbbProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/789/trunk/src/de/schildbach/pte/SbbProvider.java
+END
+TlseProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/TlseProvider.java
+END
+VmvProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/VmvProvider.java
+END
+ShProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/788/trunk/src/de/schildbach/pte/ShProvider.java
+END
+VrtProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/VrtProvider.java
+END
+SydneyProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/619/trunk/src/de/schildbach/pte/SydneyProvider.java
+END
+SeptaProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/788/trunk/src/de/schildbach/pte/SeptaProvider.java
+END
+VvtProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/781/trunk/src/de/schildbach/pte/VvtProvider.java
+END
+NriProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/711/trunk/src/de/schildbach/pte/NriProvider.java
+END
+VmobilProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/VmobilProvider.java
+END
+NaldoProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/NaldoProvider.java
+END
+VgsProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/788/trunk/src/de/schildbach/pte/VgsProvider.java
+END
+BsvagProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/BsvagProvider.java
+END
+StockholmProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/769/trunk/src/de/schildbach/pte/StockholmProvider.java
+END
+VagfrProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/VagfrProvider.java
+END
+VmsProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/VmsProvider.java
+END
+AbstractHafasProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/803/trunk/src/de/schildbach/pte/AbstractHafasProvider.java
+END
+KvvProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/KvvProvider.java
+END
+SeProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/770/trunk/src/de/schildbach/pte/SeProvider.java
+END
+OebbProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/789/trunk/src/de/schildbach/pte/OebbProvider.java
+END
+VvmProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/795/trunk/src/de/schildbach/pte/VvmProvider.java
+END
+BahnProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/794/trunk/src/de/schildbach/pte/BahnProvider.java
+END
+DsbProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/789/trunk/src/de/schildbach/pte/DsbProvider.java
+END
+BvbProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/BvbProvider.java
+END
+VbbProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/789/trunk/src/de/schildbach/pte/VbbProvider.java
+END
+DubProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/DubProvider.java
+END
+StvProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/StvProvider.java
+END
+SvvProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/SvvProvider.java
+END
+LocationUtils.java
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/540/trunk/src/de/schildbach/pte/LocationUtils.java
+END
+BayernProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/771/trunk/src/de/schildbach/pte/BayernProvider.java
+END
+NsProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/772/trunk/src/de/schildbach/pte/NsProvider.java
+END
+VbnProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/706/trunk/src/de/schildbach/pte/VbnProvider.java
+END
+TflProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/TflProvider.java
+END
+InvgProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/788/trunk/src/de/schildbach/pte/InvgProvider.java
+END
+VrnProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/VrnProvider.java
+END
+SfProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/SfProvider.java
+END
+NvvProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/759/trunk/src/de/schildbach/pte/NvvProvider.java
+END
+VrrProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/795/trunk/src/de/schildbach/pte/VrrProvider.java
+END
+PlProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/763/trunk/src/de/schildbach/pte/PlProvider.java
+END
+NvbwProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/NvbwProvider.java
+END
+LinzProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/LinzProvider.java
+END
+BsagProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/BsagProvider.java
+END
+AbstractNetworkProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/803/trunk/src/de/schildbach/pte/AbstractNetworkProvider.java
+END
+BvgProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/803/trunk/src/de/schildbach/pte/BvgProvider.java
+END
+IvbProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/IvbProvider.java
+END
+DingProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/DingProvider.java
+END
+NasaProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/804/trunk/src/de/schildbach/pte/NasaProvider.java
+END
+GvhProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/GvhProvider.java
+END
+SncbProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/789/trunk/src/de/schildbach/pte/SncbProvider.java
+END
+ZvvProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/789/trunk/src/de/schildbach/pte/ZvvProvider.java
+END
+MetProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/MetProvider.java
+END
+RtProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/789/trunk/src/de/schildbach/pte/RtProvider.java
+END
+TlswProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/694/trunk/src/de/schildbach/pte/TlswProvider.java
+END
+NetworkId.java
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/781/trunk/src/de/schildbach/pte/NetworkId.java
+END
+AvvProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/AvvProvider.java
+END
+AtcProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/AtcProvider.java
+END
+StandardColors.java
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/540/trunk/src/de/schildbach/pte/StandardColors.java
+END
+MvvProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/803/trunk/src/de/schildbach/pte/MvvProvider.java
+END
+VvoProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/VvoProvider.java
+END
+VvsProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/803/trunk/src/de/schildbach/pte/VvsProvider.java
+END
+AbstractEfaProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/806/trunk/src/de/schildbach/pte/AbstractEfaProvider.java
+END
+LuProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/789/trunk/src/de/schildbach/pte/LuProvider.java
+END
+VblProvider.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/663/trunk/src/de/schildbach/pte/VblProvider.java
+END
