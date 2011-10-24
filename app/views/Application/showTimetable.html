@@ -38,8 +38,8 @@
             <td>&rarr;</td>
             <td>
                 ${connection?.to?.name}
-                #{my.isit connection?.parts[connection?.parts?.size-1], a:'Trip',
-                notnull:connection?.parts[connection?.parts?.size-1]?.arrivalPosition}<span style="color:silver;">(Gleis ${connection?.parts[connection?.parts?.size-1]?.arrivalPosition})</span>#{/my.isit}
+                #{my.isit connection?.parts[connection?.parts?.size-1], a:'Trip'}#{if
+                connection?.parts[connection?.parts?.size-1]?.arrivalPosition}<span style="color:silver;">(Gleis ${connection?.parts[connection?.parts?.size-1]?.arrivalPosition})</span>#{/if}#{/my.isit}
             </td>
             <td style="width:99%; text-align:center;">
                 #{if connection?.parts?.size>1}
@@ -51,28 +51,7 @@
         <tr id="details_${connection_index}" style="display:none;" class="${connection_parity}">
             <td colspan="5" align="right">
                 #{if connection?.parts?.size>1}
-                <table>
-                    *{
-                    <tr>}*
-                        #{list items:connection.parts, as:'via'}
-                        #{ifnot via_isFirst}
-                        <td>#{my.isit via, a:'Trip'}#{if via?.departurePosition}umsteigen auf Gleis
-                            ${via?.departurePosition}#{/if}#{/my.isit}
-                        </td>
-                        <td>#{my.isit via, a:'Trip'}(${via?.departureTime?.format("HH:mm")})#{/my.isit}</td>
-                    </tr>
-                    #{/ifnot}
-                    #{ifnot via_isLast}
-                    <tr>
-                        <td>In ${via?.arrival?.name}:</td>
-                        <td>#{my.isit via, a:'Trip'}Gleis ${via?.arrivalPosition}#{/my.isit}</td>
-                        <td>#{my.isit via, a:'Trip'}(${via?.arrivalTime?.format("HH:mm")})#{/my.isit}</td>
-                        #{/ifnot}
-                        #{/list}
-                        *{
-                    </tr>
-                    }*
-                </table>
+                #{my.getVias connection.parts/}
                 #{/if}
             </td>
         </tr>

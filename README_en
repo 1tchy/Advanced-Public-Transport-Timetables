@@ -1,0 +1,5 @@
+This web application enables specific queries for public transport timetables.
+
+ATM it can query timetables for multiple starts/destinations and display them on one page.
+
+It results of a small project at the University of Applied Science in Rapperswil, Switzerland.
