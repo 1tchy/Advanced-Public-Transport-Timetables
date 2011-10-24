@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false" defaultCharsetForPropertiesFiles="UTF-8">
+    <file url="file://$PROJECT_DIR$/Procfile" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/README" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/controllers/Application.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/de/schildbach/pte/dto/Connection.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/models/ComplexRequests.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/models/FahrplanByDeparture.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/models/InputChecker.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/models/KnownProvider.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/tags/FastTags.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/views/Application/index.html" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/views/Application/selectTimetable.html" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/views/Application/showTimetable.html" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/views/main.html" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/git upload command.txt" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/public/stylesheets/main.css" charset="UTF-8" />
+  </component>
+</project>
+
