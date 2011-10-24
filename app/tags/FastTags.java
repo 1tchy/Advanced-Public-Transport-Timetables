@@ -237,4 +237,23 @@ public class FastTags extends play.templates.FastTags {
         return new SimpleDateFormat("HH:mm").format(zeit);
     }
 
+    /**
+     * Removes the matching of a regular expression from the body
+     *
+     * @param args     the default argument (arg) is the regular expression needle that's been removed
+     * @param body     haystack
+     * @param out      used to return the result
+     * @param template ignored
+     * @param fromLine ignored
+     */
+    public static void _remove(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        String s = JavaExtensions.toString(body);
+        if (s == null) return;
+        Object arg = args.get("arg");
+        if (arg == null) {
+            out.print(body);
+        } else {
+            out.print(s.replaceAll(arg.toString(), ""));
+        }
+    }
 }

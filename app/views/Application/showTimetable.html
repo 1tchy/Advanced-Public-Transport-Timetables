@@ -12,15 +12,17 @@
 * GNU General Public License for more details.
 *
 * You should have received a copy of the GNU General Public License
-* along with this program.  If not, see
-<http://www.gnu.org/licenses/>.
+* along with this program.  If not, see < http://www.gnu.org/licenses/ >.
 }*
 
 #{extends 'main.html' /}
 #{set title:'Home' /}
 <div class="content">
-    <a href="@{Application.index()}">Bahnanbieter w&auml;hlen</a> &gt; <a
-        href="@{Application.selectTimetable(params.provider)}?${request.querystring}">Abfrage &auml;ndern</a>
+    <a href="@{Application.index()}">Bahnanbieter wählen</a><span class="likealink"> &gt; </span><a
+        href="@{Application.selectTimetable(params.provider)}?${request.querystring}">Abfrage ändern</a> <span
+        class="likealink">(</span><a
+        href="@{Application.showTimetable(params.provider)}?#{my.remove '&amp;time=[0-9][0-9]%3A[0-9][0-9]'}${request.querystring}#{/my.remove}">zu
+    aktueller Uhrzeit</a><span class="likealink">)</span>
 </div>
 <div class="content">
     <h1>Fahrpl&auml;ne</h1>
@@ -58,4 +60,3 @@
         #{/list}
     </table>
 </div>
-

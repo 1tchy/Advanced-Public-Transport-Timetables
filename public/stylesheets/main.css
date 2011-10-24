@@ -38,7 +38,7 @@ img.header {
     margin: 0;
 }
 
-a {
+a, .likealink {
     color: gray;
 }
 
