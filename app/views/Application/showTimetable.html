@@ -12,7 +12,8 @@
 * GNU General Public License for more details.
 *
 * You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+* along with this program.  If not, see
+<http://www.gnu.org/licenses/>.
 }*
 
 #{extends 'main.html' /}
@@ -31,8 +32,8 @@
             </td>
             <td>
                 ${connection?.from?.name}
-                #{my.isit connection?.parts[connection?.parts?.size-1], a:'Trip',
-                notnull:connection?.parts[0]?.departurePosition}<span style="color:silver;">(Gleis ${connection?.parts[0]?.departurePosition})</span>#{/my.isit}
+                #{my.isit connection?.parts[0], a:'Trip'}#{if connection?.parts[0]?.departurePosition}<span
+                    style="color:silver;">(Gleis ${connection?.parts[0]?.departurePosition})</span>#{/if}#{/my.isit}
             </td>
             <td>&rarr;</td>
             <td>
@@ -55,15 +56,17 @@
                     <tr>}*
                         #{list items:connection.parts, as:'via'}
                         #{ifnot via_isFirst}
-                        <td>umsteigen auf Gleis #{if via?.departurePosition}${via?.departurePosition}#{/if}</td>
-                        <td>(${via?.departureTime?.format("HH:mm")})</td>
+                        <td>#{my.isit via, a:'Trip'}#{if via?.departurePosition}umsteigen auf Gleis
+                            ${via?.departurePosition}#{/if}#{/my.isit}
+                        </td>
+                        <td>#{my.isit via, a:'Trip'}(${via?.departureTime?.format("HH:mm")})#{/my.isit}</td>
                     </tr>
                     #{/ifnot}
                     #{ifnot via_isLast}
                     <tr>
                         <td>In ${via?.arrival?.name}:</td>
-                        <td>Gleis ${via?.arrivalPosition}</td>
-                        <td>(${via?.arrivalTime?.format("HH:mm")})</td>
+                        <td>#{my.isit via, a:'Trip'}Gleis ${via?.arrivalPosition}#{/my.isit}</td>
+                        <td>#{my.isit via, a:'Trip'}(${via?.arrivalTime?.format("HH:mm")})#{/my.isit}</td>
                         #{/ifnot}
                         #{/list}
                         *{
