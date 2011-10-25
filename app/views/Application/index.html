@@ -12,7 +12,7 @@
 * GNU General Public License for more details.
 *
 * You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+* along with this program.  If not, see < http://www.gnu.org/licenses/ >.
 }*
 
 #{extends 'main.html' /}
@@ -28,10 +28,14 @@
             oder mehreren Zielhaltestellen eine Fahrplantabelle getätigt werden kann. Beispielsweise:
             <ul>
                 <li>Ich suche eine Verbindung von Maschwanden nach Luzern. Soll ich den Zug ab Mettmenstetten oder ab
-                    Mühlau nehmen?
+                    Mühlau nehmen? <span class="likealink">(</span><a
+                            href="@{Application.showTimetable('sbb')}?start%5B%5D=Mettmenstetten&start%5B%5D=M%C3%BChlau&start%5B%5D=&crossover=true&stop%5B%5D=Luzern&stop%5B%5D=&timeAsDeparture=true">Antwort</a><span
+                            class="likealink">)</span>
                 </li>
                 <li>Ich komme mit dem Zug in Zürich HB an. Um nach Hause zu kommen, soll ich das Tram nach Zürich
-                    Birchstrasse nehmen oder eine S-Bahn nach Zürich Oerlikon?
+                    Birchstrasse nehmen oder eine S-Bahn nach Zürich Oerlikon? <span class="likealink">(</span><a
+                            href="@{Application.showTimetable('sbb')}?start%5B%5D=Z%C3%BCrich+HB&start%5B%5D=Z%C3%BCrich%2C+Bahnhofquai%2FHB&start%5B%5D=&crossover=false&stop%5B%5D=Z%C3%BCrich+Oerlikon&stop%5B%5D=Z%C3%BCrich%2C+Regensbergbr%C3%BCcke&stop%5B%5D=&timeAsDeparture=true">Antwort</a><span
+                            class="likealink">)</span>
                 </li>
             </ul>
         </li>
@@ -41,11 +45,11 @@
 
 
     Liste der Bahnanbieter: <select size="1" onchange="window.location.href=this.value">
-        <option value="">-------- Wählen --------</option>
-        #{list items:provider, as:'s'}
-        <option value="@{Application.selectTimetable(s.id)}">${s.humanName}</option>
-        #{/list}
-    </select>
+    <option value="">-------- Wählen --------</option>
+    #{list items:provider, as:'s'}
+    <option value="@{Application.selectTimetable(s.id)}">${s.humanName}</option>
+    #{/list}
+</select>
 
     <noscript>
         <ul>
