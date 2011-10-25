@@ -12,17 +12,16 @@
 * GNU General Public License for more details.
 *
 * You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+* along with this program.  If not, see < http://www.gnu.org/licenses/ >.
 }*
-
 <!DOCTYPE html>
 
 <html>
 <head>
     <title>#{get 'title' /}</title>
     <meta charset="${_response_encoding}">
-    <meta name="viewport" content="width=400" />
-    <link rel="apple-touch-icon" href="/public/images/favicon.png"/> 
+    <meta name="viewport" content="width=400"/>
+    <link rel="apple-touch-icon" href="/public/images/favicon.png"/>
     <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/main.css'}">
     #{get 'moreStyles' /}
     <script src="@{'/public/javascripts/jquery-1.5.2.min.js'}" type="text/javascript"
@@ -32,6 +31,13 @@
 <body>
 <img src="/public/images/sbb_background.jpg" alt="SBB"
      longdesc="Quelle: http://www.flickr.com/photos/alex-photos/343600662/" class="header">
-    #{doLayout /}
+#{doLayout /}
+<div class="content footer">
+    <b>Disclaimer:</b> Diese Seite ist kein offizieller Teil irgendeiner Bahnunternehmung. Sie wurde von L. Murer als
+    Student
+    der <a href="http://www.hsr.ch/">Fachhochschule Rapperswil</a> entwickelt. Sie wird in der Hoffnung zur Verfügung
+    gestellt, dass sie nützlich ist - jedoch ohne irgendeiner Garantie. Sie unterliegt der <a
+        href="http://www.gnu.org/licenses/">GNU General Public License version 3</a>.
+</div>
 </body>
 </html>
