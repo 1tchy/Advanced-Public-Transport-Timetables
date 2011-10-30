@@ -58,12 +58,12 @@ public class InputChecker {
      *
      * @param time      String to evaluate (HH:mm)
      * @param fieldName The name of the field that's evaluated (used for error output)
-     * @return a date with the given time within the last 2 and the next 22hours (or if no String got delivered, now)
+     * @return a date with the given time within the last 2 and the next 22hours (or if no String got delivered, null)
      */
     public static Date getAndValidateTime(String time, String fieldName) {
         //if nothing got delivered, return the current time
         if (time == null || time.trim().length() == 0) {
-            return new GregorianCalendar().getTime();
+            return null;
         }
         //remove spaces from the input
         time = time.trim();

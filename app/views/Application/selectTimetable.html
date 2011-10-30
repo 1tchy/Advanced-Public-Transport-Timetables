@@ -12,7 +12,7 @@
 * GNU General Public License for more details.
 *
 * You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+* along with this program.  If not, see < http://www.gnu.org/licenses/ >.
 }*
 
 #{extends 'main.html' /}
@@ -63,8 +63,8 @@
                     <label for="crossoverYes"><img src="/public/images/mix.png"
                                                    alt="A&rarr;X | B&rarr;X | A&rarr;Y | B&rarr;Y"
                                                    title="A&rarr;X | B&rarr;X | A&rarr;Y | B&rarr;Y"></label>
-                    <input type="radio" id="crossoverNo" name="crossover" value="false"#{if crossover=='false'}
-                    checked#{/if}>
+                    <input type="radio" id="crossoverNo" name="crossover" value="false"#{if
+                    crossover=='false'}checked#{/if}>
                     <label for="crossoverNo"><img src="/public/images/straight.png"
                                                   alt="A&rarr;X | B&rarr;Y"
                                                   title="A&rarr;X | B&rarr;Y"></label>
@@ -89,7 +89,7 @@
                 </td>
                 <td>
                     <input id="time" type="time" name="time"
-                           value="#{if time?.size()>3}${time}#{/if}#{else}${new Date().format('HH:mm')}#{/else}"
+                           value="#{if time?.size()>3}${time}#{/if}#{else}${now}#{/else}"
                            maxlength="5" style="width:26pt;"/>
                     <input id="timeAsDeparture" type="checkbox" name="timeAsDeparture" value="true"#{if
                     timeAsDeparture!='false'}
@@ -107,23 +107,23 @@
 
     <script type="text/javascript">
         function check(whatToCheck) {
-            inputs = document.getElementById(whatToCheck).getElementsByTagName("input");
-            emptyField = -1;
-            for (var i = inputs.length - 1; i >= 0; i--) {
-                if (inputs[i].value == "") {
-                    if (emptyField == i + 1) {
-                        document.getElementById(whatToCheck).removeChild(inputs[emptyField]);
-                    }
-                    emptyField = i;
-                }
-            }
-            if (emptyField == -1) {
-                field = document.createElement("input")
-                field.setAttribute("type", "text");
-                field.setAttribute("name", whatToCheck + "[]");
-                field.setAttribute("onkeyup", "check('" + whatToCheck + "');");
-                document.getElementById(whatToCheck).appendChild(field);
-            }
+        inputs = document.getElementById(whatToCheck).getElementsByTagName("input");
+        emptyField = -1;
+        for (var i = inputs.length - 1; i >= 0; i--) {
+        if (inputs[i].value == "") {
+        if (emptyField == i + 1) {
+        document.getElementById(whatToCheck).removeChild(inputs[emptyField]);
+        }
+        emptyField = i;
+        }
+        }
+        if (emptyField == -1) {
+        field = document.createElement("input")
+        field.setAttribute("type", "text");
+        field.setAttribute("name", whatToCheck + "[]");
+        field.setAttribute("onkeyup", "check('" + whatToCheck + "');");
+        document.getElementById(whatToCheck).appendChild(field);
+        }
         }
     </script>
 </div>

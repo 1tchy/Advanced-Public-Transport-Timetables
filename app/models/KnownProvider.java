@@ -19,8 +19,8 @@ package models;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.SbbProvider;
 
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 
 /**
  * Created by IntelliJ IDEA.
@@ -42,6 +42,10 @@ public class KnownProvider {
      */
     public final String id;
     /**
+     * the Locale to get the correct times
+     */
+    public final Locale locale;
+    /**
      * if the list of known providers already got loaded
      */
     private static boolean initialized = false;
@@ -50,10 +54,11 @@ public class KnownProvider {
      */
     private static HashSet<KnownProvider> all = new HashSet<KnownProvider>();
 
-    private KnownProvider(NetworkProvider provider, String humanName, String id) {
+    private KnownProvider(NetworkProvider provider, String humanName, String id, Locale locale) {
         this.provider = provider;
         this.humanName = humanName;
         this.id = id.toLowerCase();
+        this.locale = locale;
     }
 
     /**
@@ -62,7 +67,7 @@ public class KnownProvider {
     private static void initialize() {
         if (initialized) return;
         initialized = true;
-        all.add(new KnownProvider(new SbbProvider("MJXZ841ZfsmqqmSymWhBPy5dMNoqoGsHInHbWJQ5PTUZOJ1rLTkn8vVZOZDFfSe"), "SBB", "sbb"));
+        all.add(new KnownProvider(new SbbProvider("MJXZ841ZfsmqqmSymWhBPy5dMNoqoGsHInHbWJQ5PTUZOJ1rLTkn8vVZOZDFfSe"), "SBB", "sbb", new Locale("de_ch")));
 
     }
 
@@ -107,5 +112,21 @@ public class KnownProvider {
             }
         }
         return "unknown";
+    }
+
+    /**
+     * Gets the locale of a known provider by its object
+     *
+     * @param provider The object for the provider
+     * @return the locale of this provider
+     */
+    public static Locale getLocale(NetworkProvider provider) {
+        initialize();
+        for (KnownProvider kp : all) {
+            if (kp.provider.equals(provider)) {
+                return kp.locale;
+            }
+        }
+        return null;
     }
 }

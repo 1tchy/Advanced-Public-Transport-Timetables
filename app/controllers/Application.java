@@ -25,6 +25,7 @@ import play.data.validation.Validation;
 import play.mvc.Controller;
 
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -44,12 +45,15 @@ public class Application extends Controller {
      * @param provider the ID of the provider to get the timetable from
      */
     public static void selectTimetable(String provider) {
-        if (InputChecker.getAndValidateProvider(provider) == null) return;
+        NetworkProvider networkProvider = InputChecker.getAndValidateProvider(provider);
+        if (networkProvider == null) return;
         //prepare all input for the template. No verification done.
         Map<String, String[]> allParams = params.all();
         for (String param : allParams.keySet()) {
             renderArgs.put(param.replace("[]", ""), (param.endsWith("[]") ? allParams.get(param) : allParams.get(param)[0]));
         }
+        GregorianCalendar now = new GregorianCalendar(KnownProvider.getLocale(networkProvider));
+        renderArgs.put("now", now.get(GregorianCalendar.HOUR_OF_DAY) + ":" + now.get(GregorianCalendar.MINUTE));
         render("Application/selectTimetable.html");
     }
 
@@ -66,14 +70,17 @@ public class Application extends Controller {
             return;
         }
         //checks the given parameters and creates correct Objects. On error, create error output.
-        HashSet<String> shownErrors=new HashSet<String>(1);
-        HashSet<Location> starts = InputChecker.getAndValidateStations(provider_object, params.getAll("start[]"), "Abfahrtshaltestelle", "start",shownErrors);
+        HashSet<String> shownErrors = new HashSet<String>(1);
+        HashSet<Location> starts = InputChecker.getAndValidateStations(provider_object, params.getAll("start[]"), "Abfahrtshaltestelle", "start", shownErrors);
         boolean isCrossover = InputChecker.getAndValidateBoolean(params.get("crossover"), true);
-        HashSet<Location> stops = InputChecker.getAndValidateStations(provider_object, params.getAll("stop[]"), "Zielhaltestelle", "stop",shownErrors);
+        HashSet<Location> stops = InputChecker.getAndValidateStations(provider_object, params.getAll("stop[]"), "Zielhaltestelle", "stop", shownErrors);
         if (!isCrossover && (starts.size() != stops.size())) {
             Validation.addError("crossover", "Wenn nicht alle Verbindungen von <b>allen</b> Abfahrtshaltestellen zu <b>allen</b> Zielhaltestellen gesucht werden, müssen gleich viele Abfahrts- wie Zielhaltestellen angegeben werden.");
         }
         Date datetime = InputChecker.getAndValidateTime(params.get("time"), "time");
+        if (datetime == null) {
+            datetime = new GregorianCalendar(KnownProvider.getLocale(provider_object)).getTime();
+        }
         boolean isTimeAsDeparture = InputChecker.getAndValidateBoolean(params.get("timeAsDeparture"), true);
         //now, all parameters got handled. Did there occur an error?
         if (Validation.hasErrors()) {
