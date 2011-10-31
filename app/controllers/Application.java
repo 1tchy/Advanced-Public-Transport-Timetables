@@ -24,6 +24,8 @@ import models.KnownProvider;
 import play.data.validation.Validation;
 import play.mvc.Controller;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -52,8 +54,9 @@ public class Application extends Controller {
         for (String param : allParams.keySet()) {
             renderArgs.put(param.replace("[]", ""), (param.endsWith("[]") ? allParams.get(param) : allParams.get(param)[0]));
         }
-        GregorianCalendar now = new GregorianCalendar(KnownProvider.getLocale(networkProvider));
-        renderArgs.put("now", now.get(GregorianCalendar.HOUR_OF_DAY) + ":" + now.get(GregorianCalendar.MINUTE));
+        DateFormat now = new SimpleDateFormat("HH:mm");
+        now.setTimeZone(KnownProvider.getTimeZone(networkProvider));
+        renderArgs.put("now", now.format(new Date()));
         render("Application/selectTimetable.html");
     }
 
@@ -79,7 +82,7 @@ public class Application extends Controller {
         }
         Date datetime = InputChecker.getAndValidateTime(params.get("time"), "time");
         if (datetime == null) {
-            datetime = new GregorianCalendar(KnownProvider.getLocale(provider_object)).getTime();
+            datetime = new GregorianCalendar(KnownProvider.getTimeZone(provider_object)).getTime();
         }
         boolean isTimeAsDeparture = InputChecker.getAndValidateBoolean(params.get("timeAsDeparture"), true);
         //now, all parameters got handled. Did there occur an error?
