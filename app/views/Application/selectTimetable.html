@@ -17,6 +17,19 @@
 
 #{extends 'main.html' /}
 #{set title:'Home' /}
+#{set 'moreStyles'}
+<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/jquery-ui-1.8.13.custom.css'}">
+#{/set}
+#{set 'moreScripts'}
+<script src="@{'/public/javascripts/jquery-1.5.2.min.js'}" type="text/javascript"
+        charset="${_response_encoding}"></script>
+<script src="@{'/public/javascripts/jquery-ui-1.8.13.custom.min.js'}" type="text/javascript"
+        charset="${_response_encoding}"></script>
+<script src="@{'/public/javascripts/prettify.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+<script src="@{'/public/javascripts/autocomplete-value.js'}" type="text/javascript"
+        charset="${_response_encoding}"></script>
+<script src="@{'/public/javascripts/autocomplete.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+#{/set}
 
 <div class="content">
     <a href="@{Application.index()}">Bahnanbieter w&auml;hlen</a>
@@ -46,10 +59,12 @@
                 <td id="start">
                     #{list items:start, as:'s'}
                     #{if s != ""}
-                    <input type="text" name="start[]" value="${s}" onkeyup="check('start');"/>
+                    <input class="autocompleteStation" type="text" name="start[]" value="${s}" onkeyup="check('start');"
+                           data-url="@{Application.autocompleteStation(params.provider)}"/>
                     #{/if}
                     #{/list}
-                    <input id="newstart" type="text" name="start[]" value="" onkeyup="check('start');"/>
+                    <input id="newstart" class="autocompleteStation" type="text" name="start[]" value=""
+                           onkeyup="check('start');" data-url="@{Application.autocompleteStation(params.provider)}"/>
                 </td>
             </tr>
             <tr>
@@ -77,9 +92,11 @@
                 <td>
                     <div id="stop">
                         #{list items:stop, as:'s'}#{if s != ""}
-                        <input type="text" name="stop[]" value="${s}" onkeyup="check('stop');"/>
+                        <input class="autocompleteStation" type="text" name="stop[]" value="${s}"
+                               onkeyup="check('stop');" data-url="@{Application.autocompleteStation(params.provider)}"/>
                         #{/if}#{/list}
-                        <input id="newstop" type="text" name="stop[]" value="" onkeyup="check('stop');"/>
+                        <input class="autocompleteStation" id="newstop" type="text" name="stop[]" value=""
+                               onkeyup="check('stop');" data-url="@{Application.autocompleteStation(params.provider)}"/>
                     </div>
                 </td>
             </tr>
@@ -107,23 +124,35 @@
 
     <script type="text/javascript">
         function check(whatToCheck) {
-        inputs = document.getElementById(whatToCheck).getElementsByTagName("input");
-        emptyField = -1;
-        for (var i = inputs.length - 1; i >= 0; i--) {
-        if (inputs[i].value == "") {
-        if (emptyField == i + 1) {
-        document.getElementById(whatToCheck).removeChild(inputs[emptyField]);
+            inputs = document.getElementById(whatToCheck).getElementsByTagName("input");
+            emptyField = -1;
+            for (var i = inputs.length - 1; i >= 0; i--) {
+                if (inputs[i].value == "") {
+                    if (emptyField == i + 1) {
+                        document.getElementById(whatToCheck).removeChild(inputs[emptyField]);
+                    }
+                    emptyField = i;
+                }
+            }
+            if (emptyField == -1) {
+                field = document.createElement("input");
+                field.setAttribute("class", "autocompleteStation");
+                field.setAttribute("type", "text");
+                field.setAttribute("name", whatToCheck + "[]");
+                field.setAttribute("onkeyup", "check('" + whatToCheck + "');");
+                field.setAttribute("data-url", "@{Application.autocompleteStation(params.provider)}");
+                document.getElementById(whatToCheck).appendChild(field);
+                autocomplete();
+            }
         }
-        emptyField = i;
+
+        function autocomplete() {
+            $('input.autocompleteStation').each(function() {
+                var $input = $(this);
+                var serverUrl = $input.data('url');
+                $input.autocomplete({ source:serverUrl });
+            });
         }
-        }
-        if (emptyField == -1) {
-        field = document.createElement("input")
-        field.setAttribute("type", "text");
-        field.setAttribute("name", whatToCheck + "[]");
-        field.setAttribute("onkeyup", "check('" + whatToCheck + "');");
-        document.getElementById(whatToCheck).appendChild(field);
-        }
-        }
+        autocomplete();
     </script>
 </div>

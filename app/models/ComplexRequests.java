@@ -23,8 +23,8 @@ import de.schildbach.pte.dto.QueryConnectionsResult;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeSet;
 
 /**
@@ -45,12 +45,16 @@ public class ComplexRequests {
      * @param timeAsDeparture is this time assumed as the departure-time (and not the arrival)
      * @return a list of connections for the given request arguments (will not be null)
      */
-    public static TreeSet<Connection> getMultipleTimetables(NetworkProvider provider, HashSet<Location> starts, boolean crossover, HashSet<Location> stops, Date datetime, boolean timeAsDeparture) {
+    public static Set<Connection> getMultipleTimetables(NetworkProvider provider, Set<Location> starts, boolean crossover, Set<Location> stops, Date datetime, boolean timeAsDeparture) {
         //assures, that none-crossover-requests have the same amount of starts and stops
         assert crossover || starts.size() == stops.size() : "Anzahl Abfahrtshaltestellen und Zielhaltestellen bei der Nicht-Crossover Verbindung m�ssen gleich sein.";
 
         //creates the new connection set with an ordering by departure
-        TreeSet<Connection> connections = new TreeSet<Connection>(new FahrplanByDeparture());
+        Set<Connection> connections = new TreeSet<Connection>(new FahrplanByDeparture());
+
+        //update statistics
+        PopularLocation.increasePopularities(KnownProvider.getId(provider), starts);
+        PopularLocation.increasePopularities(KnownProvider.getId(provider), stops);
 
         //iterator for all stops (will be reset, if crossover
         Iterator<Location> stopsIterator = stops.iterator();

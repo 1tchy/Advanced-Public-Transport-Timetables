@@ -20,21 +20,19 @@ package models;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Connection;
 import de.schildbach.pte.dto.Location;
-import org.junit.*;
-import play.test.*;
+import org.junit.Before;
+import org.junit.Test;
+import play.test.UnitTest;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.TreeSet;
+import java.util.*;
 
 public class ComplexRequestsTest extends UnitTest {
     /**
      * cached return values for getMultipleTimetables
      * access with the extra-method (multipleConnection(...))
      */
-    private ArrayList<TreeSet<Connection>> multipleConnections;
+    private List<Set<Connection>> multipleConnections;
 
     /**
      * Contains exception errors that happened during setup
@@ -46,7 +44,7 @@ public class ComplexRequestsTest extends UnitTest {
      */
     @Before
     public void setUp() {
-        multipleConnections = new ArrayList<TreeSet<Connection>>();
+        multipleConnections = new ArrayList<Set<Connection>>();
         final NetworkProvider sbb = KnownProvider.get("sbb");
         HashSet<Location> oneLocation1 = new HashSet<Location>(1);
         HashSet<Location> oneLocation2 = new HashSet<Location>(1);
@@ -90,7 +88,7 @@ public class ComplexRequestsTest extends UnitTest {
      * @param toOne       with a single destination location?
      * @return the return of getMultipleTimetables with items with these parameters
      */
-    private TreeSet<Connection> multipleConnection(boolean crossover, boolean asDeparture, boolean fromOne, boolean toOne) {
+    private Set<Connection> multipleConnection(boolean crossover, boolean asDeparture, boolean fromOne, boolean toOne) {
         final int total = multipleConnections.size();
         int i = 0;
         if (!crossover) i += total / 2;

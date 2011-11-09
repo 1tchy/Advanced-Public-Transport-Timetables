@@ -19,7 +19,7 @@ body {
     background: #f0f0ff;
     margin-top: 0;
     text-align: center;
-    font: 12pt Helvetica, sans-serif;
+    font-family: Helvetica, sans-serif;
 }
 
 div.content {
@@ -55,5 +55,14 @@ a, .likealink {
 }
 
 .footer {
-    font-size:x-small;
+    font-size: x-small;
+}
+
+.ui-menu-item {
+    font-size: small;
+    text-align: left;
+}
+
+.ui-menu .ui-menu-item a {
+    line-height: 1 !important;
 }

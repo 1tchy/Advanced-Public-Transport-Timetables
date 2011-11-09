@@ -126,6 +126,22 @@ public class KnownProvider {
     }
 
     /**
+     * Gets the id of a known provider by its object
+     *
+     * @param provider The object for the provider
+     * @return the human readable name of this provider
+     */
+    public static String getId(NetworkProvider provider) {
+        initialize();
+        for (KnownProvider kp : all.values()) {
+            if (kp.provider.equals(provider)) {
+                return kp.id;
+            }
+        }
+        throw new IllegalArgumentException("Unknown provider: " + provider.toString());
+    }
+
+    /**
      * Gets the timezone of a known provider by its object
      *
      * @param provider The object for the provider

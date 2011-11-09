@@ -23,4 +23,4 @@
 # Application dependencies
 
 require:
-    - play
+    - play -> jqueryui 1.0

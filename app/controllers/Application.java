@@ -18,6 +18,7 @@ package controllers;
 
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Location;
+import models.Autocomplete;
 import models.ComplexRequests;
 import models.InputChecker;
 import models.KnownProvider;
@@ -30,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class Application extends Controller {
 
@@ -73,10 +75,10 @@ public class Application extends Controller {
             return;
         }
         //checks the given parameters and creates correct Objects. On error, create error output.
-        HashSet<String> shownErrors = new HashSet<String>(1);
-        HashSet<Location> starts = InputChecker.getAndValidateStations(provider_object, params.getAll("start[]"), "Abfahrtshaltestelle", "start", shownErrors);
+        Set<String> shownErrors = new HashSet<String>(1);
+        Set<Location> starts = InputChecker.getAndValidateStations(provider_object, params.getAll("start[]"), "Abfahrtshaltestelle", "start", shownErrors);
         boolean isCrossover = InputChecker.getAndValidateBoolean(params.get("crossover"), true);
-        HashSet<Location> stops = InputChecker.getAndValidateStations(provider_object, params.getAll("stop[]"), "Zielhaltestelle", "stop", shownErrors);
+        Set<Location> stops = InputChecker.getAndValidateStations(provider_object, params.getAll("stop[]"), "Zielhaltestelle", "stop", shownErrors);
         if (!isCrossover && (starts.size() != stops.size())) {
             Validation.addError("crossover", "Wenn nicht alle Verbindungen von <b>allen</b> Abfahrtshaltestellen zu <b>allen</b> Zielhaltestellen gesucht werden, müssen gleich viele Abfahrts- wie Zielhaltestellen angegeben werden.");
         }
@@ -108,4 +110,13 @@ public class Application extends Controller {
         }
     }
 
+    /**
+     * Answers to a autocomplete request for a station
+     *
+     * @param provider the ID of the provider
+     * @param term     the term to complete to a stations name
+     */
+    public static void autocompleteStation(final String provider, final String term) {
+        renderJSON(Autocomplete.stations(provider, term));
+    }
 }

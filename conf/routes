@@ -26,6 +26,7 @@ GET     /favicon.ico                            staticFile:public/images/favicon
 GET     /                                       Application.index
 GET     /{provider}/?                           Application.selectTimetable
 GET     /{provider}/timetable/?                 Application.showTimetable
+GET     /{provider}/autocomplete/?              Application.autocompleteStation
 
 
 # Map static resources from the /app/public folder to the /public path
