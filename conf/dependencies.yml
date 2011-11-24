@@ -23,4 +23,7 @@
 # Application dependencies
 
 require:
+    - play
     - play -> jqueryui 1.0
+    - play -> cloudbees 0.2.2
+    - play -> mockito 0.1

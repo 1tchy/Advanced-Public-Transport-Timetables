@@ -44,6 +44,7 @@ public class ComplexRequestsTest extends UnitTest {
      */
     @Before
     public void setUp() {
+
         multipleConnections = new ArrayList<Set<Connection>>();
         final NetworkProvider sbb = KnownProvider.get("sbb");
         HashSet<Location> oneLocation1 = new HashSet<Location>(1);
@@ -55,7 +56,7 @@ public class ComplexRequestsTest extends UnitTest {
             oneLocation2.add(sbb.autocompleteStations("Zug").get(0));
             threeLocations1.add(sbb.autocompleteStations("Luzern").get(0));
             threeLocations1.add(sbb.autocompleteStations("Basel").get(0));
-            threeLocations1.add(sbb.autocompleteStations("ZŸrich HB").get(0));
+            threeLocations1.add(sbb.autocompleteStations("Zï¿½rich HB").get(0));
             threeLocations2.add(sbb.autocompleteStations("Chur").get(0));
             threeLocations2.add(sbb.autocompleteStations("Olten").get(0));
             threeLocations2.add(sbb.autocompleteStations("Lugano").get(0));
@@ -72,11 +73,16 @@ public class ComplexRequestsTest extends UnitTest {
             for (boolean asDeparture : new boolean[]{true, false}) {
                 for (HashSet<Location> from : froms) {
                     for (HashSet<Location> to : tos) {
-                        multipleConnections.add(ComplexRequests.getMultipleTimetables(sbb, from, crossover, to, new Date(1319178289), asDeparture));
+                        if (crossover || (from.size() == to.size())) {
+                            multipleConnections.add(ComplexRequests.getMultipleTimetables(sbb, from, crossover, to, new Date(), asDeparture));
+                        } else {
+                            multipleConnections.add(null);
+                        }
                     }
                 }
             }
         }
+        System.out.println();
     }
 
     /**
@@ -98,21 +104,41 @@ public class ComplexRequestsTest extends UnitTest {
         return multipleConnections.get(i);
     }
 
-    /**
-     * Verifies that the setup worked
-     */
-    @Test
-    public void setUpOk() {
-        assertNull(setUpExceptions);
-    }
-
     @Test
     public void test1() {
+        assertNull(setUpExceptions);
+        final int amountOfOneConnectionMin = 4;
+        final int amountOfOneConnectionMax = 6;
         for (boolean crossover : new boolean[]{true, false}) {
             for (boolean asDeparture : new boolean[]{true, false}) {
                 for (boolean fromOne : new boolean[]{true, false}) {
                     for (boolean toOne : new boolean[]{true, false}) {
-
+                        Set<Connection> cs = multipleConnection(crossover, asDeparture, fromOne, toOne);
+                        if (crossover) {
+                            int expected = 1;
+                            if (!fromOne) expected *= 3;
+                            if (!toOne) expected *= 3;
+                            assert cs.size() >= expected * amountOfOneConnectionMin : "Expected more than " + (expected * amountOfOneConnectionMin - 1) + " connections, but got " + cs.size() + ". (crossover=true, asDeparture=" + (asDeparture ? "true" : "false") + ", fromOne=" + (fromOne ? "true" : "false") + ", toOne=" + (toOne ? "true" : "false") + ")";
+                            assert cs.size() <= expected * amountOfOneConnectionMax : "Expected less than " + (expected * amountOfOneConnectionMax + 1) + " connections, but got " + cs.size() + ". (crossover=true, asDeparture=" + (asDeparture ? "true" : "false") + ", fromOne=" + (fromOne ? "true" : "false") + ", toOne=" + (toOne ? "true" : "false") + ")";
+                        } else {
+                            if ((fromOne && toOne) || ((!fromOne) && (!toOne))) {
+                                assert multipleConnection(crossover, asDeparture, fromOne, toOne).size() >= (fromOne ? 1 : 3) * amountOfOneConnectionMin : "Expected more than " + ((fromOne ? 1 : 3) * amountOfOneConnectionMin - 1) + " connection but found " + multipleConnection(crossover, asDeparture, fromOne, toOne).size() + ". (crossover=false, asDeparture=" + (asDeparture ? "true" : "false") + ", fromOne=" + (fromOne ? "true" : "false") + ", toOne=" + (toOne ? "true" : "false") + ")";
+                                assert multipleConnection(crossover, asDeparture, fromOne, toOne).size() <= (fromOne ? 1 : 3) * amountOfOneConnectionMax : "Expected less than " + ((fromOne ? 1 : 3) * amountOfOneConnectionMax + 1) + " connection but found " + multipleConnection(crossover, asDeparture, fromOne, toOne).size() + ". (crossover=false, asDeparture=" + (asDeparture ? "true" : "false") + ", fromOne=" + (fromOne ? "true" : "false") + ", toOne=" + (toOne ? "true" : "false") + ")";
+                            } else {
+                                assert multipleConnection(crossover, asDeparture, fromOne, toOne) == null : "Should not find any connections if not crossover and different starting/end locations. (from:" + (fromOne ? "1" : "3") + ", to:" + (toOne ? "1" : "3") + ")";
+                                continue;
+                            }
+                        }
+                        long differenceFirstDep = Math.abs(multipleConnection(crossover, asDeparture, fromOne, toOne).iterator().next().departureTime.getTime() - (new Date().getTime()));
+                        long differenceLastArr = 0;
+                        for (Connection connection : multipleConnection(crossover, asDeparture, fromOne, toOne)) {
+                            differenceLastArr = Math.abs(connection.departureTime.getTime() - (new Date().getTime()));
+                        }
+                        if (asDeparture) {
+                            assert differenceFirstDep < differenceLastArr;
+                        } else {
+                            assert differenceLastArr < differenceFirstDep;
+                        }
                     }
                 }
             }

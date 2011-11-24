@@ -22,6 +22,7 @@ import de.schildbach.pte.dto.Location;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Created by IntelliJ IDEA.
@@ -75,11 +76,16 @@ public class Autocomplete {
                 try {
                     //get the list of the requested stations from the provider
                     List<Location> locations = p.autocompleteStations(term);
+                    String simplifiedTerm = simplify(term);
+                    boolean firstSuggestion = true;
                     for (Location location : locations) {
-                        autocomplete_list.add(location.name);
-                        if (autocomplete_list.size() == AUTOCOMPLETE_MAX) {
-                            break;
+                        if (firstSuggestion || simplify(location.name).contains(simplifiedTerm)) {
+                            autocomplete_list.add(location.name);
+                            if (autocomplete_list.size() == AUTOCOMPLETE_MAX) {
+                                break;
+                            }
                         }
+                        firstSuggestion = false;
                     }
                     providers_autocomplete.put(term, autocomplete_list);
                     providers_autocomplete_level.put(term, join(mostPopular));
@@ -92,6 +98,16 @@ public class Autocomplete {
             }
         }
         return autocomplete_list;
+    }
+
+    /**
+     * Simplifies a string heavily (removes everything that's not a normal letter and returns it in lowercase)
+     *
+     * @param string to simplify
+     * @return simplified version of the string
+     */
+    private static String simplify(String string) {
+        return Pattern.compile("[^a-z]").matcher(string.toLowerCase()).replaceAll("");
     }
 
     /**

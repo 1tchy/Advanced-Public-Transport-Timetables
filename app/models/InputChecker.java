@@ -37,16 +37,16 @@ public class InputChecker {
     /**
      * String to boolean
      *
-     * @param crossover     String to evaluate
+     * @param bool          String to evaluate
      * @param defaultReturn if String is neither "true" nor "false", what to return then
      * @return the String ("true"/"false") as its equivalent boolean or the defaultReturn value if it's not clear
      */
-    public static boolean getAndValidateBoolean(String crossover, boolean defaultReturn) {
-        if (crossover == null) {
+    public static boolean getAndValidateBoolean(String bool, boolean defaultReturn) {
+        if (bool == null) {
             return defaultReturn;
-        } else if (crossover.toLowerCase().equals("true")) {
+        } else if (bool.toLowerCase().equals("true")) {
             return true;
-        } else if (crossover.toLowerCase().equals("false")) {
+        } else if (bool.toLowerCase().equals("false")) {
             return false;
         } else {
             return defaultReturn;
@@ -114,7 +114,7 @@ public class InputChecker {
         }
         //will be true, if an error occurred
         boolean errorOccurred = false;
-        Set<Location> stationSet = new HashSet<Location>(stations.length - 1);
+        Set<Location> stationSet = new HashSet<Location>(stations.length);
         //for each station that's not ""
         for (String station : stations) {
             if (!station.equals("")) {

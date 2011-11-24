@@ -101,6 +101,9 @@ public class PopularLocation implements Comparable<PopularLocation> {
      * @return popular locations (max the amount given) for the given term
      */
     public static List<String> getMostPopularLike(String provider, String term, int maximum) {
+        if (term == null) {
+            return new ArrayList<String>(0);
+        }
         TreeSet<PopularLocation> top = new TreeSet<PopularLocation>();
         for (PopularLocation pl : getProvidersList(provider).values()) {
             if (pl.location.name.contains(term)) {
@@ -109,8 +112,9 @@ public class PopularLocation implements Comparable<PopularLocation> {
         }
         int values = Math.min(maximum, top.size());
         List<String> ret = new ArrayList<String>(values);
+        Iterator<PopularLocation> popularLocationIterator = top.iterator();
         while (values-- > 0) {
-            ret.add(top.iterator().next().location.name);
+            ret.add(popularLocationIterator.next().location.name);
         }
         return ret;
     }
@@ -122,7 +126,12 @@ public class PopularLocation implements Comparable<PopularLocation> {
      * @return a positive number if this is more popular
      */
     public int compareTo(PopularLocation popularLocation) {
-        return popularity - popularLocation.popularity;
+        int popularityDifference = popularLocation.popularity - popularity;
+        if (popularityDifference != 0) {
+            return popularityDifference;
+        } else {
+            return hashCode() - popularLocation.hashCode();
+        }
     }
 
     /**
