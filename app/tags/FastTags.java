@@ -19,6 +19,7 @@ package tags;
 import de.schildbach.pte.dto.Connection.Footway;
 import de.schildbach.pte.dto.Connection.Part;
 import de.schildbach.pte.dto.Connection.Trip;
+import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import groovy.lang.Closure;
 import models.KnownProvider;
@@ -136,7 +137,7 @@ public class FastTags extends play.templates.FastTags {
                             if (gleis != null && gleis.length() > 0) {
                                 out.print("umsteigen auf</td>\n\t\t<td>Gleis " + gleis + " (" + getTime(trip.departureTime) + ")");
                             } else {
-                                out.print(", Weiterfahrt</td>\n\t\t<td>" + getTime(trip.departureTime));
+                                out.print("Umstieg auf Anschluss</td>\n\t\t<td>" + getTime(trip.departureTime));
                             }
                         } else {
                             //if it's not simple to display...
@@ -152,6 +153,7 @@ public class FastTags extends play.templates.FastTags {
                         }
                         out.println("\t</tr>");
                     }
+                    out.println("\t<tr><td colspan=\"3\" align=\"center\">" + getPartIcon(via, false) + "</td></tr>");
 
                     //We don't want to display the arriving part of the last element, as it's already in the overview
                     if (via_iterator.hasNext()) {
@@ -167,6 +169,33 @@ public class FastTags extends play.templates.FastTags {
         }
         //If there was an error with the parameters...
         throw new InvalidParameterException("Default argument should be a list of Connection Parts.");
+    }
+
+    /**
+     * Creates HTML code to display an icon for a part of a connection
+     *
+     * @param p        the part to give the icon for
+     * @param iconOnly whether only the icon should be displayed (and not also a description behind)
+     * @return HTML code to display an icon for the given connection part
+     */
+    private static String getPartIcon(Part p, boolean iconOnly) {
+        if (p instanceof Footway) {
+            return "<img src=\"/public/images/icons/foot.png\" width=\"22\" height=\"22\" alt=\"" + (iconOnly ? "Fussweg" : "") + "\">" + (iconOnly ? "" : " Fussweg");
+        } else if (p instanceof Trip) {
+            Trip t = (Trip) p;
+            Line line = t.line;
+            if (line != null) {
+                String label = line.label;
+                if (label.length() > 2) {
+                    return "<img src=\"/public/images/icons/" + label.substring(0, 1).toLowerCase() + ".png\" width=\"22\" height=\"22\" alt=\"" + (iconOnly ? label.substring(1) : "") + "\">" + (iconOnly ? "" : " " + label.substring(1));
+                }
+            }
+        }
+        if (iconOnly) {
+            return "<img src=\"/public/images/icons/unknown.png\" width=\"22\" height=\"22\" alt=\"Unbekanntes Verkehrsmittel\">";
+        } else {
+            return "Reise";
+        }
     }
 
     /**
