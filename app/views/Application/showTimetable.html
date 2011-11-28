@@ -33,6 +33,9 @@
                 ${connection?.departureTime?.format("HH:mm")} - ${connection?.arrivalTime?.format("HH:mm")}
             </td>
             <td>
+                <span style="color:silver;">(#{my.getDuration dt:connection?.departureTime, at:connection?.arrivalTime/})</span>
+            </td>
+            <td>
                 ${connection?.from?.name}
                 #{my.isit connection?.parts[0], a:'Trip'}#{if connection?.parts[0]?.departurePosition}<span
                     style="color:silver;">(Gleis ${connection?.parts[0]?.departurePosition})</span>#{/if}#{/my.isit}

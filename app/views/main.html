@@ -20,17 +20,22 @@
 <head>
     <title>#{get 'title' /}</title>
     <meta charset="${_response_encoding}">
-    <meta name="viewport" content="width=400"/>
+    <!--<meta name="viewport" content="width=400"/>-->
     <link rel="apple-touch-icon" href="/public/images/favicon.png"/>
     <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/main.css'}">
     #{get 'moreStyles' /}
     <script type="text/javascript">
-        var _gaq = _gaq || []; _gaq.push(['_setAccount', 'UA-82988-6']); _gaq.push(['_trackPageview']);
+        var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-82988-6']);
+        _gaq.push(['_trackPageview']);
         (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
-        '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+            var ga = document.createElement('script');
+            ga.type = 'text/javascript';
+            ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+                    '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(ga, s);
         })();
     </script>
     #{get 'moreScripts' /}
@@ -40,14 +45,13 @@
      class="header">
 #{doLayout /}
 <div class="content footer">
-    <b>Disclaimer:</b> Diese Seite ist kein offizieller Teil irgendeiner Bahnunternehmung. Sie wurde von <a
+    <b>Disclaimer:</b> Diese Seite wurde von <a
         href="http://www.google.com/recaptcha/mailhide/d?k=019jW4xDWC-dVmVda4_5ZH6A==&amp;c=8nm0SBkIE8MYUc0gmE6EcA=="
-        onclick="window.open('http://www.google.com/recaptcha/mailhide/d?k\075019jW4xDWC-dVmVda4_5ZH6A\75\75\46c\758nm0SBkIE8MYUc0gmE6EcA\75\075', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;">L.
-    Murer</a> als
-    Student der <a href="http://www.hsr.ch/">Fachhochschule Rapperswil</a> entwickelt. Sie wird in der Hoffnung zur
-    Verfügung
-    gestellt, dass sie nützlich ist - jedoch ohne irgendeiner Garantie. Sie unterliegt der <a
-        href="http://www.gnu.org/licenses/">GNU General Public License version 3</a>.
+        onclick="window.open('http://www.google.com/recaptcha/mailhide/d?k\075019jW4xDWC-dVmVda4_5ZH6A\75\75\46c\758nm0SBkIE8MYUc0gmE6EcA\75\075', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;">L.&nbsp;Murer</a>
+    als Student der <a href="http://www.hsr.ch/">Fachhochschule Rapperswil</a> entwickelt. Sie wird in der Hoffnung zur
+    Verfügung gestellt, dass sie nützlich ist - jedoch ohne irgendeiner Garantie. Sie unterliegt der <a
+        href="http://www.gnu.org/licenses/">GNU General Public License version 3</a>. Sie ist kein offizieller Teil
+    irgendeiner Bahnunternehmung.
     <div style="float:right; margin-left:10px" class="likealink"><span
             style="font-size:smaller;">#{my.getCurrentTime /}</span></div>
 

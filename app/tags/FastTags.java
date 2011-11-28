@@ -170,6 +170,32 @@ public class FastTags extends play.templates.FastTags {
     }
 
     /**
+     * It prints out the duration of a connection in hours and minutes
+     *
+     * @param args     the argument 'dt' must include the departure time (as a Date), the argument 'at' must include the arrival time (as a Date)
+     * @param body     ignored
+     * @param out      used to return the result
+     * @param template ignored
+     * @param fromLine ignored
+     */
+    public static void _getDuration(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        assert args.containsKey("dt") : "Argument 'dt' must be given.";
+        assert args.get("dt") instanceof Date : "Argument 'dt' must be a Date.";
+        assert args.containsKey("at") : "Argument 'at' must be given.";
+        assert args.get("at") instanceof Date : "Argument 'at' must be a Date.";
+        Date dt = (Date) args.get("dt");
+        Date at = (Date) args.get("at");
+        long duration = (at.getTime() - dt.getTime());
+        duration /= 60000; //to minutes
+        if (duration >= 60) {
+            out.print(duration / 60);
+            out.print("h ");
+        }
+        out.print(duration % 60);
+        out.print("min");
+    }
+
+    /**
      * It prints out the current time
      *
      * @param args     ignored
