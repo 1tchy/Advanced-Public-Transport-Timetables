@@ -1,0 +1,6 @@
+S: S-Bahn
+B: Bus
+I: ICN
+R: IR
+F: Schiff
+T: Tram

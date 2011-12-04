@@ -20,15 +20,15 @@
 <head>
     <title>#{get 'title' /}</title>
     <meta charset="${_response_encoding}">
-    <!--<meta name="viewport" content="width=400"/>-->
-    <link rel="apple-touch-icon" href="/public/images/favicon.png"/>
+    <link rel="shortcut icon" href="/public/images/logo.png">
+    <link rel="apple-touch-icon" href="/public/images/apple-touch-icon.png">
     <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/main.css'}">
-    #{get 'moreStyles' /}
+#{get 'moreStyles' /}
     <script type="text/javascript">
         var _gaq = _gaq || [];
         _gaq.push(['_setAccount', 'UA-82988-6']);
         _gaq.push(['_trackPageview']);
-        (function() {
+        (function () {
             var ga = document.createElement('script');
             ga.type = 'text/javascript';
             ga.async = true;
@@ -38,12 +38,34 @@
             s.parentNode.insertBefore(ga, s);
         })();
     </script>
-    #{get 'moreScripts' /}
+#{get 'moreScripts' /}
 </head>
 <body>
-<img src="/public/images/sbb_background.jpg" alt="Quelle: http://www.flickr.com/photos/alex-photos/343600662/"
-     class="header">
+<table class="navi">
+    <tr>
+        <td><span><a href="@{Application.index()}">Neue Abfrage</a></span></td>
+    </tr>
+#{get 'moreNavigation'/}
+    <tr>
+        <td style="height: auto;"></td>
+    </tr>
+    <tr>
+        <td style="height: 60px;"><span style="left: -10px; width: 60px;"><a
+                href="@{Application.showFAQ()}">FAQ</a></span></td>
+    </tr>
+    <tr>
+        <td style="height: 22px;"></td>
+    </tr>
+</table>
+<div class="content">
+    <table border="0">
+        <tr>
+            <td><img src="/public/images/logo.png" width="80" height="80" alt="schneller-dort.ch"></td>
+            <td><h1>Der effiziente Fahrplan</h1></td>
+        </tr>
+    </table>
 #{doLayout /}
+</div>
 <div class="content footer">
     <b>Disclaimer:</b> Diese Seite wurde von <a
         href="http://www.google.com/recaptcha/mailhide/d?k=019jW4xDWC-dVmVda4_5ZH6A==&amp;c=8nm0SBkIE8MYUc0gmE6EcA=="

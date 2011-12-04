@@ -28,27 +28,24 @@ import play.mvc.Controller;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class Application extends Controller {
 
     /**
      * Shows s webpage to the user to welcome him and ask him for the transport company he wants to use
      */
-    public static void index() {
+    public static void index_old() {
         renderArgs.put("provider", KnownProvider.all());
-        render("Application/index.html");
+        render("Application/index_old.html");
     }
 
     /**
      * Shows a webpage to the user, that displays some input fields to start a request. There may be some predefined values
-     *
-     * @param provider the ID of the provider to get the timetable from
+     * //@param provider the ID of the provider to get the timetable from
      */
-    public static void selectTimetable(String provider) {
+    public static void index() {
+        String provider = "sbb";
         NetworkProvider networkProvider = InputChecker.getAndValidateProvider(provider);
         if (networkProvider == null) return;
         //prepare all input for the template. No verification done.
@@ -59,16 +56,16 @@ public class Application extends Controller {
         DateFormat now = new SimpleDateFormat("HH:mm");
         now.setTimeZone(KnownProvider.getTimeZone(networkProvider));
         renderArgs.put("now", now.format(new Date()));
-        render("Application/selectTimetable.html");
+        render("Application/index.html");
     }
 
 
     /**
      * Shows a webpage with some timetables to the user, depending on the given parameters
-     *
-     * @param provider the ID of the provider to get the timetable from
+     * //@param provider the ID of the provider to get the timetable from
      */
-    public static void showTimetable(String provider) {
+    public static void showTimetable() {
+        String provider = "sbb";
         Validation.clear();
         NetworkProvider provider_object = InputChecker.getAndValidateProvider(provider);
         if (provider_object == null) {
@@ -76,9 +73,9 @@ public class Application extends Controller {
         }
         //checks the given parameters and creates correct Objects. On error, create error output.
         Set<String> shownErrors = new HashSet<String>(1);
-        Set<Location> starts = InputChecker.getAndValidateStations(provider_object, params.getAll("start[]"), "Abfahrtshaltestelle", "start", shownErrors);
+        List<Location> starts = InputChecker.getAndValidateStations(provider_object, params.getAll("start[]"), "Abfahrtshaltestelle", "start", shownErrors);
         boolean isCrossover = InputChecker.getAndValidateBoolean(params.get("crossover"), true);
-        Set<Location> stops = InputChecker.getAndValidateStations(provider_object, params.getAll("stop[]"), "Zielhaltestelle", "stop", shownErrors);
+        List<Location> stops = InputChecker.getAndValidateStations(provider_object, params.getAll("stop[]"), "Zielhaltestelle", "stop", shownErrors);
         if (!isCrossover && (starts.size() != stops.size())) {
             Validation.addError("crossover", "Wenn nicht alle Verbindungen von <b>allen</b> Abfahrtshaltestellen zu <b>allen</b> Zielhaltestellen gesucht werden, müssen gleich viele Abfahrts- wie Zielhaltestellen angegeben werden.");
         }
@@ -102,21 +99,31 @@ public class Application extends Controller {
                 renderArgs.put(param.replace("[]", ""), (param.endsWith("[]") ? allParams.get(param) : allParams.get(param)[0]));
             }
             Validation.keep();
-            render("Application/selectTimetable.html");
+            render("Application/index.html");
         } else {
             //If everything is fine, create the desired timetables and print them out
             renderArgs.put("connections", ComplexRequests.getMultipleTimetables(provider_object, starts, isCrossover, stops, datetime, isTimeAsDeparture));
+            renderArgs.put("starts", starts);
+            renderArgs.put("stops", stops);
             render("Application/showTimetable.html");
         }
     }
 
     /**
      * Answers to a autocomplete request for a station
+     * //@param provider the ID of the provider
      *
-     * @param provider the ID of the provider
-     * @param term     the term to complete to a stations name
+     * @param term the term to complete to a stations name
      */
-    public static void autocompleteStation(final String provider, final String term) {
+    public static void autocompleteStation(final String term) {
+        String provider = "sbb";
         renderJSON(Autocomplete.stations(provider, term));
+    }
+
+    /**
+     * Shows a page to answer (all) questions a User of this page might have (frequently asked questions).
+     */
+    public static void showFAQ() {
+        render("Application/faq.html");
     }
 }

@@ -106,7 +106,7 @@ public class Autocomplete {
      * @param string to simplify
      * @return simplified version of the string
      */
-    private static String simplify(String string) {
+    public static String simplify(String string) {
         return Pattern.compile("[^a-z]").matcher(string.toLowerCase()).replaceAll("");
     }
 

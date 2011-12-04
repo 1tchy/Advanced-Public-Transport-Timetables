@@ -16,26 +16,64 @@
  */
 
 body {
-    background: #f0f0ff;
-    margin-top: 0;
+    background: url(/public/images/bg.jpg) center top no-repeat, url(/public/images/bg_spiegelung.jpg) repeat;
+    background-size: 100% auto, 100% auto;
+    margin: 50px;
     text-align: center;
-    font-family: Helvetica, sans-serif;
+    font-family: Lucida Sans Unicode, Lucida Grande, sans-serif;
+}
+
+#bg {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+table.navi {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 40px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.5) !important;
+    background: white;
+}
+
+table.navi td {
+    height: 140px;
+}
+
+table.navi td > span {
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+    position: fixed;
+    text-align: center;
+    left: -50px; /* = -(this.width - table.navi.width) / 2 */
+    width: 140px; /* = parent.height */
+}
+
+table.navi a {
+    text-decoration: none;
 }
 
 div.content {
-    border: solid 1px black;
-    background: #fffff9;
-    margin: 5px auto 0 auto;
-    padding: 5px;
+    background: #ffffff;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 10px 10px 10px 10px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 10px 10px 10px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 10px 10px 10px 10px rgba(0, 0, 0, 0.2);
+    margin: 100px auto 0 auto;
+    padding: 15px;
     width: 100%;
     max-width: 788px;
     text-align: left;
 }
 
-img.header {
-    width: 100%;
-    max-width: 800px;
-    margin: 0;
+div.content h1 {
+    margin-left: 10px;
 }
 
 a, .likealink {
@@ -56,6 +94,7 @@ a, .likealink {
 
 .footer {
     font-size: x-small;
+    margin-bottom: 25px !important;
 }
 
 .ui-menu-item {

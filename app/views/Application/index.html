@@ -16,50 +16,134 @@
 }*
 
 #{extends 'main.html' /}
-#{set title:'Home' /}
+#{set title:'Der effiziente Fahrplan' /}
+#{set 'moreStyles'}
+<link rel="stylesheet" media="screen" href="@{'/public/stylesheets/jquery-ui-1.8.13.custom.css'}">
+#{/set}
+#{set 'moreScripts'}
+<script src="@{'/public/javascripts/jquery-1.5.2.min.js'}" type="text/javascript"
+        charset="${_response_encoding}"></script>
+<script src="@{'/public/javascripts/jquery-ui-1.8.13.custom.min.js'}" type="text/javascript"
+        charset="${_response_encoding}"></script>
+<script src="@{'/public/javascripts/prettify.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+<script src="@{'/public/javascripts/autocomplete-value.js'}" type="text/javascript"
+        charset="${_response_encoding}"></script>
+<script src="@{'/public/javascripts/autocomplete.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+#{/set}
 
-<div class="content">
-
-    <h1>Advanced Public Transport Timetables</h1>
-
-    <p>Auf dieser Seite können Sie spezialisierte Abfragen für den öffentlichen Verkehr durchführen.</p>
-    <ol>
-        <li><b>Mehrere Verbindungen:</b> Verbindungsabfrage mit der von einer oder mehreren Abfahrthaltestellen zu einer
-            oder mehreren Zielhaltestellen eine Fahrplantabelle getätigt werden kann. Beispielsweise:
-            <ul>
-                <li>Ich suche eine Verbindung von Maschwanden nach Luzern. Soll ich den Zug <a
-                        href="http://map.search.ch/d/jringi3mz">ab Mettmenstetten oder ab Mühlau</a> nehmen? <span
-                        class="likealink">(</span><a
-                        href="@{Application.showTimetable('sbb')}?start%5B%5D=Mettmenstetten&start%5B%5D=M%C3%BChlau&start%5B%5D=&crossover=true&stop%5B%5D=Luzern&stop%5B%5D=&timeAsDeparture=true">Antwort</a><span
-                        class="likealink">)</span>
-                </li>
-                <li>Ich komme mit dem Zug in Zürich HB an. Um nach Hause zu kommen, soll ich das Tram <a
-                        href="http://map.search.ch/d/dm1yzu2nt">nach Zürich Birchstrasse oder eine S-Bahn nach Zürich
-                    Oerlikon</a> nehmen? <span class="likealink">(</span><a
-                        href="@{Application.showTimetable('sbb')}?start%5B%5D=Z%C3%BCrich+HB&start%5B%5D=Z%C3%BCrich%2C+Bahnhofquai%2FHB&start%5B%5D=&crossover=false&stop%5B%5D=Z%C3%BCrich+Oerlikon&stop%5B%5D=Z%C3%BCrich%2C+Regensbergbr%C3%BCcke&stop%5B%5D=&timeAsDeparture=true">Antwort</a><span
-                        class="likealink">)</span>
-                </li>
-            </ul>
+#{ifErrors}
+<h3>Fehler</h3>
+<ul>
+    #{errors}
+        <li>
+        ${error.raw()}
         </li>
-    </ol>
+    #{/errors}
+</ul>
+#{/ifErrors}
 
-    <h3>Um eine Anfrage zu starten, Schritt 1 - Bahnanbieter wählen:</h3>
+<form action="@{Application.showTimetable()}" method="GET">
+    <table border="0">
+        <tr>
+            <td>
+                <label for="newstart">Von:</label>
+            </td>
+            <td id="start">
+            #{list items:start, as:'s'}
+                #{if s != ""}
+                    <input class="autocompleteStation" type="text" name="start[]" value="${s}" onkeyup="check('start');"
+                           data-url="@{Application.autocompleteStation()}"/>
+                #{/if}
+            #{/list}
+                <input id="newstart" class="autocompleteStation" type="text" name="start[]" value=""
+                       onkeyup="check('start');" data-url="@{Application.autocompleteStation()}"/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label>Link: <a
+                        href="javascript:alert('Diese Auswahl legt fest, wie die Abfahrts- und die Zielhaltestellen behandelt werden sollen.\nVariante 1: Es werden Verbindungen für alle Abfahrtshaltestellen zu allen Zielhaltestellen gesucht.\nVariante 2: Es werden nur Verbindungen zwischen den Abfahrtshaltestellen und den darunter eingetragenen Zielhaltestellen gesucht.\n                  (Es müssen gleich viele Abfahrts- wie Zielhaltestelle angegeben werden.)')">[?]</a></label>
+            </td>
+            <td>
+                <input type="radio" id="crossoverYes" name="crossover" value="true"#{if crossover!='false'}
+                       checked#{/if}>
+                <label for="crossoverYes"><img src="/public/images/mix.png"
+                                               alt="A&rarr;X | B&rarr;X | A&rarr;Y | B&rarr;Y"
+                                               title="A&rarr;X | B&rarr;X | A&rarr;Y | B&rarr;Y"></label>
+                <input type="radio" id="crossoverNo" name="crossover" value="false"#{if
+                crossover=='false'}checked#{/if}>
+                <label for="crossoverNo"><img src="/public/images/straight.png"
+                                              alt="A&rarr;X | B&rarr;Y"
+                                              title="A&rarr;X | B&rarr;Y"></label>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="newstop">Nach:</label>
+            </td>
+            <td>
+                <div id="stop">
+                #{list items:stop, as:'s'}#{if s != ""}
+                    <input class="autocompleteStation" type="text" name="stop[]" value="${s}"
+                           onkeyup="check('stop');" data-url="@{Application.autocompleteStation()}"/>
+                #{/if}#{/list}
+                    <input class="autocompleteStation" id="newstop" type="text" name="stop[]" value=""
+                           onkeyup="check('stop');" data-url="@{Application.autocompleteStation()}"/>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="time">Zeit:</label>
+            </td>
+            <td>
+                <input id="time" type="time" name="time"
+                       value="#{if time?.size()>3}${time}#{/if} #{else}${now}#{/else}"
+                       maxlength="5" style="width:50px;"/>
+                <input id="timeAsDeparture" type="checkbox" name="timeAsDeparture" value="true"#{if
+                timeAsDeparture!='false'}
+                       checked#{/if}/><label for="timeAsDeparture">als Abfahrtszeit</label>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align:center;">
+                <button type="submit"> Submit</button>
+            </td>
+        </tr>
+    </table>
 
+</form>
 
-    Liste der Bahnanbieter: <select size="1" onchange="window.location.href=this.value">
-    <option value="">-------- Wählen --------</option>
-    #{list items:provider, as:'s'}
-    <option value="@{Application.selectTimetable(s.id)}">${s.humanName}</option>
-    #{/list}
-</select>
+<script type="text/javascript">
+    function check(whatToCheck) {
+        inputs = document.getElementById(whatToCheck).getElementsByTagName("input");
+        emptyField = -1;
+        for (var i = inputs.length - 1; i >= 0; i--) {
+            if (inputs[i].value == "") {
+                if (emptyField == i + 1) {
+                    document.getElementById(whatToCheck).removeChild(inputs[emptyField]);
+                }
+                emptyField = i;
+            }
+        }
+        if (emptyField == -1) {
+            field = document.createElement("input");
+            field.setAttribute("class", "autocompleteStation");
+            field.setAttribute("type", "text");
+            field.setAttribute("name", whatToCheck + "[]");
+            field.setAttribute("onkeyup", "check('" + whatToCheck + "');");
+            field.setAttribute("data-url", "@{Application.autocompleteStation()}");
+            document.getElementById(whatToCheck).appendChild(field);
+            autocomplete();
+        }
+    }
 
-    <noscript>
-        <ul>
-            <li>
-                #{list items:provider, as:'s'}
-                <a href="@{Application.selectTimetable(s.id)}">${s.humanName}</a>
-                #{/list}
-            </li>
-        </ul>
-    </noscript>
-</div>
+    function autocomplete() {
+        $('input.autocompleteStation').each(function () {
+            var $input = $(this);
+            var serverUrl = $input.data('url');
+            $input.autocomplete({ source:serverUrl });
+        });
+    }
+    autocomplete();
+</script>

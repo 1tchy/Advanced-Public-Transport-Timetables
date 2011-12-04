@@ -16,50 +16,56 @@
 }*
 
 #{extends 'main.html' /}
-#{set title:'Home' /}
-<div class="content">
-    <a href="@{Application.index()}">Bahnanbieter wählen</a><span class="likealink"> &gt; </span><a
-        href="@{Application.selectTimetable(params.provider)}?${request.querystring}">Abfrage ändern</a> <span
-        class="likealink">(</span><a
-        href="@{Application.showTimetable(params.provider)}?#{my.remove '&amp;time=[0-9][0-9]%3A[0-9][0-9]'}${request.querystring}#{/my.remove}">zu
-    aktueller Uhrzeit</a><span class="likealink">)</span>
-</div>
-<div class="content">
-    <h1>Fahrpl&auml;ne</h1>
-    <table id="fahrplantabelle" border="0" style="width:auto;">
-        #{list items:connections, as:'connection'}
-        <tr class="${connection_parity}">
-            <td>
-                ${connection?.departureTime?.format("HH:mm")} - ${connection?.arrivalTime?.format("HH:mm")}
-            </td>
-            <td>
-                <span style="color:silver;">(#{my.getDuration dt:connection?.departureTime, at:connection?.arrivalTime/})</span>
-            </td>
-            <td>
-                ${connection?.from?.name}
-                #{my.isit connection?.parts[0], a:'Trip'}#{if connection?.parts[0]?.departurePosition}<span
+#{set title:(starts?.join("&#44 ").replace(",","")+" &rarr; "+stops?.join("&#44 ").replace(",","")).raw() /}
+#{set "moreNavigation"}
+<tr>
+    <td><span><a href="@{Application.index()}?${request.querystring}">Abfrage ändern</a></span></td>
+</tr>
+<tr>
+    <td style="height: 200px;"><span style="left: -80px; width: 200px;"><a
+            href="@{Application.showTimetable()}?#{my.remove '&amp;time=[0-9][0-9]%3A[0-9][0-9]'}${request.querystring}#{/my.remove}">zu
+        aktueller Uhrzeit</a></span></td>
+</tr>
+#{/set}
+
+<h2>Verbindungen von ${starts?.join("&#44 ").replace(",","").raw()}
+    nach ${stops?.join("&#44 ").replace(",","").raw()}</h2>
+<table id="fahrplantabelle" border="0" style="width:auto;">
+#{list items:connections, as:'connection'}
+    <tr class="${connection_parity}">
+        <td>
+        ${connection?.departureTime?.format("HH:mm")} - ${connection?.arrivalTime?.format("HH:mm")}
+        </td>
+        <td>
+            <span style="color:silver;">(#{my.getDuration dt:connection?.departureTime, at:connection?.arrivalTime/}
+                )</span>
+        </td>
+        <td>
+        ${connection?.from?.name}
+            #{my.isit connection?.parts[0], a:'Trip'}#{if connection?.parts[0]?.departurePosition}<span
                     style="color:silver;">(Gleis ${connection?.parts[0]?.departurePosition})</span>#{/if}#{/my.isit}
-            </td>
-            <td>&rarr;</td>
-            <td>
-                ${connection?.to?.name}
-                #{my.isit connection?.parts[connection?.parts?.size-1], a:'Trip'}#{if
-                connection?.parts[connection?.parts?.size-1]?.arrivalPosition}<span style="color:silver;">(Gleis ${connection?.parts[connection?.parts?.size-1]?.arrivalPosition})</span>#{/if}#{/my.isit}
-            </td>
-            <td style="width:99%; text-align:center;">
-                #{if connection?.parts?.size>1}
+        </td>
+        <td>&rarr;</td>
+        <td>
+        ${connection?.to?.name}
+            #{my.isit connection?.parts[connection?.parts?.size-1], a:'Trip'}#{if
+            connection?.parts[connection?.parts?.size-1]?.arrivalPosition}<span
+                        style="color:silver;">(Gleis ${connection?.parts[connection?.parts?.size-1]?.arrivalPosition}
+                    )</span>#{/if}#{/my.isit}
+        </td>
+        <td style="width:99%; text-align:center;">
+            #{if connection?.parts?.size>1}
                 <a href="#"
                    onclick="this.innerHTML='';document.getElementById('details_${connection_index}').style.display='';return false;">Umsteigedetails</a>
-                #{/if}
-            </td>
-        </tr>
-        <tr id="details_${connection_index}" style="display:none;" class="${connection_parity}">
-            <td colspan="5" align="right">
-                #{if connection?.parts?.size>1}
+            #{/if}
+        </td>
+    </tr>
+    <tr id="details_${connection_index}" style="display:none;" class="${connection_parity}">
+        <td colspan="5" align="right">
+            #{if connection?.parts?.size>1}
                 #{my.getVias connection.parts/}
                 #{/if}
-            </td>
-        </tr>
-        #{/list}
-    </table>
-</div>
+        </td>
+    </tr>
+#{/list}
+</table>

@@ -106,15 +106,15 @@ public class InputChecker {
      * @param shownErrors a list of shown errors, that only should be shown once
      * @return a list of stations (might have 0 elements)
      */
-    public static Set<Location> getAndValidateStations(NetworkProvider provider, String[] stations, String description, String fieldName, Set<String> shownErrors) {
+    public static List<Location> getAndValidateStations(NetworkProvider provider, String[] stations, String description, String fieldName, Set<String> shownErrors) {
         //check for no station given
         if (stations == null || stations.length == 0) {
             Validation.addError(fieldName, "Sie müssen mindestens eine " + description + " angeben.");
-            return new HashSet<Location>(0);
+            return new ArrayList<Location>(0);
         }
         //will be true, if an error occurred
         boolean errorOccurred = false;
-        Set<Location> stationSet = new HashSet<Location>(stations.length);
+        List<Location> stationSet = new ArrayList<Location>(stations.length);
         //for each station that's not ""
         for (String station : stations) {
             if (!station.equals("")) {
@@ -154,7 +154,7 @@ public class InputChecker {
                 } else { //There are multiple stations possible -> check all and add the correct matching to the list (or print error)
                     Location l = null;
                     for (Location location : locationList) {
-                        if (station.equals(location.uniqueShortName())) {
+                        if (Autocomplete.simplify(station).equals(Autocomplete.simplify(location.uniqueShortName()))) {
                             l = location;
                             break;
                         }
