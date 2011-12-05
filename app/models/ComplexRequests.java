@@ -70,6 +70,8 @@ public class ComplexRequests {
                     }
                 } catch (IOException e) {
                     e.printStackTrace(); //is the providers server online?
+                } catch (Exception e) {
+                    e.printStackTrace(); //an error in the underlying application occurred todo: better Error output
                 }
             }
             while (crossover && stopsIterator.hasNext()); //loop over all stops (if crossover connections are requested and there is a next stopping location)

@@ -23,7 +23,7 @@
 </tr>
 <tr>
     <td style="height: 200px;"><span style="left: -80px; width: 200px;"><a
-            href="@{Application.showTimetable()}?#{my.remove '&amp;time=[0-9][0-9]%3A[0-9][0-9]'}${request.querystring}#{/my.remove}">zu
+            href="@{Application.showTimetable()}?#{my.remove '&amp;time=\\+?[0-9][0-9]%3A[0-9][0-9]\\+*'}${request.querystring}#{/my.remove}">zu
         aktueller Uhrzeit</a></span></td>
 </tr>
 #{/set}

@@ -46,6 +46,7 @@ public class Application extends Controller {
      */
     public static void index() {
         String provider = "sbb";
+        Validation.clear();
         NetworkProvider networkProvider = InputChecker.getAndValidateProvider(provider);
         if (networkProvider == null) return;
         //prepare all input for the template. No verification done.

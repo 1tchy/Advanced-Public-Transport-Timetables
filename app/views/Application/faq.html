@@ -19,3 +19,71 @@
 #{set title:'Der effiziente Fahrplan: FAQ' /}
 
 <h2>Frequently Asked Questions</h2>
+
+<ul>
+    <li><a href="#wen">Für wen ist diese Seite?</a></li>
+    <li><a href="#wem">Von wem ist diese Seite?</a></li>
+    <li><a href="#sbb">Was ist das Verhältnis zur SBB?</a></li>
+    <li><a href="#verbessern">Wie kann ich die Seite verbessern?</a></li>
+    <li><a href="#mehr">Ich tscheggs immer no nöd.</a></li>
+</ul>
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+<a name="wen"></a><h4>Für wen ist diese Seite?</h4>
+<p>Diese Seite ist für alle regelmässigen Benützer des öffentlichen Verkehrs. Sie vereinfacht im Prinzip folgende
+    Abfragen:</p>
+<ol type="a">
+    <li>Mehrere Stationen sind vom eigenen Standort gleich weit entfernt:
+        <a href="http://map.search.ch/maschwanden?x=144m&y=8m&z=64&poi=zug" target="_blank"><img
+                src="/public/images/faq_map.search.ch1.png"
+                alt="Mehrere Stationen sind vom eigenen Standort gleich weit entfernt" style="width: 100%;"></a>
+        An welchen Bahnhof soll ich jetzt gehen? Mit dem offiziellen SBB Fahrplan müssten jetzt drei Anfragen gestellt
+        werden. Mit dieser Seite hier ist nunmehr nur noch eine Anfrage nötig. Und ausserdem kann sie als Lesezeichen
+        abgespeichert werden!<br>
+        <a href="@{Application.showTimetable()}?start[]=Mühlau&start[]=Mettmenstetten&start[]=Knonau&start[]=&crossover=true&stop[]=Luzern&stop[]=&timeAsDeparture=true">Beispielabfrage</a>
+    </li>
+    <li>Mehrere parallelle Verbindungen sind erdenkbar:
+        <a href="http://map.search.ch/oerlikon-zuerich?x=-616m&y=-1744m&z=64&poi=zug" target="_blank"><img
+                src="/public/images/faq_map.search.ch2.png" alt="Mehrere parallelle Verbindungen" style="width: 100%;"></a>
+        Nach Hause gibt es von Zürich HB aus zwei mögliche Routen. Erstens, ich könnte mit dem Zug nach Oerlikon fahren
+        und von dort zu Fuss nach Hause laufen, oder ich nehme das Tram direkt vor meine Haustüre. Da das Tram jedoch
+        leider bedeutend länger hat als der Zug, nehme ich trotzdem lieber ein Zug, falls er gerade fährt. Da ich diese
+        Überlegungen und damit verbundenen Abfragen nich immer und immer durchführen muss, kann ich mir einfach ein
+        Lesezeichen auf die Ergebnisanzeige mit der aktuellen Uhrzeit (Link auf der linken Seite: "zu aktueller
+        Uhrzeit") speichern.<br>
+        <a href="@{Application.showTimetable()}?start[]=Zürich+HB&start[]=Zürich%2C+Bahnhofplatz%2FHB&start[]=&crossover=true&stop[]=Zürich+Oerlikon&stop[]=Zürich%2C+Regensbergbrücke&stop[]=&timeAsDeparture=true">Beispielabfrage</a>
+    </li>
+</ol>
+
+<a name="wem"></a><h4>Von wem ist diese Seite?</h4>
+<p>Diese Seite wurde von <a
+        href="http://www.google.com/recaptcha/mailhide/d?k=01AhtrkbDIr6bRdy2uE4kKag==&amp;c=VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs="
+        onclick="window.open('http://www.google.com/recaptcha/mailhide/d?k\07501AhtrkbDIr6bRdy2uE4kKag\75\75\46c\75VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs\075', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;">Laurin
+    Murer</a>
+    als Student der <a href="http://www.hsr.ch/" target="_blank">Fachhochschule Rapperswil</a> entwickelt. Sie wird in
+    der Hoffnung zur Verfügung gestellt, dass sie nützlich ist - jedoch ohne irgendeiner Garantie. Sie unterliegt der <a
+            href="http://www.gnu.org/licenses/" target="_blank">GNU General Public License version 3</a>. Der Quellcode
+    der Seite ist <a href="https://github.com/1tchy/Advanced-Public-Transport-Timetables" target="_blank">auf Github
+        frei verfügbar</a>.</p>
+
+<a name="sbb"></a><h4>Was ist das Verhältnis zur SBB?</h4>
+<p>Diese Seite hat keine Verbindung zur SBB, sie bezieht lediglich die Fahrplandaten von einem Server der SBB.</p>
+
+<a name="verbessern"></a><h4>Wie kann ich die Seite verbessern?</h4>
+<p>Schreib' mir ein Mail: <a
+        href="http://www.google.com/recaptcha/mailhide/d?k=01AhtrkbDIr6bRdy2uE4kKag==&amp;c=VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs="
+        onclick="window.open('http://www.google.com/recaptcha/mailhide/d?k\07501AhtrkbDIr6bRdy2uE4kKag\75\75\46c\75VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs\075', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;">schneller-dort@...</a>.
+</p>
+
+<a name="mehr"></a><h4>Ich tscheggs immer no nöd.</h4>
+<p>Wenn du immer noch nicht draus kommst, hast du folgende Möglichkeiten: (bitte der Reihe nach probieren)</p>
+<ol>
+    <li>Probiers einfach mal aus.</li>
+    <li>Frag deine Geschwister/Eltern/Arbeitskollegen/... um ihre Unterstützung.</li>
+    <li>Bitte mich, einen neuen Eintrag in diese FAQ aufzunehmen: <a
+            href="http://www.google.com/recaptcha/mailhide/d?k=01AhtrkbDIr6bRdy2uE4kKag==&amp;c=VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs="
+            onclick="window.open('http://www.google.com/recaptcha/mailhide/d?k\07501AhtrkbDIr6bRdy2uE4kKag\75\75\46c\75VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs\075', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;">schneller-dort@...</a>.
+    </li>
+</ol>
