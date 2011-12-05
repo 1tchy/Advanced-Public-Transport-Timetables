@@ -58,7 +58,15 @@ div.navi a {
 }
 
 .nav_faq {
+    position: fixed;
+    bottom: 0;
     height: 60px;
+}
+
+@media screen and (max-device-width: 480px) {
+    .nav_faq {
+        bottom: 55%;
+    }
 }
 
 .nav_faq span {
@@ -67,12 +75,12 @@ div.navi a {
 }
 
 .nav_large {
-    height: 200px;
+    height: 200px !important;
 }
 
 .nav_large span {
-    left: -80px;
-    width: 200px;
+    left: -80px !important;
+    width: 200px !important;
 }
 
 div.content {

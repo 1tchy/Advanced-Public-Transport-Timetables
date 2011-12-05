@@ -42,3 +42,19 @@ div.navi span {
 div.navi a {
     text-decoration: underline;
 }
+
+.nav_faq {
+    position: relative;
+    bottom: auto;
+    height: auto;
+    margin-left: 20px;
+}
+
+.nav_large {
+    height: auto !important;
+}
+
+.nav_large span {
+    left: auto !important;
+    width: auto !important;
+}
