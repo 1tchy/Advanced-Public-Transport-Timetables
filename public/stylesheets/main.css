@@ -93,8 +93,10 @@ a, .likealink {
 }
 
 .footer {
-    font-size: x-small;
-    margin-bottom: 25px !important;
+    font-size: xx-small;
+    position: fixed;
+    bottom: 0;
+    right: 2px;
 }
 
 .ui-menu-item {
