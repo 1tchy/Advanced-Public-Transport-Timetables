@@ -23,14 +23,7 @@ body {
     font-family: Lucida Sans Unicode, Lucida Grande, sans-serif;
 }
 
-#bg {
-    width: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-table.navi {
+div.navi {
     position: fixed;
     left: 0;
     top: 0;
@@ -38,13 +31,20 @@ table.navi {
     height: 100%;
     background: rgba(255, 255, 255, 0.5) !important;
     background: white;
+    display: table;
 }
 
-table.navi td {
+div.navi > div {
+    display: table-row;
+}
+
+div.navi > div > div {
+    display: table-cell;
     height: 140px;
+    vertical-align: middle;
 }
 
-table.navi td > span {
+div.navi span {
     -webkit-transform: rotate(-90deg);
     -moz-transform: rotate(-90deg);
     position: fixed;
@@ -53,8 +53,26 @@ table.navi td > span {
     width: 140px; /* = parent.height */
 }
 
-table.navi a {
+div.navi a {
     text-decoration: none;
+}
+
+.nav_faq {
+    height: 60px;
+}
+
+.nav_faq span {
+    left: -10px;
+    width: 60px;
+}
+
+.nav_large {
+    height: 200px;
+}
+
+.nav_large span {
+    left: -80px;
+    width: 200px;
 }
 
 div.content {

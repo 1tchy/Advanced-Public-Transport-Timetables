@@ -18,14 +18,14 @@
 #{extends 'main.html' /}
 #{set title:(starts?.join("&#44 ").replace(",","")+" &rarr; "+stops?.join("&#44 ").replace(",","")).raw() /}
 #{set "moreNavigation"}
-<tr>
-    <td><span><a href="@{Application.index()}?${request.querystring}">Abfrage ändern</a></span></td>
-</tr>
-<tr>
-    <td style="height: 200px;"><span style="left: -80px; width: 200px;"><a
+<div>
+    <div><span><a href="@{Application.index()}?${request.querystring}">Abfrage ändern</a></span></div>
+</div>
+<div>
+    <div class="nav_large"><span><a
             href="@{Application.showTimetable()}?#{my.remove '&amp;time=\\+?[0-9]{0,2}%3A[0-9]{0,2}\\+*'}${request.querystring}#{/my.remove}">zu
-        aktueller Uhrzeit</a></span></td>
-</tr>
+        aktueller Uhrzeit</a></span></div>
+</div>
 #{/set}
 
 <h2>Verbindungen von ${starts?.join("&#44 ").replace(",","").raw()}

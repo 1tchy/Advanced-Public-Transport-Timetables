@@ -23,6 +23,9 @@
     <link rel="shortcut icon" href="/public/images/logo.png">
     <link rel="apple-touch-icon" href="/public/images/apple-touch-icon.png">
     <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/main.css'}">
+    <!--[if IE]>
+    <link rel="stylesheet" type="text/css" href="@{'/public/stylesheets/ie.css'}"/>
+    <![endif]-->
 #{get 'moreStyles' /}
     <script type="text/javascript">
         var _gaq = _gaq || [];
@@ -41,22 +44,21 @@
 #{get 'moreScripts' /}
 </head>
 <body>
-<table class="navi">
-    <tr>
-        <td><span><a href="@{Application.index()}">Neue Abfrage</a></span></td>
-    </tr>
+<div class="navi">
+    <div>
+        <div><span><a href="@{Application.index()}">Neue Abfrage</a></span></div>
+    </div>
 #{get 'moreNavigation'/}
-    <tr>
-        <td style="height: auto;"></td>
-    </tr>
-    <tr>
-        <td style="height: 60px;"><span style="left: -10px; width: 60px;"><a
-                href="@{Application.showFAQ()}">FAQ</a></span></td>
-    </tr>
-    <tr>
-        <td style="height: 22px;"></td>
-    </tr>
-</table>
+    <div>
+        <div style="height: auto;"></div>
+    </div>
+    <div>
+        <div class="nav_faq"><span><a href="@{Application.showFAQ()}">FAQ</a></span></div>
+    </div>
+    <div>
+        <div style="height: 22px;"></div>
+    </div>
+</div>
 <div class="content">
     <table border="0">
         <tr>
