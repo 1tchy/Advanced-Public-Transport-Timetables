@@ -82,11 +82,23 @@ public class Application extends Controller {
         }
         Date datetime = InputChecker.getAndValidateTime(params.get("time"), "time");
         if (datetime == null) {
-            DateFormat now = new SimpleDateFormat("EEE MMM d HH:mm:ss zzz yyyy");
-            now.setTimeZone(KnownProvider.getTimeZone(provider_object));
-            String localeDate = now.format(new Date());
+            // get the providers timezone
+            TimeZone providerTimezone = KnownProvider.getTimeZone(provider_object);
+            // get the string of the timezone of the provider
+            SimpleDateFormat timezoneFormatter = new SimpleDateFormat("zzz");
+            timezoneFormatter.setTimeZone(providerTimezone);
+            String providerTimezoneString = timezoneFormatter.format(new Date());
+
+            String formatString = "EEE MMM d HH:mm:ss zzz yyyy";
+            // get the string of the local time
+            DateFormat df = new SimpleDateFormat(formatString);
+            df.setTimeZone(providerTimezone);
+            String localeDate = df.format(new Date());
+            // fake the timezone, so that a Date can be generated accepted by provider
+            localeDate = localeDate.replace(providerTimezoneString, "GMT");
+            // convert the local time to the Date accepted by the provider
             try {
-                datetime = now.parse(localeDate);
+                datetime = df.parse(localeDate);
             } catch (ParseException e) {
                 datetime = new Date();
             }
