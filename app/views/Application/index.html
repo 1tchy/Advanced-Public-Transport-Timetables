@@ -115,27 +115,60 @@
 </form>
 
 <script type="text/javascript">
+    function addField(ofType) {
+        field = document.createElement("input");
+        field.setAttribute("class", "autocompleteStation");
+        field.setAttribute("type", "text");
+        field.setAttribute("name", ofType + "[]");
+        field.setAttribute("onkeyup", "check('" + ofType + "');");
+        field.setAttribute("data-url", "@{Application.autocompleteStation()}");
+        field.setAttribute("style", "margin-right:2px;");
+        document.getElementById(ofType).appendChild(field);
+        autocomplete();
+    }
+
     function check(whatToCheck) {
-        inputs = document.getElementById(whatToCheck).getElementsByTagName("input");
-        emptyField = -1;
-        for (var i = inputs.length - 1; i >= 0; i--) {
-            if (inputs[i].value == "") {
-                if (emptyField == i + 1) {
-                    document.getElementById(whatToCheck).removeChild(inputs[emptyField]);
+        var needAlignement = document.getElementById("crossoverNo").checked;
+        if (needAlignement) {
+            var starts = document.getElementById("start").getElementsByTagName("input");
+            var stops = document.getElementById("stop").getElementsByTagName("input");
+            var doubleEmptyFieldPresent = true;
+            if (starts.length < stops.length) {
+                for (var j = stops.length - starts.length; j > 0; j--) {
+                    addField("start");
                 }
-                emptyField = i;
+            } else if (starts.length > stops.length) {
+                for (var jj = starts.length - stops.length; jj > 0; jj--) {
+                    addField("stop");
+                }
+            } else {
+                doubleEmptyFieldPresent = starts[starts.length - 1].value == "" && stops[stops.length - 1].value == "";
+                for (var ii = starts.length - 2; ii >= 0; ii--) {
+                    if (starts[ii].value == "" && stops[ii].value == "" && starts[ii + 1].value == "" && stops[ii + 1].value == "" && document.getElementById("start").getElementsByTagName("input").length > 2) {
+                        document.getElementById("start").removeChild(starts[ii]);
+                        document.getElementById("stop").removeChild(stops[ii]);
+                        doubleEmptyFieldPresent = true;
+                    }
+                }
+                if (!doubleEmptyFieldPresent) {
+                    addField("start");
+                    addField("stop");
+                }
             }
-        }
-        if (emptyField == -1) {
-            field = document.createElement("input");
-            field.setAttribute("class", "autocompleteStation");
-            field.setAttribute("type", "text");
-            field.setAttribute("name", whatToCheck + "[]");
-            field.setAttribute("onkeyup", "check('" + whatToCheck + "');");
-            field.setAttribute("data-url", "@{Application.autocompleteStation()}");
-            field.setAttribute("style", "margin-right:2px;");
-            document.getElementById(whatToCheck).appendChild(field);
-            autocomplete();
+        } else {
+            var inputs = document.getElementById(whatToCheck).getElementsByTagName("input");
+            var emptyField = -1;
+            for (var i = inputs.length - 1; i >= 0; i--) {
+                if (inputs[i].value == "") {
+                    if (emptyField == i + 1 && document.getElementById(whatToCheck).getElementsByTagName("input").length > 2) {
+                        document.getElementById(whatToCheck).removeChild(inputs[emptyField]);
+                    }
+                    emptyField = i;
+                }
+            }
+            if (emptyField == -1) {
+                addField(whatToCheck);
+            }
         }
     }
 
