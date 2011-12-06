@@ -67,6 +67,10 @@ public class InputChecker {
         }
         //remove spaces from the input
         time = time.trim();
+        //fix issues with only hour given
+        if (time.length() == 1) time = "0" + time + ":00";
+        if (time.length() == 2) time = time + ":00";
+        if (time.length() == 3 && time.matches("\\d\\d[^\\d]")) time = time + "00";
         //fix issue with hours like "8:15" (to "08:15")
         if (time.length() == 4) time = "0" + time;
         if (time.length() == 5) {
