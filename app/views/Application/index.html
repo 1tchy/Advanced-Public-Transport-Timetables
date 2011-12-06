@@ -133,6 +133,7 @@
             field.setAttribute("name", whatToCheck + "[]");
             field.setAttribute("onkeyup", "check('" + whatToCheck + "');");
             field.setAttribute("data-url", "@{Application.autocompleteStation()}");
+            field.setAttribute("style", "margin-right:2px;");
             document.getElementById(whatToCheck).appendChild(field);
             autocomplete();
         }

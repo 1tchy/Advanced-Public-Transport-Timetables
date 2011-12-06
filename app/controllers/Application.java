@@ -51,6 +51,12 @@ public class Application extends Controller {
         if (networkProvider == null) return;
         //prepare all input for the template. No verification done.
         Map<String, String[]> allParams = params.all();
+        //if no field is already set, make sure at the beginning two fields are displayed
+        if (allParams.size() <= 1) {
+            allParams.put("start[]", new String[]{null});
+            allParams.put("stop[]", new String[]{null});
+        }
+        //display all fields
         for (String param : allParams.keySet()) {
             renderArgs.put(param.replace("[]", ""), (param.endsWith("[]") ? allParams.get(param) : allParams.get(param)[0]));
         }
