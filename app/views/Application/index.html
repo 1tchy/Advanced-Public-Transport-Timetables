@@ -43,7 +43,7 @@
 #{/ifErrors}
 
 <form action="@{Application.showTimetable()}" method="GET">
-    <table border="0">
+    <table border="0" cellpadding="0" cellspacing="0">
         <tr>
             <td>
                 <label for="newstart">Von:</label>
@@ -60,21 +60,16 @@
             </td>
         </tr>
         <tr>
+            <td><label>Link:</label></td>
             <td>
-                <label>Link: <a
-                        href="javascript:alert('Diese Auswahl legt fest, wie die Abfahrts- und die Zielhaltestellen behandelt werden sollen.\nVariante 1: Es werden Verbindungen für alle Abfahrtshaltestellen zu allen Zielhaltestellen gesucht.\nVariante 2: Es werden nur Verbindungen zwischen den Abfahrtshaltestellen und den darunter eingetragenen Zielhaltestellen gesucht.\n                  (Es müssen gleich viele Abfahrts- wie Zielhaltestelle angegeben werden.)')">[?]</a></label>
-            </td>
-            <td>
+                <a href="#" onclick="changeStraight(document.getElementById('crossoverYes').checked)"
+                   onmouseover="changeImage(true);" onmouseout="changeImage(false);"><img id="mixstraight"
+                                                                                          src="@{'/public/images/mix/22.png'}"
+                                                                                          alt="todo"></a>
                 <input type="radio" id="crossoverYes" name="crossover" value="true"#{if crossover!='false'}
-                       checked#{/if}>
-                <label for="crossoverYes"><img src="/public/images/mix.png"
-                                               alt="A&rarr;X | B&rarr;X | A&rarr;Y | B&rarr;Y"
-                                               title="A&rarr;X | B&rarr;X | A&rarr;Y | B&rarr;Y"></label>
-                <input type="radio" id="crossoverNo" name="crossover" value="false"#{if
-                crossover=='false'}checked#{/if}>
-                <label for="crossoverNo"><img src="/public/images/straight.png"
-                                              alt="A&rarr;X | B&rarr;Y"
-                                              title="A&rarr;X | B&rarr;Y"></label>
+                       checked#{/if} style="display: none;">
+                <input type="radio" id="crossoverNo" name="crossover" value="false"
+                       #{if crossover=='false'}checked#{/if} style="display: none;">
             </td>
         </tr>
         <tr>
@@ -115,6 +110,23 @@
 </form>
 
 <script type="text/javascript">
+    function changeStraight(toStraight) {
+        if (toStraight) {
+            document.getElementById("crossoverNo").checked = true;
+        } else {
+            document.getElementById("crossoverYes").checked = true;
+            check("stop");
+        }
+        check("start");
+        document.focus();
+    }
+    function changeImage(hover) {
+        var anzahl_start = document.getElementById("start").getElementsByTagName("input").length;
+        var anzahl_stop = document.getElementById("stop").getElementsByTagName("input").length;
+        var straight = document.getElementById("crossoverNo").checked;
+        if (hover) straight = !straight;
+        document.getElementById("mixstraight").src = "@{'/public/images'}/" + (straight ? "straight" : "mix") + "/" + anzahl_start + (straight ? "" : anzahl_stop) + ".png";
+    }
     function addField(ofType) {
         field = document.createElement("input");
         field.setAttribute("class", "autocompleteStation");
@@ -122,7 +134,7 @@
         field.setAttribute("name", ofType + "[]");
         field.setAttribute("onkeyup", "check('" + ofType + "');");
         field.setAttribute("data-url", "@{Application.autocompleteStation()}");
-        field.setAttribute("style", "margin-right:2px;");
+        field.setAttribute("style", "margin-right:5px;");
         document.getElementById(ofType).appendChild(field);
         autocomplete();
     }
@@ -170,6 +182,7 @@
                 addField(whatToCheck);
             }
         }
+        changeImage(false);
     }
 
     function autocomplete() {
@@ -180,4 +193,5 @@
         });
     }
     autocomplete();
+    changeImage(false);
 </script>

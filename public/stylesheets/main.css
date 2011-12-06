@@ -133,3 +133,16 @@ a, .likealink {
 .ui-menu .ui-menu-item a {
     line-height: 1 !important;
 }
+
+input.autocompleteStation {
+    width: 160px;
+}
+
+#mixstraight {
+    margin-left: 80px;
+    display: block;
+}
+
+label {
+    margin-right: 5px;
+}
