@@ -192,7 +192,7 @@ public class FastTags extends play.templates.FastTags {
                         }
                         out.println("\t</tr>");
                     }
-                    out.println("\t<tr><td></td><td align=\"left\">" + getPartIcon(via, false) + "</td><td></td></tr>");
+                    out.println("\t<tr><td></td><td align=\"left\" colspan=\"2\">" + getPartIcon(via, false) + "</td></tr>");
 
                     //We don't want to display the arriving part of the last element, as it's already in the overview
 //                    if (via_iterator.hasNext()) {
@@ -202,7 +202,7 @@ public class FastTags extends play.templates.FastTags {
                     lastStationName = getLocation(via.arrival); //set the name of this arrival station (to not show it in the second part of the output again)
 //                    }
                 }
-                out.println("</table>");
+                out.println("\t\t<td></td>\n\t\t<td></td>\n\t</tr>\n</table>");
                 return;
             }
         }

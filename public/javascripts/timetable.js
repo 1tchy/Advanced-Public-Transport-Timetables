@@ -17,8 +17,16 @@
 
 function showDetails(connection) {
     document.getElementById('showDetails_' + connection).style.display = 'none';
+    document.getElementById('hideDetails_' + connection).style.display = '';
     document.getElementById('details_' + connection).style.display = 'table-row';
     document.getElementById('arr_' + connection).style.color = 'silver';
     document.getElementById('to_' + connection).style.color = 'silver';
-//    document.getElementById('from_' + connection).colSpan = 3;
+}
+
+function hideDetails(connection) {
+    document.getElementById('showDetails_' + connection).style.display = '';
+    document.getElementById('hideDetails_' + connection).style.display = 'none';
+    document.getElementById('details_' + connection).style.display = 'none';
+    document.getElementById('arr_' + connection).style.color = '';
+    document.getElementById('to_' + connection).style.color = '';
 }
