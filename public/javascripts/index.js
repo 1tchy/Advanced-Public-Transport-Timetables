@@ -28,6 +28,9 @@ function changeStraight(toStraight) {
 function changeImage(hover) {
     var anzahl_start = document.getElementById("start").getElementsByTagName("input").length;
     var anzahl_stop = document.getElementById("stop").getElementsByTagName("input").length;
+    var maximum = 4;
+    anzahl_start = Math.min(anzahl_start, maximum);
+    anzahl_stop = Math.min(anzahl_stop, maximum);
     var straight = document.getElementById("crossoverNo").checked;
     if (hover) straight = !straight;
     document.getElementById("mixstraight").src = "/public/images/" + (straight ? "straight" : "mix") + "/" + anzahl_start + (straight ? "" : anzahl_stop) + ".png";
