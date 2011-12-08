@@ -17,6 +17,9 @@
 
 #{extends 'main.html' /}
 #{set title:(starts?.join("&#44 ").replace(",","")+" &rarr; "+stops?.join("&#44 ").replace(",","")).raw() /}
+#{set 'moreScripts'}
+<script src="@{'/public/javascripts/timetable.js'}" type="text/javascript" charset="${_response_encoding}"></script>
+#{/set}
 #{set "moreNavigation"}
 <div>
     <div><span><a href="@{Application.index()}?${request.querystring}">Abfrage ändern</a></span></div>
@@ -40,13 +43,13 @@
             <span style="color:silver;">(#{my.getDuration dt:connection?.departureTime, at:connection?.arrivalTime/}
                 )</span>
         </td>
-        <td>
+        <td id="from_${connection_index}">
         ${connection?.from?.name}
             #{my.isit connection?.parts[0], a:'Trip'}#{if connection?.parts[0]?.departurePosition}<span
                     style="color:silver;">(Gleis ${connection?.parts[0]?.departurePosition})</span>#{/if}#{/my.isit}
         </td>
-        <td>&rarr;</td>
-        <td>
+        <td id="arr_${connection_index}">&rarr;</td>
+        <td id="to_${connection_index}">
         ${connection?.to?.name}
             #{my.isit connection?.parts[connection?.parts?.size-1], a:'Trip'}#{if
             connection?.parts[connection?.parts?.size-1]?.arrivalPosition}<span
@@ -55,13 +58,13 @@
         </td>
         <td style="width:99%; text-align:center;">
             #{if connection?.parts?.size>1}
-                <a href="#"
-                   onclick="this.innerHTML='';document.getElementById('details_${connection_index}').style.display='';return false;">Umsteigedetails</a>
+                <a href="javascript:void(0);" onclick="showDetails('${connection_index}');"
+                   id="showDetails_${connection_index}">#{my.getAmountOfChanges connection.parts, text:"x Umsteigen", pl:"x Umsteigen"/}</a>
             #{/if}
         </td>
     </tr>
     <tr id="details_${connection_index}" style="display:none;" class="${connection_parity}">
-        <td colspan="5" align="right">
+        <td colspan="6" align="center">
             #{if connection?.parts?.size>1}
                 #{my.getVias connection.parts/}
                 #{/if}

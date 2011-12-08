@@ -86,6 +86,45 @@ public class FastTags extends play.templates.FastTags {
     }
 
     /**
+     * It prints out the amount of changes of a trip
+     *
+     * @param args     the default argument (arg) must include an object containing a List with multiple Parts (e.g. a List of Vias); the argument 'text' must include a String to describe the amount (will also be displayed), the optional argument 'pl' can define the pluralised argument 'text'.
+     * @param body     ignored
+     * @param out      used to return the result
+     * @param template ignored
+     * @param fromLine ignored
+     */
+    public static void _getAmountOfChanges(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        //prepare the parameteres to use
+        Object object_via = args.get("arg");
+        assert object_via instanceof List : "First parameter must be a list object. But is " + object_via;
+        List list_vias = (List) object_via;
+        Object object_text = args.get("text");
+        assert object_text instanceof String : "Parameter text must be a String. But is " + object_text;
+        String text = (String) object_text;
+        int amount = -1; //the first part obviously doesn't count as a change
+        //for each Part that isn't a Footway, count one up
+        for (Object via : list_vias) {
+            if (via instanceof Part) {
+                if (!(via instanceof Footway)) {
+                    amount++;
+                }
+            }
+        }
+        //print the output
+        if (amount == 1) {
+            out.print("1" + text);
+        } else if (amount > 1) {
+            if (args.containsKey("pl")) {
+                out.print(amount + "" + args.get("pl"));
+            } else {
+                out.print(amount + text + "s");
+            }
+        }
+    }
+
+
+    /**
      * It prints out as a table containing how to change from one Part to the next Part.
      *
      * @param args     the default argument (arg) must include an object containing a List with multiple Parts (e.g. a List of Vias)
@@ -153,15 +192,15 @@ public class FastTags extends play.templates.FastTags {
                         }
                         out.println("\t</tr>");
                     }
-                    out.println("\t<tr><td colspan=\"3\" align=\"center\">" + getPartIcon(via, false) + "</td></tr>");
+                    out.println("\t<tr><td></td><td align=\"left\">" + getPartIcon(via, false) + "</td><td></td></tr>");
 
                     //We don't want to display the arriving part of the last element, as it's already in the overview
-                    if (via_iterator.hasNext()) {
-                        //Write the part where to arrive at by this Part (first part in output view)
-                        out.println("\t<tr>"); //start a new line
-                        out.print("\t\t<td>" + getPartOfPart(via, false) + "</td>"); //show the full information of this Parts arrival
-                        lastStationName = getLocation(via.arrival); //set the name of this arrival station (to not show it in the second part of the output again)
-                    }
+//                    if (via_iterator.hasNext()) {
+                    //Write the part where to arrive at by this Part (first part in output view)
+                    out.println("\t<tr>"); //start a new line
+                    out.print("\t\t<td>" + getPartOfPart(via, false) + "</td>"); //show the full information of this Parts arrival
+                    lastStationName = getLocation(via.arrival); //set the name of this arrival station (to not show it in the second part of the output again)
+//                    }
                 }
                 out.println("</table>");
                 return;
