@@ -125,6 +125,34 @@ public class FastTags extends play.templates.FastTags {
 
 
     /**
+     * It prints out the body part, but only if there are multiple parts that need to be displayed
+     *
+     * @param args     the default argument (arg) must include an object containing a List with multiple Parts (e.g. a List of Vias)
+     * @param body     displayed, if vias can be displayed
+     * @param out      used to return the result
+     * @param template ignored
+     * @param fromLine ignored
+     */
+    public static void _showDetails(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        //prepare the parameteres to use
+        Object object_via = args.get("arg");
+        assert object_via instanceof List : "First parameter must be a list object. But is " + object_via;
+        List list_vias = (List) object_via;
+        int totalRealParts = 0;
+        for (Object via : list_vias) {
+            if (via instanceof Part) {
+                if (!(via instanceof Footway)) {
+                    totalRealParts++;
+                    if (totalRealParts > 1) {
+                        out.print(JavaExtensions.toString(body));
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * It prints out as a table containing how to change from one Part to the next Part.
      *
      * @param args     the default argument (arg) must include an object containing a List with multiple Parts (e.g. a List of Vias)
@@ -158,15 +186,15 @@ public class FastTags extends play.templates.FastTags {
                     assert via_obj instanceof Part;
                     Part via = (Part) via_obj;
 
+                    if (via instanceof Footway) { // don't display this, if it's to walk but remember it.
+                        isWalking = true;
+                        continue;
+                    }
                     //We don't want to display the departure part of the first element, as it's already in the overview.
                     if (isFirstElement) {
                         isFirstElement = false;
                     } else {
                         //Write the part where to depart from this Part (second part in output view)
-                        if (via instanceof Footway) { // don't display this, if it's to walk but remember it.
-                            isWalking = true;
-                            continue;
-                        }
                         out.print("\t\t<td style='padding:0 10px;'>");
                         //If the last station was the same as this one, no need to display its name again (as it's the second part of the line in the output view)
                         if (lastStationName.equals(getLocation(via.departure)) && (via instanceof Trip)) {
