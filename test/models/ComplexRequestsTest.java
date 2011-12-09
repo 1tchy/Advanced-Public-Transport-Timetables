@@ -56,7 +56,7 @@ public class ComplexRequestsTest extends UnitTest {
             oneLocation2.add(sbb.autocompleteStations("Zug").get(0));
             threeLocations1.add(sbb.autocompleteStations("Luzern").get(0));
             threeLocations1.add(sbb.autocompleteStations("Basel").get(0));
-            threeLocations1.add(sbb.autocompleteStations("Z�rich HB").get(0));
+            threeLocations1.add(sbb.autocompleteStations("Zürich HB").get(0));
             threeLocations2.add(sbb.autocompleteStations("Chur").get(0));
             threeLocations2.add(sbb.autocompleteStations("Olten").get(0));
             threeLocations2.add(sbb.autocompleteStations("Lugano").get(0));

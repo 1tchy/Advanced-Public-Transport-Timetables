@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -60,7 +60,7 @@ public class InputCheckerTest extends UnitTest {
     public void getAndValidateStations() {
         NetworkProvider sbb = KnownProvider.get("sbb");
         Validation.clear();
-        Set<Location> validatedStations = InputChecker.getAndValidateStations(sbb, new String[]{"Olten", "Bern", "Zürich HB"}, "description", "fieldName", new HashSet<String>());
+        List<Location> validatedStations = InputChecker.getAndValidateStations(sbb, new String[]{"Olten", "Bern", "Zürich HB"}, "description", "fieldName", new HashSet<String>());
         assert !Validation.hasErrors() : "InputChecker.getAndValidateStations(sbb, new String[]{\"Olten\", \"Bern\", \"Zürich HB\"}, \"description\", \"fieldName\", new HashSet<String>()) shouldn't return an error. But returned " + Validation.errors().toString();
         assert validatedStations.size() == 3 : "InputChecker.getAndValidateStations(sbb, new String[]{\"Olten\", \"Bern\", \"Zürich HB\"}, \"description\", \"fieldName\", new HashSet<String>()) should return three stations but returned " + validatedStations.size() + ".";
         boolean o = false;

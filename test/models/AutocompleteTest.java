@@ -23,7 +23,6 @@ import play.test.UnitTest;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class AutocompleteTest extends UnitTest {
 
@@ -46,7 +45,7 @@ public class AutocompleteTest extends UnitTest {
     public void includPopularStationsTest() {
         //rise popularity
         String[] popular = {"Luzern, Brünigstrasse", "Luzern, Bundesplatz", "Luzern, Tiefe", "Luzern, Kantonalbank", "Luzern, Hubelmatt"};
-        Set<Location> popularL = InputChecker.getAndValidateStations(KnownProvider.get("sbb"), popular, "description", "fieldName", new HashSet<String>());
+        List<Location> popularL = InputChecker.getAndValidateStations(KnownProvider.get("sbb"), popular, "description", "fieldName", new HashSet<String>());
         for (int i = 500; i > 0; i--) {
             PopularLocation.increasePopularities("sbb", popularL);
         }
