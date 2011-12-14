@@ -16,71 +16,36 @@
  */
 
 body {
-    background: url(/public/images/bg.jpg) center top no-repeat, url(/public/images/bg_spiegelung.jpg) repeat;
-    background-size: 100% auto, 100% auto;
+    background: #eaecde;
     margin: 50px;
     text-align: center;
     font-family: Lucida Sans Unicode, Lucida Grande, sans-serif;
+}
+
+@media screen and (min-device-width: 481px) {
+    body {
+        background: url(/public/images/bg.jpg) center top no-repeat, url(/public/images/bg_spiegelung.jpg) repeat !important;
+        background-size: 100% auto, 100% auto !important;
+    }
 }
 
 div.navi {
     position: fixed;
     left: 0;
     top: 0;
-    width: 40px;
-    height: 100%;
+    width: 100%;
+    padding: 10px;
     background: rgba(255, 255, 255, 0.5) !important;
     background: white;
-    display: table;
-}
-
-div.navi > div {
-    display: table-row;
-}
-
-div.navi > div > div {
-    display: table-cell;
-    height: 140px;
-    vertical-align: middle;
-}
-
-div.navi span {
-    -webkit-transform: rotate(-90deg);
-    -moz-transform: rotate(-90deg);
-    position: fixed;
-    text-align: center;
-    left: -50px; /* = -(this.width - table.navi.width) / 2 */
-    width: 140px; /* = parent.height */
 }
 
 div.navi a {
+    margin: auto 30px;
     text-decoration: none;
 }
 
-.nav_faq {
-    position: fixed;
-    bottom: 0;
-    height: 60px;
-}
-
-@media screen and (max-device-width: 480px) {
-    .nav_faq {
-        bottom: 55%;
-    }
-}
-
-.nav_faq span {
-    left: -10px;
-    width: 60px;
-}
-
-.nav_large {
-    height: 200px !important;
-}
-
-.nav_large span {
-    left: -80px !important;
-    width: 200px !important;
+div.navi a.faq {
+    margin-left: 60px;
 }
 
 div.content {

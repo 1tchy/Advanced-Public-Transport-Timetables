@@ -21,14 +21,10 @@
 <script src="@{'/public/javascripts/timetable.js'}" type="text/javascript" charset="${_response_encoding}"></script>
 #{/set}
 #{set "moreNavigation"}
-<div>
-    <div><span><a href="@{Application.index()}?${request.querystring}">Abfrage ändern</a></span></div>
-</div>
-<div>
-    <div class="nav_large"><span><a
-            href="@{Application.showTimetable()}?#{my.remove '&amp;time=\\+?[0-9]{0,2}%3A[0-9]{0,2}\\+*'}${request.querystring}#{/my.remove}">zu
-        aktueller Uhrzeit</a></span></div>
-</div>
+<a href="@{Application.index()}?${request.querystring}">Abfrage ändern</a>
+<a href="@{Application.showTimetable()}?#{my.remove '&amp;time=\\+?[0-9]{0,2}%3A[0-9]{0,2}\\+*'}${request.querystring}#{/my.remove}">...
+    zu
+    aktueller Uhrzeit</a>
 #{/set}
 
 <h2>Verbindungen von ${starts?.join("&#44 ").replace(",","").raw()}

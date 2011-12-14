@@ -23,9 +23,6 @@
     <link rel="shortcut icon" href="/public/images/logo.png">
     <link rel="apple-touch-icon" href="/public/images/apple-touch-icon.png">
     <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/main.css'}">
-    <!--[if IE]>
-    <link rel="stylesheet" type="text/css" href="@{'/public/stylesheets/ie.css'}"/>
-    <![endif]-->
 #{get 'moreStyles' /}
     <script type="text/javascript">
         var _gaq = _gaq || [];
@@ -45,17 +42,15 @@
 </head>
 <body>
 <div class="navi">
-    <div>
-        <div><span><a href="@{Application.index()}">Neue Abfrage</a></span></div>
-    </div>
+    <a href="@{Application.index()}">Neue Abfrage</a>
 #{get 'moreNavigation'/}
-    <div class="nav_faq"><span><a href="@{Application.showFAQ()}">FAQ</a></span></div>
+    <a href="@{Application.showFAQ()}" class="faq">FAQ</a>
 </div>
 <div class="content">
     <table border="0">
         <tr>
             <td><a href="@{Application.index()}"><img src="/public/images/logo.png" width="80" height="80"
-                                                      alt="schneller-dort.ch"></a></td>
+                                                      alt="schneller-dort.ch" border="0"></a></td>
             <td><h1>Der effiziente Fahrplan</h1></td>
         </tr>
     </table>
