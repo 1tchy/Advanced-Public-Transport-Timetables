@@ -129,8 +129,7 @@ public final class ParserUtils {
                     else
                         throw new IOException(message + ": " + url);
                 }
-            }
-            catch (final SocketTimeoutException x) {
+            } catch (final SocketTimeoutException x) {
                 if (tries-- > 0)
                     System.out.println("socket timed out, retrying...");
                 else
@@ -362,8 +361,7 @@ public final class ParserUtils {
     public static String urlEncode(final String str) {
         try {
             return URLEncoder.encode(str, "utf-8");
-        }
-        catch (final UnsupportedEncodingException x) {
+        } catch (final UnsupportedEncodingException x) {
             throw new RuntimeException(x);
         }
     }
@@ -371,8 +369,7 @@ public final class ParserUtils {
     public static String urlEncode(final String str, final String enc) {
         try {
             return URLEncoder.encode(str, enc);
-        }
-        catch (final UnsupportedEncodingException x) {
+        } catch (final UnsupportedEncodingException x) {
             throw new RuntimeException(x);
         }
     }
@@ -380,8 +377,7 @@ public final class ParserUtils {
     public static String urlDecode(final String str, final String enc) {
         try {
             return URLDecoder.decode(str, enc);
-        }
-        catch (final UnsupportedEncodingException x) {
+        } catch (final UnsupportedEncodingException x) {
             throw new RuntimeException(x);
         }
     }
