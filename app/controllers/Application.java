@@ -82,7 +82,7 @@ public class Application extends Controller {
         if (!isCrossover && (starts.size() != stops.size())) {
             Validation.addError("crossover", "Wenn nicht alle Verbindungen von <b>allen</b> Abfahrtshaltestellen zu <b>allen</b> Zielhaltestellen gesucht werden, müssen gleich viele Abfahrts- wie Zielhaltestellen angegeben werden.");
         }
-        Date datetime = InputChecker.getAndValidateTime(params.get("time"), "time");
+        Date datetime = InputChecker.getAndValidateTime(params.get("time"), "time", KnownProvider.getTimeZone(provider_object));
         if (datetime == null) {
             datetime = new Date();
         }

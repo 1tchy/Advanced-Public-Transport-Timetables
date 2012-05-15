@@ -58,9 +58,10 @@ public class InputChecker {
      *
      * @param time      String to evaluate (HH:mm)
      * @param fieldName The name of the field that's evaluated (used for error output)
+     * @param timeZone  The timezone the given time is in
      * @return a date with the given time within the last 2 and the next 22hours (or if no String got delivered, null)
      */
-    public static Date getAndValidateTime(String time, String fieldName) {
+    public static Date getAndValidateTime(String time, String fieldName, TimeZone timeZone) {
         //if nothing got delivered, return the current time
         if (time == null || time.trim().length() == 0) {
             return null;
@@ -80,7 +81,7 @@ public class InputChecker {
             if (time.matches("(([01][0-9])|(2[0-3])).[0123456][0-9]")) {
                 Calendar now = new GregorianCalendar();
                 //create the date (as a Calendar)
-                Calendar c = new GregorianCalendar();
+                Calendar c = new GregorianCalendar(timeZone);
                 c.set(Calendar.HOUR_OF_DAY, Integer.parseInt(time.substring(0, 2)));
                 c.set(Calendar.MINUTE, Integer.parseInt(time.substring(3, 5)));
                 //within how many hours in the past is ok?
