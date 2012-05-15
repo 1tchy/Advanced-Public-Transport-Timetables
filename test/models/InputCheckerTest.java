@@ -56,6 +56,17 @@ public class InputCheckerTest extends UnitTest {
     }
 
     @Test
+    public void getAndValidateTime_withTimeZones() {
+        TimeZone inputTimezone = TimeZone.getTimeZone("GMT-5");
+        TimeZone outputTimezone = TimeZone.getTimeZone("GMT-7");
+        Date time = InputChecker.getAndValidateTime("08:30", "test", inputTimezone);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(outputTimezone);
+        calendar.setTime(time);
+        assert calendar.get(Calendar.HOUR_OF_DAY) == 6 : "Should return 6 but returned " + calendar.get(Calendar.HOUR_OF_DAY);
+    }
+
+    @Test
     public void getAndValidateStations() {
         NetworkProvider sbb = KnownProvider.get("sbb");
         Validation.clear();

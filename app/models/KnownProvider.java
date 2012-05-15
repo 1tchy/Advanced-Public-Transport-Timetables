@@ -70,7 +70,8 @@ public class KnownProvider {
      */
     private static void initialize() {
         if (initialized) return;
-        new KnownProvider(new OpenDataProvider("http://transport.opendata.ch/v1/", NetworkId.SBB),"SBB","sbb",TimeZone.getTimeZone("Europe/Zurich"));
+        TimeZone timeZone = TimeZone.getTimeZone("Europe/Zurich");
+        new KnownProvider(new OpenDataProvider("http://transport.opendata.ch/v1/", NetworkId.SBB, timeZone),"SBB","sbb", timeZone);
         initialized = true;
 //        new KnownProvider(new SbbProvider("MJXZ841ZfsmqqmSymWhBPy5dMNoqoGsHInHbWJQ5PTUZOJ1rLTkn8vVZOZDFfSe"), "SBB", "sbb", TimeZone.getTimeZone("Europe/Zurich"));
     }
