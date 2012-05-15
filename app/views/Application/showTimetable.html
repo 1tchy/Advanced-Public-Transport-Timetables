@@ -33,7 +33,7 @@
 #{list items:connections, as:'connection'}
     <tr class="${connection_parity}">
         <td>
-        ${connection?.getFirstTripDepartureTime()?.format("HH:mm")} - ${connection?.getLastTripArrivalTime()?.format("HH:mm")}
+        #{my.parseTime connection?.getFirstTripDepartureTime()/} - #{my.parseTime connection?.getLastTripArrivalTime()/}
         </td>
         <td>
             <span style="color:silver;">(#{my.getDuration dt:connection?.getFirstTripDepartureTime(), at:connection?.getLastTripArrivalTime()/}

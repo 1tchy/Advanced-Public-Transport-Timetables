@@ -165,6 +165,7 @@ public class FastTags extends play.templates.FastTags {
     public static void _getVias(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
         //The default argument should be a List Object containing only parts. Otherwise, there will be thrown an Exception.
         Object object_via = args.get("arg");
+        TimeZone timeZone = getTimezone(template);
         if (object_via instanceof List) {
             List list_vias = (List) object_via;
             boolean allViasPart = true;
@@ -203,9 +204,9 @@ public class FastTags extends play.templates.FastTags {
                             Trip trip = (Trip) via;
                             String gleis = trip.departurePosition;
                             if (gleis != null && gleis.length() > 0) {
-                                out.print("umsteigen auf</td>\n\t\t<td>Gleis " + gleis + " (" + getTime(trip.departureTime) + ")");
+                                out.print("umsteigen auf</td>\n\t\t<td>Gleis " + gleis + " (" + printTime(trip.departureTime, timeZone) + ")");
                             } else {
-                                out.print("Umstieg auf Anschluss</td>\n\t\t<td>" + getTime(trip.departureTime));
+                                out.print("Umstieg auf Anschluss</td>\n\t\t<td>" + printTime(trip.departureTime, timeZone));
                             }
                         } else {
                             //if it's not simple to display...
@@ -217,7 +218,7 @@ public class FastTags extends play.templates.FastTags {
                                 out.print("umsteigen auf</td>\n\t\t<td>");
                             }
                             //and the target departure to change to
-                            out.print(getPartOfPart(via, true) + "</td>");
+                            out.print(getPartOfPart(via, true, timeZone) + "</td>");
                         }
                         out.println("\t</tr>");
                     }
@@ -227,7 +228,7 @@ public class FastTags extends play.templates.FastTags {
 //                    if (via_iterator.hasNext()) {
                     //Write the part where to arrive at by this Part (first part in output view)
                     out.println("\t<tr>"); //start a new line
-                    out.print("\t\t<td>" + getPartOfPart(via, false) + "</td>"); //show the full information of this Parts arrival
+                    out.print("\t\t<td>" + getPartOfPart(via, false, timeZone) + "</td>"); //show the full information of this Parts arrival
                     lastStationName = getLocation(via.arrival); //set the name of this arrival station (to not show it in the second part of the output again)
 //                    }
                 }
@@ -293,6 +294,19 @@ public class FastTags extends play.templates.FastTags {
     }
 
     /**
+     * Parses the time to be displayed
+     *
+     * @param args     the first argument must be the time to display
+     * @param body     ignored
+     * @param out      used to return the result
+     * @param template used for getting the provider for which the time will be generated
+     * @param fromLine ignored
+     */
+    public static void _parseTime(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+        out.print(printTime(args.get("arg"), getTimezone(template)));
+    }
+
+    /**
      * It prints out the current time
      *
      * @param args     ignored
@@ -330,9 +344,10 @@ public class FastTags extends play.templates.FastTags {
      *
      * @param via          the part to render (should, but don't have to, be a Trip)
      * @param getDeparture Show the departure? (or the arrival)
+     * @param timeZone     In which timezone the times should be displayed
      * @return Description of the departure/arrival of the part
      */
-    private static String getPartOfPart(Part via, boolean getDeparture) {
+    private static String getPartOfPart(Part via, boolean getDeparture, TimeZone timeZone) {
         //Make sure, via is not null
         if (via == null) return "";
         //Define the output
@@ -363,21 +378,38 @@ public class FastTags extends play.templates.FastTags {
                 location.append(", ");
             }
             //add time
-            location.append(getTime(zeit));
+            location.append(printTime(zeit, timeZone));
             location.append(")");
         }
         return location.toString();
     }
 
     /**
+     * Reads the timezone from the Template arguents
+     *
+     * @param template To get the timezone from
+     * @return The timezone for the template
+     */
+    private static TimeZone getTimezone(ExecutableTemplate template) {
+        Object o = template.getProperty("timezone");
+        if (o instanceof TimeZone) return (TimeZone) o;
+        return TimeZone.getDefault();
+    }
+
+    /**
      * Renders the time for display
      *
-     * @param zeit a date to render
-     * @return a string with the time
+     * @param date     Which time to print
+     * @param timeZone In which timezone should the time be
+     * @return The time to display
      */
-    private static String getTime(Date zeit) {
-        if (zeit == null) return "??:??";
-        return new SimpleDateFormat("HH:mm").format(zeit);
+    private static String printTime(Object date, TimeZone timeZone) {
+        if (timeZone == null) {
+            timeZone = TimeZone.getDefault();
+        }
+        DateFormat dateFormat = new SimpleDateFormat("HH:mm");
+        dateFormat.setTimeZone(timeZone);
+        return dateFormat.format(date);
     }
 
     /**

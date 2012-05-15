@@ -82,7 +82,8 @@ public class Application extends Controller {
         if (!isCrossover && (starts.size() != stops.size())) {
             Validation.addError("crossover", "Wenn nicht alle Verbindungen von <b>allen</b> Abfahrtshaltestellen zu <b>allen</b> Zielhaltestellen gesucht werden, müssen gleich viele Abfahrts- wie Zielhaltestellen angegeben werden.");
         }
-        Date datetime = InputChecker.getAndValidateTime(params.get("time"), "time", KnownProvider.getTimeZone(provider_object));
+        TimeZone timeZone = KnownProvider.getTimeZone(provider_object);
+        Date datetime = InputChecker.getAndValidateTime(params.get("time"), "time", timeZone);
         if (datetime == null) {
             datetime = new Date();
         }
@@ -102,6 +103,7 @@ public class Application extends Controller {
             }
             renderArgs.put("starts", starts);
             renderArgs.put("stops", stops);
+            renderArgs.put("timezone", timeZone);
             render("Application/showTimetable.html");
         }
     }
