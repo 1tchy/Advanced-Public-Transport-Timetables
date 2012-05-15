@@ -79,13 +79,15 @@ public class Autocomplete {
                     String simplifiedTerm = simplify(term);
                     boolean firstSuggestion = true;
                     for (Location location : locations) {
-                        if (firstSuggestion || simplify(location.name).contains(simplifiedTerm)) {
-                            autocomplete_list.add(location.name);
-                            if (autocomplete_list.size() == AUTOCOMPLETE_MAX) {
-                                break;
+                        if (!autocomplete_list.contains(location.name)) {
+                            if (firstSuggestion || simplify(location.name).contains(simplifiedTerm)) {
+                                autocomplete_list.add(location.name);
+                                if (autocomplete_list.size() == AUTOCOMPLETE_MAX) {
+                                    break;
+                                }
                             }
+                            firstSuggestion = false;
                         }
-                        firstSuggestion = false;
                     }
                     providers_autocomplete.put(term, autocomplete_list);
                     providers_autocomplete_level.put(term, join(mostPopular));

@@ -16,8 +16,9 @@
  */
 package models;
 
+import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
-import de.schildbach.pte.SbbProvider;
+import de.schildbach.pte.OpenDataProvider;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -69,8 +70,9 @@ public class KnownProvider {
      */
     private static void initialize() {
         if (initialized) return;
+        new KnownProvider(new OpenDataProvider("http://transport.opendata.ch/v1/", NetworkId.SBB),"SBB","sbb",TimeZone.getTimeZone("Europe/Zurich"));
         initialized = true;
-        new KnownProvider(new SbbProvider("MJXZ841ZfsmqqmSymWhBPy5dMNoqoGsHInHbWJQ5PTUZOJ1rLTkn8vVZOZDFfSe"), "SBB", "sbb", TimeZone.getTimeZone("Europe/Zurich"));
+//        new KnownProvider(new SbbProvider("MJXZ841ZfsmqqmSymWhBPy5dMNoqoGsHInHbWJQ5PTUZOJ1rLTkn8vVZOZDFfSe"), "SBB", "sbb", TimeZone.getTimeZone("Europe/Zurich"));
     }
 
     /**

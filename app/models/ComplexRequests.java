@@ -42,7 +42,7 @@ public class ComplexRequests {
      * @param timeAsDeparture is this time assumed as the departure-time (and not the arrival)
      * @return a list of connections for the given request arguments (will not be null)
      */
-    public static Set<Connection> getMultipleTimetables(NetworkProvider provider, Collection<Location> starts, boolean crossover, Collection<Location> stops, Date datetime, boolean timeAsDeparture) {
+    public static Set<Connection> getMultipleTimetables(NetworkProvider provider, Collection<Location> starts, boolean crossover, Collection<Location> stops, Date datetime, boolean timeAsDeparture) throws ServerNotReachableException {
         //assures, that none-crossover-requests have the same amount of starts and stops
         assert crossover || starts.size() == stops.size() : "Anzahl Abfahrtshaltestellen und Zielhaltestellen bei der Nicht-Crossover Verbindung m�ssen gleich sein.";
 
@@ -62,16 +62,14 @@ public class ComplexRequests {
                 Location aStop = stopsIterator.next();
                 try {
                     //try to get a set of connections for one combination of starts/stops
-                    QueryConnectionsResult result = provider.queryConnections(aStart, null, aStop, datetime, timeAsDeparture, null, NetworkProvider.WalkSpeed.FAST);
+                    QueryConnectionsResult result = provider.queryConnections(aStart, null, aStop, datetime, timeAsDeparture, null, NetworkProvider.WalkSpeed.FAST, NetworkProvider.Accessibility.NEUTRAL);
 
                     //if there is at least one connection returned, add it to the list to return
                     if (result != null && result.connections != null && result.connections.size() > 0) {
                         connections.addAll(result.connections);
                     }
                 } catch (IOException e) {
-                    e.printStackTrace(); //is the providers server online?
-                } catch (Exception e) {
-                    e.printStackTrace(); //an error in the underlying application occurred todo: better Error output
+                    throw new ServerNotReachableException(e);
                 }
             }
             while (crossover && stopsIterator.hasNext()); //loop over all stops (if crossover connections are requested and there is a next stopping location)
@@ -81,5 +79,23 @@ public class ComplexRequests {
             }
         }
         return connections;
+    }
+
+    public static class ServerNotReachableException extends IOException {
+        private static String exceptionText = "Konnte nicht zum Fahrplananbieter verbinden";
+
+        public ServerNotReachableException(IOException ex) {
+            super(ex);
+        }
+
+        @Override
+        public String getMessage() {
+            return exceptionText + " (" + super.getMessage() + ")";
+        }
+
+        @Override
+        public String getLocalizedMessage() {
+            return exceptionText + " (" + super.getLocalizedMessage() + ")";
+        }
     }
 }

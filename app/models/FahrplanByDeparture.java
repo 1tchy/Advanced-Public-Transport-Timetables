@@ -19,6 +19,7 @@ package models;
 import de.schildbach.pte.dto.Connection;
 
 import java.util.Comparator;
+import java.util.Date;
 
 /**
  * Compares two connections based on their departing time
@@ -29,6 +30,11 @@ import java.util.Comparator;
  */
 public class FahrplanByDeparture implements Comparator<Connection> {
     public int compare(Connection c1, Connection c2) {
-        return c1.departureTime.compareTo(c2.departureTime);
+        Date c2start = c2.getFirstTripDepartureTime();
+        Date c1start = c1.getFirstTripDepartureTime();
+        if (c1start == null || c2start == null || c1start.equals(c2start)) {
+            return c1.hashCode() - c2.hashCode();
+        }
+        return c1start.compareTo(c2start);
     }
 }

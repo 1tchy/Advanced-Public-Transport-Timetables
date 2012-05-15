@@ -25,6 +25,7 @@ import play.test.UnitTest;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -51,9 +52,10 @@ public class InputCheckerTest extends UnitTest {
     @Test
     public void getAndValidateTime() {
         assert Math.abs(InputChecker.getAndValidateTime(new SimpleDateFormat("HH:mm").format(new Date()), "test").getTime() - new Date().getTime()) <= 1 : "InputChecker.getAndValidateTime of the current time in HH:mm should return again the current time.";
-        Date d = InputChecker.getAndValidateTime("08:30", "test");
-        assert d.getHours() == 8 : "The hour of InputChecker.getAndValidateTime(\"08:30\", \"test\") should be 8.";
-        assert d.getMinutes() == 30 : "The minutes of InputChecker.getAndValidateTime(\"08:30\", \"test\") should be 30.";
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(InputChecker.getAndValidateTime("08:30", "test"));
+        assert calendar.get(Calendar.HOUR_OF_DAY) == 8 : "The hour of InputChecker.getAndValidateTime(\"08:30\", \"test\") should be 8.";
+        assert calendar.get(Calendar.MINUTE) == 30 : "The minutes of InputChecker.getAndValidateTime(\"08:30\", \"test\") should be 30.";
     }
 
     @Test

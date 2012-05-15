@@ -22,23 +22,18 @@ import models.Autocomplete;
 import models.ComplexRequests;
 import models.InputChecker;
 import models.KnownProvider;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.SimpleEmail;
 import play.data.validation.Validation;
+import play.libs.Mail;
+import play.mvc.Catch;
 import play.mvc.Controller;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Application extends Controller {
-
-    /**
-     * Shows s webpage to the user to welcome him and ask him for the transport company he wants to use
-     */
-    public static void index_old() {
-        renderArgs.put("provider", KnownProvider.all());
-        render("Application/index_old.html");
-    }
 
     /**
      * Shows a webpage to the user, that displays some input fields to start a request. There may be some predefined values
@@ -71,6 +66,7 @@ public class Application extends Controller {
      * Shows a webpage with some timetables to the user, depending on the given parameters
      * //@param provider the ID of the provider to get the timetable from
      */
+    @SuppressWarnings("unused")
     public static void showTimetable() {
         String provider = "sbb";
         Validation.clear();
@@ -88,44 +84,35 @@ public class Application extends Controller {
         }
         Date datetime = InputChecker.getAndValidateTime(params.get("time"), "time");
         if (datetime == null) {
-            // get the providers timezone
-            TimeZone providerTimezone = KnownProvider.getTimeZone(provider_object);
-            // get the string of the timezone of the provider
-            SimpleDateFormat timezoneFormatter = new SimpleDateFormat("zzz");
-            timezoneFormatter.setTimeZone(providerTimezone);
-            String providerTimezoneString = timezoneFormatter.format(new Date());
-
-            String formatString = "EEE MMM d HH:mm:ss zzz yyyy";
-            // get the string of the local time
-            DateFormat df = new SimpleDateFormat(formatString);
-            df.setTimeZone(providerTimezone);
-            String localeDate = df.format(new Date());
-            // fake the timezone, so that a Date can be generated accepted by provider
-            localeDate = localeDate.replace(providerTimezoneString, "GMT");
-            // convert the local time to the Date accepted by the provider
-            try {
-                datetime = df.parse(localeDate);
-            } catch (ParseException e) {
-                datetime = new Date();
-            }
+            datetime = new Date();
         }
         boolean isTimeAsDeparture = InputChecker.getAndValidateBoolean(params.get("timeAsDeparture"), true);
         //now, all parameters got handled. Did there occur an error?
         if (Validation.hasErrors()) {
             //On any error, show the input page again.
-            Map<String, String[]> allParams = params.all();
-            for (String param : allParams.keySet()) {
-                renderArgs.put(param.replace("[]", ""), (param.endsWith("[]") ? allParams.get(param) : allParams.get(param)[0]));
-            }
-            Validation.keep();
-            render("Application/index.html");
+            showInputPageAgain();
         } else {
             //If everything is fine, create the desired timetables and print them out
-            renderArgs.put("connections", ComplexRequests.getMultipleTimetables(provider_object, starts, isCrossover, stops, datetime, isTimeAsDeparture));
+            try {
+                renderArgs.put("connections", ComplexRequests.getMultipleTimetables(provider_object, starts, isCrossover, stops, datetime, isTimeAsDeparture));
+            } catch (ComplexRequests.ServerNotReachableException e) {
+                Validation.addError("general", e.getLocalizedMessage());
+                showInputPageAgain();
+                return;
+            }
             renderArgs.put("starts", starts);
             renderArgs.put("stops", stops);
             render("Application/showTimetable.html");
         }
+    }
+
+    private static void showInputPageAgain() {
+        Map<String, String[]> allParams = params.all();
+        for (String param : allParams.keySet()) {
+            renderArgs.put(param.replace("[]", ""), (param.endsWith("[]") ? allParams.get(param) : allParams.get(param)[0]));
+        }
+        Validation.keep();
+        render("Application/index.html");
     }
 
     /**
@@ -134,6 +121,7 @@ public class Application extends Controller {
      *
      * @param term the term to complete to a stations name
      */
+    @SuppressWarnings("unused")
     public static void autocompleteStation(final String term) {
         String provider = "sbb";
         renderJSON(Autocomplete.stations(provider, term));
@@ -142,7 +130,28 @@ public class Application extends Controller {
     /**
      * Shows a page to answer (all) questions a User of this page might have (frequently asked questions).
      */
+    @SuppressWarnings("unused")
     public static void showFAQ() {
         render("Application/faq.html");
+    }
+
+    @SuppressWarnings("unused")
+    @Catch(Exception.class)
+    public static void catchAllExceptions(Throwable throwable) throws EmailException {
+        SimpleEmail mail = new SimpleEmail();
+        String mailAddress = "ymfhaad6n9" + "@" + "laurinmurer.ch";
+        mail.setFrom(mailAddress);
+        mail.addTo(mailAddress);
+        mail.setSubject("Exception thrown: " + throwable.getMessage());
+        StringBuilder mailContent = new StringBuilder("Request was: http://");
+        mailContent.append(request.domain).append(request.url).append("\n\nStacktrace:\n");
+        for (StackTraceElement element : throwable.getStackTrace()) {
+            mailContent.append(element).append("\n");
+        }
+        mail.setMsg(mailContent.toString());
+        Mail.send(mail);
+        if (Math.random() > 0.03) { //show almost always, but prevent from a loop
+            showInputPageAgain();
+        }
     }
 }

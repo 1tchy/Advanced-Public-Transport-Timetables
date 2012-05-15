@@ -40,6 +40,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 @FastTags.Namespace("my")
+@SuppressWarnings("unused")
 public class FastTags extends play.templates.FastTags {
     /**
      * This Tag verifies, that an object is an instance of a specific class. If it is, it will return the body-part of the tag

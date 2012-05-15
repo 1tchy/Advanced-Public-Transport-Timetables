@@ -19,9 +19,14 @@ package models;
 
 import de.schildbach.pte.dto.Connection;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.modules.junit4.PowerMockRunner;
 import play.test.UnitTest;
 
 import java.util.Date;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by IntelliJ IDEA.
@@ -29,12 +34,16 @@ import java.util.Date;
  * Date: 23.11.11
  * Time: 09:44
  */
+@RunWith(PowerMockRunner.class)
 public class FahrplanByDepartureTest extends UnitTest {
     @Test
     public void test1() {
-        Connection c1 = new Connection(null, null, new Date(1322038500), null, null, null, null, null, null);
-        Connection c2a = new Connection(null, null, new Date(1322039999), null, null, null, null, null, null);
-        Connection c2b = new Connection(null, null, new Date(1322039999), null, null, null, null, null, null);
+        Connection c1 = mock(Connection.class);
+        when(c1.getFirstDepartureTime()).thenReturn(new Date(1322038500));
+        Connection c2a = mock(Connection.class);
+        when(c2a.getFirstDepartureTime()).thenReturn(new Date(1322039999));
+        Connection c2b = mock(Connection.class);
+        when(c2b.getFirstDepartureTime()).thenReturn(new Date(1322039999));
         FahrplanByDeparture comparator = new FahrplanByDeparture();
         assert comparator.compare(c1, c2a) < 0 : "FahrplanByDeparture should be able to compare two Connections only by their departureTime. comparator.compare(c1, c2a) returned " + comparator.compare(c1, c2a);
         assert comparator.compare(c2a, c1) > 0 : "FahrplanByDeparture should be able to compare two Connections only by their departureTime. comparator.compare(c2a,c1) returned " + comparator.compare(c2a, c1);

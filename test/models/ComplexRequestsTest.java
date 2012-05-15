@@ -74,7 +74,11 @@ public class ComplexRequestsTest extends UnitTest {
                 for (HashSet<Location> from : froms) {
                     for (HashSet<Location> to : tos) {
                         if (crossover || (from.size() == to.size())) {
-                            multipleConnections.add(ComplexRequests.getMultipleTimetables(sbb, from, crossover, to, new Date(), asDeparture));
+                            try {
+                                multipleConnections.add(ComplexRequests.getMultipleTimetables(sbb, from, crossover, to, new Date(), asDeparture));
+                            } catch (ComplexRequests.ServerNotReachableException e) {
+                                e.printStackTrace();
+                            }
                         } else {
                             multipleConnections.add(null);
                         }
@@ -129,10 +133,10 @@ public class ComplexRequestsTest extends UnitTest {
                                 continue;
                             }
                         }
-                        long differenceFirstDep = Math.abs(multipleConnection(crossover, asDeparture, fromOne, toOne).iterator().next().departureTime.getTime() - (new Date().getTime()));
+                        long differenceFirstDep = Math.abs(multipleConnection(crossover, asDeparture, fromOne, toOne).iterator().next().getFirstTripDepartureTime().getTime() - (new Date().getTime()));
                         long differenceLastArr = 0;
                         for (Connection connection : multipleConnection(crossover, asDeparture, fromOne, toOne)) {
-                            differenceLastArr = Math.abs(connection.departureTime.getTime() - (new Date().getTime()));
+                            differenceLastArr = Math.abs(connection.getFirstTripDepartureTime().getTime() - (new Date().getTime()));
                         }
                         if (asDeparture) {
                             assert differenceFirstDep < differenceLastArr;
