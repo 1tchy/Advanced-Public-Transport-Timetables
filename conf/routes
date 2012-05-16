@@ -20,10 +20,11 @@
 #
 ##########################################################################
 
-GET     /favicon.ico                            staticFile:public/images/icon.png
+GET     /favicon.ico                            staticFile:public/images/favicon.ico
 
 # Home page
 GET     /                                       Application.index
+GET     /robots.txt                             staticFile:public/robots.txt
 GET     /timetable/?                            Application.showTimetable
 GET     /autocomplete/?                         Application.autocompleteStation
 GET     /faq/?                                  Application.showFAQ
