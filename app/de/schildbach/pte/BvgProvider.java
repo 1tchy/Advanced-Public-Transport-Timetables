@@ -35,6 +35,7 @@ import de.schildbach.pte.dto.Connection;
 import de.schildbach.pte.dto.Departure;
 import de.schildbach.pte.dto.GetConnectionDetailsResult;
 import de.schildbach.pte.dto.Line;
+import de.schildbach.pte.dto.Line.Attr;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.NearbyStationsResult;
@@ -44,10 +45,11 @@ import de.schildbach.pte.dto.QueryDeparturesResult;
 import de.schildbach.pte.dto.ResultHeader;
 import de.schildbach.pte.dto.StationDepartures;
 import de.schildbach.pte.dto.Stop;
+import de.schildbach.pte.dto.Style;
+import de.schildbach.pte.dto.Style.Shape;
 import de.schildbach.pte.exception.SessionExpiredException;
 import de.schildbach.pte.exception.UnexpectedRedirectException;
 import de.schildbach.pte.geo.Berlin;
-import de.schildbach.pte.util.Color;
 import de.schildbach.pte.util.ParserUtils;
 
 /**
@@ -292,9 +294,9 @@ public final class BvgProvider extends AbstractHafasProvider
 					final Matcher mMsgsFine = P_DEPARTURES_LIVE_MSGS_FINE.matcher(mMsgsCoarse.group(1));
 					if (mMsgsFine.matches())
 					{
-						final String line = normalizeLine(ParserUtils.resolveEntities(mMsgsFine.group(1)));
+						final Line line = parseLineWithoutType(ParserUtils.resolveEntities(mMsgsFine.group(1)));
 						final String message = ParserUtils.resolveEntities(mMsgsFine.group(3)).replace('\n', ' ');
-						messages.put(line, message);
+						messages.put(line.label, message);
 					}
 					else
 					{
@@ -326,16 +328,16 @@ public final class BvgProvider extends AbstractHafasProvider
 						else
 							plannedTime = parsedTime.getTime();
 
-						final String line = normalizeLine(ParserUtils.resolveEntities(mDepFine.group(3)));
+						final Line line = parseLineWithoutType(ParserUtils.resolveEntities(mDepFine.group(3)));
 
 						final String position = null;
 
-						final int destinationId = 0;
+						final String[] destinationPlaceAndName = splitPlaceAndName(ParserUtils.resolveEntities(mDepFine.group(4)));
+						final Location destination = new Location(LocationType.ANY, 0, destinationPlaceAndName[0], destinationPlaceAndName[1]);
 
-						final String destination = ParserUtils.resolveEntities(mDepFine.group(4));
+						final String message = messages.get(line.label);
 
-						final Departure dep = new Departure(plannedTime, predictedTime, new Line(null, line, line != null ? lineColors(line) : null),
-								position, destinationId, destination, null, messages.get(line));
+						final Departure dep = new Departure(plannedTime, predictedTime, line, position, destination, null, message);
 						if (!departures.contains(dep))
 							departures.add(dep);
 					}
@@ -396,16 +398,16 @@ public final class BvgProvider extends AbstractHafasProvider
 
 						final Date plannedTime = parsedTime.getTime();
 
-						final String line = normalizeLine(ParserUtils.resolveEntities(mDepFine.group(2)));
+						final Line line = parseLineWithoutType(ParserUtils.resolveEntities(mDepFine.group(2)));
 
 						final String position = ParserUtils.resolveEntities(mDepFine.group(3));
 
 						final int destinationId = Integer.parseInt(mDepFine.group(4));
+						final String[] destinationPlaceAndName = splitPlaceAndName(ParserUtils.resolveEntities(mDepFine.group(5)));
+						final Location destination = new Location(destinationId > 0 ? LocationType.STATION : LocationType.ANY, destinationId,
+								destinationPlaceAndName[0], destinationPlaceAndName[1]);
 
-						final String destination = ParserUtils.resolveEntities(mDepFine.group(5));
-
-						final Departure dep = new Departure(plannedTime, null, new Line(null, line, line != null ? lineColors(line) : null),
-								position, destinationId, destination, null, null);
+						final Departure dep = new Departure(plannedTime, null, line, position, destination, null, null);
 						if (!departures.contains(dep))
 							departures.add(dep);
 					}
@@ -549,7 +551,7 @@ public final class BvgProvider extends AbstractHafasProvider
 
 	@Override
 	public QueryConnectionsResult queryConnections(final Location from, final Location via, final Location to, final Date date, final boolean dep,
-			final String products, final WalkSpeed walkSpeed) throws IOException
+			final String products, final WalkSpeed walkSpeed, final Accessibility accessibility) throws IOException
 	{
 		final String uri = connectionsQueryUri(from, via, to, date, dep, products);
 		final CharSequence page = ParserUtils.scrape(uri);
@@ -604,9 +606,10 @@ public final class BvgProvider extends AbstractHafasProvider
 	}
 
 	@Override
-	public QueryConnectionsResult queryMoreConnections(final String uri) throws IOException
+	public QueryConnectionsResult queryMoreConnections(final String uri, final boolean next) throws IOException
 	{
 		final CharSequence page = ParserUtils.scrape(uri);
+		// TODO handle next/prev
 		return queryConnections(uri, page);
 	}
 
@@ -742,9 +745,6 @@ public final class BvgProvider extends AbstractHafasProvider
 					ParserUtils.parseGermanDate(time, mConFine.group(1));
 					Date lastTime = null;
 
-					Date firstDepartureTime = null;
-					Date lastArrivalTime = null;
-
 					final String id = mConFine.group(2);
 
 					final String[] trackParts = mConFine.group(3).split("\\*");
@@ -789,8 +789,6 @@ public final class BvgProvider extends AbstractHafasProvider
 								time.add(Calendar.DAY_OF_YEAR, 1);
 							lastTime = time.getTime();
 							final Date departureTime = time.getTime();
-							if (firstDepartureTime == null)
-								firstDepartureTime = departureTime;
 
 							final String[] tArr2 = track.size() == 1 ? tracks.get(iTrack + 1).get(0) : tArr;
 
@@ -801,7 +799,6 @@ public final class BvgProvider extends AbstractHafasProvider
 								time.add(Calendar.DAY_OF_YEAR, 1);
 							lastTime = time.getTime();
 							final Date arrivalTime = time.getTime();
-							lastArrivalTime = arrivalTime;
 
 							final int mins = (int) ((arrivalTime.getTime() - departureTime.getTime()) / 1000 / 60);
 
@@ -814,8 +811,6 @@ public final class BvgProvider extends AbstractHafasProvider
 								time.add(Calendar.DAY_OF_YEAR, 1);
 							lastTime = time.getTime();
 							final Date departureTime = time.getTime();
-							if (firstDepartureTime == null)
-								firstDepartureTime = departureTime;
 
 							final List<Stop> intermediateStops = new LinkedList<Stop>();
 							for (final String[] tStop : track.subList(1, track.size() - 1))
@@ -834,13 +829,11 @@ public final class BvgProvider extends AbstractHafasProvider
 								time.add(Calendar.DAY_OF_YEAR, 1);
 							lastTime = time.getTime();
 							final Date arrivalTime = time.getTime();
-							lastArrivalTime = arrivalTime;
 
 							final String arrivalPosition = !mDetails.group(4).equals("&nbsp;") ? ParserUtils.resolveEntities(mDetails.group(4))
 									: null;
 
-							final String lineStr = normalizeLine(ParserUtils.resolveEntities(tDep[3]));
-							final Line line = new Line(null, lineStr, lineColors(lineStr));
+							final Line line = parseLineWithoutType(ParserUtils.resolveEntities(tDep[3]));
 
 							final Location destination;
 							if (mDetails.group(3) != null)
@@ -854,12 +847,12 @@ public final class BvgProvider extends AbstractHafasProvider
 								destination = null;
 							}
 
-							parts.add(new Connection.Trip(line, destination, departureTime, departurePosition, departure, arrivalTime,
+							parts.add(new Connection.Trip(line, destination, departureTime, null, departurePosition, departure, arrivalTime, null,
 									arrivalPosition, arrival, intermediateStops, null));
 						}
 					}
 
-					connections.add(new Connection(id, firstUri, firstDepartureTime, lastArrivalTime, from, to, parts, null, null));
+					connections.add(new Connection(id, firstUri, from, to, parts, null, null));
 				}
 				else
 				{
@@ -896,36 +889,48 @@ public final class BvgProvider extends AbstractHafasProvider
 	private static final Pattern P_LINE_REGIONAL = Pattern.compile("Zug\\s+(\\d+)");
 	private static final Pattern P_LINE_TRAM = Pattern.compile("Tram?\\s+([\\dA-Z/-]+)");
 	private static final Pattern P_LINE_BUS = Pattern.compile("Bus\\s+([\\dA-Z/-]+)");
-	private static final Pattern P_LINE_BUS_SPECIAL = Pattern.compile("Bus([A-F]/\\d+)");
 	private static final Pattern P_LINE_FERRY = Pattern.compile("F\\d+|WT");
 	private static final Pattern P_LINE_NUMBER = Pattern.compile("\\d{4,}");
 
 	@Override
-	protected String normalizeLine(final String line)
+	protected Line parseLineWithoutType(final String line)
 	{
+		if ("S41".equals(line))
+			return newLine("SS41", Attr.CIRCLE_CLOCKWISE);
+		if ("S42".equals(line))
+			return newLine("SS42", Attr.CIRCLE_ANTICLOCKWISE);
+
+		if ("Bus S41".equals(line))
+			return newLine("BS41", Attr.SERVICE_REPLACEMENT, Attr.CIRCLE_CLOCKWISE);
+		if ("Bus S42".equals(line))
+			return newLine("BS42", Attr.SERVICE_REPLACEMENT, Attr.CIRCLE_ANTICLOCKWISE);
+
+		if ("Bus TXL".equals(line))
+			return newLine("BTXL", Attr.LINE_AIRPORT);
+		if ("S9".equals(line))
+			return newLine("SS9", Attr.LINE_AIRPORT);
+		if ("S45".equals(line))
+			return newLine("SS45", Attr.LINE_AIRPORT);
+
 		final Matcher mRegional = P_LINE_REGIONAL.matcher(line);
 		if (mRegional.matches())
-			return "R" + mRegional.group(1);
+			return newLine('R' + mRegional.group(1));
 
 		final Matcher mTram = P_LINE_TRAM.matcher(line);
 		if (mTram.matches())
-			return "T" + mTram.group(1);
+			return newLine('T' + mTram.group(1));
 
 		final Matcher mBus = P_LINE_BUS.matcher(line);
 		if (mBus.matches())
-			return "B" + mBus.group(1);
+			return newLine('B' + mBus.group(1));
 
 		if (P_LINE_FERRY.matcher(line).matches())
-			return "F" + line;
-
-		final Matcher mBusSpecial = P_LINE_BUS_SPECIAL.matcher(line);
-		if (mBusSpecial.matches())
-			return "B" + mBusSpecial.group(1);
+			return newLine('F' + line);
 
 		if (P_LINE_NUMBER.matcher(line).matches())
-			return "R" + line;
+			return newLine('R' + line);
 
-		return super.normalizeLine(line);
+		return super.parseLineWithoutType(line);
 	}
 
 	@Override
@@ -943,125 +948,133 @@ public final class BvgProvider extends AbstractHafasProvider
 		return 0;
 	}
 
-	private static final Map<String, int[]> LINES = new HashMap<String, int[]>();
+	private static final Map<String, Style> LINES = new HashMap<String, Style>();
 
 	static
 	{
-		LINES.put("SS1", new int[] { Color.rgb(221, 77, 174), Color.WHITE });
-		LINES.put("SS2", new int[] { Color.rgb(16, 132, 73), Color.WHITE });
-		LINES.put("SS25", new int[] { Color.rgb(16, 132, 73), Color.WHITE });
-		LINES.put("SS3", new int[] { Color.rgb(22, 106, 184), Color.WHITE });
-		LINES.put("SS41", new int[] { Color.rgb(162, 63, 48), Color.WHITE });
-		LINES.put("SS42", new int[] { Color.rgb(191, 90, 42), Color.WHITE });
-		LINES.put("SS45", new int[] { Color.WHITE, Color.rgb(191, 128, 55) });
-		LINES.put("SS46", new int[] { Color.rgb(191, 128, 55), Color.WHITE });
-		LINES.put("SS47", new int[] { Color.rgb(191, 128, 55), Color.WHITE });
-		LINES.put("SS5", new int[] { Color.rgb(243, 103, 23), Color.WHITE });
-		LINES.put("SS7", new int[] { Color.rgb(119, 96, 176), Color.WHITE });
-		LINES.put("SS75", new int[] { Color.rgb(119, 96, 176), Color.WHITE });
-		LINES.put("SS8", new int[] { Color.rgb(85, 184, 49), Color.WHITE });
-		LINES.put("SS85", new int[] { Color.WHITE, Color.rgb(85, 184, 49) });
-		LINES.put("SS9", new int[] { Color.rgb(148, 36, 64), Color.WHITE });
+		LINES.put("SS1", new Style(Style.rgb(221, 77, 174), Style.WHITE));
+		LINES.put("SS2", new Style(Style.rgb(16, 132, 73), Style.WHITE));
+		LINES.put("SS25", new Style(Style.rgb(16, 132, 73), Style.WHITE));
+		LINES.put("SS3", new Style(Style.rgb(22, 106, 184), Style.WHITE));
+		LINES.put("SS41", new Style(Style.rgb(162, 63, 48), Style.WHITE));
+		LINES.put("SS42", new Style(Style.rgb(191, 90, 42), Style.WHITE));
+		LINES.put("SS45", new Style(Style.WHITE, Style.rgb(191, 128, 55)));
+		LINES.put("SS46", new Style(Style.rgb(191, 128, 55), Style.WHITE));
+		LINES.put("SS47", new Style(Style.rgb(191, 128, 55), Style.WHITE));
+		LINES.put("SS5", new Style(Style.rgb(243, 103, 23), Style.WHITE));
+		LINES.put("SS7", new Style(Style.rgb(119, 96, 176), Style.WHITE));
+		LINES.put("SS75", new Style(Style.rgb(119, 96, 176), Style.WHITE));
+		LINES.put("SS8", new Style(Style.rgb(85, 184, 49), Style.WHITE));
+		LINES.put("SS85", new Style(Style.WHITE, Style.rgb(85, 184, 49)));
+		LINES.put("SS9", new Style(Style.rgb(148, 36, 64), Style.WHITE));
 
-		LINES.put("UU1", new int[] { Color.rgb(84, 131, 47), Color.WHITE });
-		LINES.put("UU2", new int[] { Color.rgb(215, 25, 16), Color.WHITE });
-		LINES.put("UU3", new int[] { Color.rgb(47, 152, 154), Color.WHITE });
-		LINES.put("UU4", new int[] { Color.rgb(255, 233, 42), Color.BLACK });
-		LINES.put("UU5", new int[] { Color.rgb(91, 31, 16), Color.WHITE });
-		LINES.put("UU55", new int[] { Color.rgb(91, 31, 16), Color.WHITE });
-		LINES.put("UU6", new int[] { Color.rgb(127, 57, 115), Color.WHITE });
-		LINES.put("UU7", new int[] { Color.rgb(0, 153, 204), Color.WHITE });
-		LINES.put("UU8", new int[] { Color.rgb(24, 25, 83), Color.WHITE });
-		LINES.put("UU9", new int[] { Color.rgb(255, 90, 34), Color.WHITE });
+		LINES.put("UU1", new Style(Shape.RECT, Style.rgb(84, 131, 47), Style.WHITE));
+		LINES.put("UU2", new Style(Shape.RECT, Style.rgb(215, 25, 16), Style.WHITE));
+		LINES.put("UU3", new Style(Shape.RECT, Style.rgb(47, 152, 154), Style.WHITE));
+		LINES.put("UU4", new Style(Shape.RECT, Style.rgb(255, 233, 42), Style.BLACK));
+		LINES.put("UU5", new Style(Shape.RECT, Style.rgb(91, 31, 16), Style.WHITE));
+		LINES.put("UU55", new Style(Shape.RECT, Style.rgb(91, 31, 16), Style.WHITE));
+		LINES.put("UU6", new Style(Shape.RECT, Style.rgb(127, 57, 115), Style.WHITE));
+		LINES.put("UU7", new Style(Shape.RECT, Style.rgb(0, 153, 204), Style.WHITE));
+		LINES.put("UU8", new Style(Shape.RECT, Style.rgb(24, 25, 83), Style.WHITE));
+		LINES.put("UU9", new Style(Shape.RECT, Style.rgb(255, 90, 34), Style.WHITE));
 
-		LINES.put("TM1", new int[] { Color.parseColor("#eb8614"), Color.WHITE });
-		LINES.put("TM2", new int[] { Color.parseColor("#68c52f"), Color.WHITE });
-		LINES.put("TM4", new int[] { Color.parseColor("#cf1b22"), Color.WHITE });
-		LINES.put("TM5", new int[] { Color.parseColor("#bf8037"), Color.WHITE });
-		LINES.put("TM6", new int[] { Color.parseColor("#1e5ca2"), Color.WHITE });
-		LINES.put("TM8", new int[] { Color.parseColor("#f46717"), Color.WHITE });
-		LINES.put("TM10", new int[] { Color.parseColor("#108449"), Color.WHITE });
-		LINES.put("TM13", new int[] { Color.parseColor("#36ab94"), Color.WHITE });
-		LINES.put("TM17", new int[] { Color.parseColor("#a23f30"), Color.WHITE });
+		LINES.put("TM1", new Style(Shape.RECT, Style.parseColor("#eb8614"), Style.WHITE));
+		LINES.put("TM2", new Style(Shape.RECT, Style.parseColor("#68c52f"), Style.WHITE));
+		LINES.put("TM4", new Style(Shape.RECT, Style.parseColor("#cf1b22"), Style.WHITE));
+		LINES.put("TM5", new Style(Shape.RECT, Style.parseColor("#bf8037"), Style.WHITE));
+		LINES.put("TM6", new Style(Shape.RECT, Style.parseColor("#1e5ca2"), Style.WHITE));
+		LINES.put("TM8", new Style(Shape.RECT, Style.parseColor("#f46717"), Style.WHITE));
+		LINES.put("TM10", new Style(Shape.RECT, Style.parseColor("#108449"), Style.WHITE));
+		LINES.put("TM13", new Style(Shape.RECT, Style.parseColor("#36ab94"), Style.WHITE));
+		LINES.put("TM17", new Style(Shape.RECT, Style.parseColor("#a23f30"), Style.WHITE));
 
-		LINES.put("T12", new int[] { Color.parseColor("#7d64b2"), Color.WHITE });
-		LINES.put("T16", new int[] { Color.parseColor("#1e5ca2"), Color.WHITE });
-		LINES.put("T18", new int[] { Color.parseColor("#f46717"), Color.WHITE });
-		LINES.put("T21", new int[] { Color.parseColor("#7d64b2"), Color.WHITE });
-		LINES.put("T27", new int[] { Color.parseColor("#a23f30"), Color.WHITE });
-		LINES.put("T37", new int[] { Color.parseColor("#a23f30"), Color.WHITE });
-		LINES.put("T50", new int[] { Color.parseColor("#36ab94"), Color.WHITE });
-		LINES.put("T60", new int[] { Color.parseColor("#108449"), Color.WHITE });
-		LINES.put("T61", new int[] { Color.parseColor("#108449"), Color.WHITE });
-		LINES.put("T62", new int[] { Color.parseColor("#125030"), Color.WHITE });
-		LINES.put("T63", new int[] { Color.parseColor("#36ab94"), Color.WHITE });
-		LINES.put("T67", new int[] { Color.parseColor("#108449"), Color.WHITE });
-		LINES.put("T68", new int[] { Color.parseColor("#108449"), Color.WHITE });
+		LINES.put("T12", new Style(Shape.RECT, Style.parseColor("#7d64b2"), Style.WHITE));
+		LINES.put("T16", new Style(Shape.RECT, Style.parseColor("#1e5ca2"), Style.WHITE));
+		LINES.put("T18", new Style(Shape.RECT, Style.parseColor("#f46717"), Style.WHITE));
+		LINES.put("T21", new Style(Shape.RECT, Style.parseColor("#7d64b2"), Style.WHITE));
+		LINES.put("T27", new Style(Shape.RECT, Style.parseColor("#a23f30"), Style.WHITE));
+		LINES.put("T37", new Style(Shape.RECT, Style.parseColor("#a23f30"), Style.WHITE));
+		LINES.put("T50", new Style(Shape.RECT, Style.parseColor("#36ab94"), Style.WHITE));
+		LINES.put("T60", new Style(Shape.RECT, Style.parseColor("#108449"), Style.WHITE));
+		LINES.put("T61", new Style(Shape.RECT, Style.parseColor("#108449"), Style.WHITE));
+		LINES.put("T62", new Style(Shape.RECT, Style.parseColor("#125030"), Style.WHITE));
+		LINES.put("T63", new Style(Shape.RECT, Style.parseColor("#36ab94"), Style.WHITE));
+		LINES.put("T67", new Style(Shape.RECT, Style.parseColor("#108449"), Style.WHITE));
+		LINES.put("T68", new Style(Shape.RECT, Style.parseColor("#108449"), Style.WHITE));
 
-		LINES.put("FF1", new int[] { Color.BLUE, Color.WHITE }); // Potsdam
-		LINES.put("FF10", new int[] { Color.BLUE, Color.WHITE });
-		LINES.put("FF11", new int[] { Color.BLUE, Color.WHITE });
-		LINES.put("FF12", new int[] { Color.BLUE, Color.WHITE });
-		LINES.put("FF21", new int[] { Color.BLUE, Color.WHITE });
-		LINES.put("FF23", new int[] { Color.BLUE, Color.WHITE });
-		LINES.put("FF24", new int[] { Color.BLUE, Color.WHITE });
+		LINES.put("FF1", new Style(Style.BLUE, Style.WHITE)); // Potsdam
+		LINES.put("FF10", new Style(Style.BLUE, Style.WHITE));
+		LINES.put("FF11", new Style(Style.BLUE, Style.WHITE));
+		LINES.put("FF12", new Style(Style.BLUE, Style.WHITE));
+		LINES.put("FF21", new Style(Style.BLUE, Style.WHITE));
+		LINES.put("FF23", new Style(Style.BLUE, Style.WHITE));
+		LINES.put("FF24", new Style(Style.BLUE, Style.WHITE));
 
 		// Regional lines Brandenburg:
-		LINES.put("RRE1", new int[] { Color.parseColor("#EE1C23"), Color.WHITE });
-		LINES.put("RRE2", new int[] { Color.parseColor("#FFD403"), Color.BLACK });
-		LINES.put("RRE3", new int[] { Color.parseColor("#F57921"), Color.WHITE });
-		LINES.put("RRE4", new int[] { Color.parseColor("#952D4F"), Color.WHITE });
-		LINES.put("RRE5", new int[] { Color.parseColor("#0072BC"), Color.WHITE });
-		LINES.put("RRE6", new int[] { Color.parseColor("#DB6EAB"), Color.WHITE });
-		LINES.put("RRE7", new int[] { Color.parseColor("#00854A"), Color.WHITE });
-		LINES.put("RRE10", new int[] { Color.parseColor("#A7653F"), Color.WHITE });
-		LINES.put("RRE11", new int[] { Color.parseColor("#059EDB"), Color.WHITE });
-		LINES.put("RRE11", new int[] { Color.parseColor("#EE1C23"), Color.WHITE });
-		LINES.put("RRE15", new int[] { Color.parseColor("#FFD403"), Color.BLACK });
-		LINES.put("RRE18", new int[] { Color.parseColor("#00A65E"), Color.WHITE });
-		LINES.put("RRB10", new int[] { Color.parseColor("#60BB46"), Color.WHITE });
-		LINES.put("RRB12", new int[] { Color.parseColor("#A3238E"), Color.WHITE });
-		LINES.put("RRB13", new int[] { Color.parseColor("#F68B1F"), Color.WHITE });
-		LINES.put("RRB13", new int[] { Color.parseColor("#00A65E"), Color.WHITE });
-		LINES.put("RRB14", new int[] { Color.parseColor("#A3238E"), Color.WHITE });
-		LINES.put("RRB20", new int[] { Color.parseColor("#00854A"), Color.WHITE });
-		LINES.put("RRB21", new int[] { Color.parseColor("#5E6DB3"), Color.WHITE });
-		LINES.put("RRB22", new int[] { Color.parseColor("#0087CB"), Color.WHITE });
-		LINES.put("ROE25", new int[] { Color.parseColor("#0087CB"), Color.WHITE });
-		LINES.put("RNE26", new int[] { Color.parseColor("#00A896"), Color.WHITE });
-		LINES.put("RNE27", new int[] { Color.parseColor("#EE1C23"), Color.WHITE });
-		LINES.put("RRB30", new int[] { Color.parseColor("#00A65E"), Color.WHITE });
-		LINES.put("RRB31", new int[] { Color.parseColor("#60BB46"), Color.WHITE });
-		LINES.put("RMR33", new int[] { Color.parseColor("#EE1C23"), Color.WHITE });
-		LINES.put("ROE35", new int[] { Color.parseColor("#5E6DB3"), Color.WHITE });
-		LINES.put("ROE36", new int[] { Color.parseColor("#A7653F"), Color.WHITE });
-		LINES.put("RRB43", new int[] { Color.parseColor("#5E6DB3"), Color.WHITE });
-		LINES.put("RRB45", new int[] { Color.parseColor("#FFD403"), Color.BLACK });
-		LINES.put("ROE46", new int[] { Color.parseColor("#DB6EAB"), Color.WHITE });
-		LINES.put("RMR51", new int[] { Color.parseColor("#DB6EAB"), Color.WHITE });
-		LINES.put("RRB51", new int[] { Color.parseColor("#DB6EAB"), Color.WHITE });
-		LINES.put("RRB54", new int[] { Color.parseColor("#FFD403"), Color.BLACK });
-		LINES.put("RRB55", new int[] { Color.parseColor("#F57921"), Color.WHITE });
-		LINES.put("ROE60", new int[] { Color.parseColor("#60BB46"), Color.WHITE });
-		LINES.put("ROE63", new int[] { Color.parseColor("#FFD403"), Color.BLACK });
-		LINES.put("ROE65", new int[] { Color.parseColor("#0072BC"), Color.WHITE });
-		LINES.put("RRB66", new int[] { Color.parseColor("#60BB46"), Color.WHITE });
-		LINES.put("RPE70", new int[] { Color.parseColor("#FFD403"), Color.BLACK });
-		LINES.put("RPE73", new int[] { Color.parseColor("#00A896"), Color.WHITE });
-		LINES.put("RPE74", new int[] { Color.parseColor("#0072BC"), Color.WHITE });
-		LINES.put("T89", new int[] { Color.parseColor("#EE1C23"), Color.WHITE });
-		LINES.put("RRB91", new int[] { Color.parseColor("#A7653F"), Color.WHITE });
-		LINES.put("RRB93", new int[] { Color.parseColor("#A7653F"), Color.WHITE });
+		LINES.put("RRE1", new Style(Shape.RECT, Style.parseColor("#EE1C23"), Style.WHITE));
+		LINES.put("RRE2", new Style(Shape.RECT, Style.parseColor("#FFD403"), Style.BLACK));
+		LINES.put("RRE3", new Style(Shape.RECT, Style.parseColor("#F57921"), Style.WHITE));
+		LINES.put("RRE4", new Style(Shape.RECT, Style.parseColor("#952D4F"), Style.WHITE));
+		LINES.put("RRE5", new Style(Shape.RECT, Style.parseColor("#0072BC"), Style.WHITE));
+		LINES.put("RRE6", new Style(Shape.RECT, Style.parseColor("#DB6EAB"), Style.WHITE));
+		LINES.put("RRE7", new Style(Shape.RECT, Style.parseColor("#00854A"), Style.WHITE));
+		LINES.put("RRE10", new Style(Shape.RECT, Style.parseColor("#A7653F"), Style.WHITE));
+		LINES.put("RRE11", new Style(Shape.RECT, Style.parseColor("#059EDB"), Style.WHITE));
+		LINES.put("RRE11", new Style(Shape.RECT, Style.parseColor("#EE1C23"), Style.WHITE));
+		LINES.put("RRE15", new Style(Shape.RECT, Style.parseColor("#FFD403"), Style.BLACK));
+		LINES.put("RRE18", new Style(Shape.RECT, Style.parseColor("#00A65E"), Style.WHITE));
+		LINES.put("RRB10", new Style(Shape.RECT, Style.parseColor("#60BB46"), Style.WHITE));
+		LINES.put("RRB12", new Style(Shape.RECT, Style.parseColor("#A3238E"), Style.WHITE));
+		LINES.put("RRB13", new Style(Shape.RECT, Style.parseColor("#F68B1F"), Style.WHITE));
+		LINES.put("RRB13", new Style(Shape.RECT, Style.parseColor("#00A65E"), Style.WHITE));
+		LINES.put("RRB14", new Style(Shape.RECT, Style.parseColor("#A3238E"), Style.WHITE));
+		LINES.put("RRB20", new Style(Shape.RECT, Style.parseColor("#00854A"), Style.WHITE));
+		LINES.put("RRB21", new Style(Shape.RECT, Style.parseColor("#5E6DB3"), Style.WHITE));
+		LINES.put("RRB22", new Style(Shape.RECT, Style.parseColor("#0087CB"), Style.WHITE));
+		LINES.put("ROE25", new Style(Shape.RECT, Style.parseColor("#0087CB"), Style.WHITE));
+		LINES.put("RNE26", new Style(Shape.RECT, Style.parseColor("#00A896"), Style.WHITE));
+		LINES.put("RNE27", new Style(Shape.RECT, Style.parseColor("#EE1C23"), Style.WHITE));
+		LINES.put("RRB30", new Style(Shape.RECT, Style.parseColor("#00A65E"), Style.WHITE));
+		LINES.put("RRB31", new Style(Shape.RECT, Style.parseColor("#60BB46"), Style.WHITE));
+		LINES.put("RMR33", new Style(Shape.RECT, Style.parseColor("#EE1C23"), Style.WHITE));
+		LINES.put("ROE35", new Style(Shape.RECT, Style.parseColor("#5E6DB3"), Style.WHITE));
+		LINES.put("ROE36", new Style(Shape.RECT, Style.parseColor("#A7653F"), Style.WHITE));
+		LINES.put("RRB43", new Style(Shape.RECT, Style.parseColor("#5E6DB3"), Style.WHITE));
+		LINES.put("RRB45", new Style(Shape.RECT, Style.parseColor("#FFD403"), Style.BLACK));
+		LINES.put("ROE46", new Style(Shape.RECT, Style.parseColor("#DB6EAB"), Style.WHITE));
+		LINES.put("RMR51", new Style(Shape.RECT, Style.parseColor("#DB6EAB"), Style.WHITE));
+		LINES.put("RRB51", new Style(Shape.RECT, Style.parseColor("#DB6EAB"), Style.WHITE));
+		LINES.put("RRB54", new Style(Shape.RECT, Style.parseColor("#FFD403"), Style.BLACK));
+		LINES.put("RRB55", new Style(Shape.RECT, Style.parseColor("#F57921"), Style.WHITE));
+		LINES.put("ROE60", new Style(Shape.RECT, Style.parseColor("#60BB46"), Style.WHITE));
+		LINES.put("ROE63", new Style(Shape.RECT, Style.parseColor("#FFD403"), Style.BLACK));
+		LINES.put("ROE65", new Style(Shape.RECT, Style.parseColor("#0072BC"), Style.WHITE));
+		LINES.put("RRB66", new Style(Shape.RECT, Style.parseColor("#60BB46"), Style.WHITE));
+		LINES.put("RPE70", new Style(Shape.RECT, Style.parseColor("#FFD403"), Style.BLACK));
+		LINES.put("RPE73", new Style(Shape.RECT, Style.parseColor("#00A896"), Style.WHITE));
+		LINES.put("RPE74", new Style(Shape.RECT, Style.parseColor("#0072BC"), Style.WHITE));
+		LINES.put("T89", new Style(Shape.RECT, Style.parseColor("#EE1C23"), Style.WHITE));
+		LINES.put("RRB91", new Style(Shape.RECT, Style.parseColor("#A7653F"), Style.WHITE));
+		LINES.put("RRB93", new Style(Shape.RECT, Style.parseColor("#A7653F"), Style.WHITE));
 	}
 
+	private static final Style STYLE_BUS_NIGHT = new Style(Shape.RECT, Style.BLACK, Style.WHITE);
+	private static final Style STYLE_BUS_DAY = new Style(Shape.RECT, Style.parseColor("#993399"), Style.WHITE);
+
 	@Override
-	public int[] lineColors(final String line)
+	public Style lineStyle(final String line)
 	{
-		final int[] lineColors = LINES.get(line);
-		if (lineColors != null)
-			return lineColors;
-		else
-			return super.lineColors(line);
+		final Style style = LINES.get(line);
+		if (style != null)
+			return style;
+
+		if (line.startsWith("BN"))
+			return STYLE_BUS_NIGHT;
+		if (line.startsWith("B"))
+			return STYLE_BUS_DAY;
+
+		return super.lineStyle(line);
 	}
 
 	@Override

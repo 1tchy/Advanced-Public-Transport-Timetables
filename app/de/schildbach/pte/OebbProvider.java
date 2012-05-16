@@ -59,6 +59,37 @@ public class OebbProvider extends AbstractHafasProvider
 	}
 
 	@Override
+	protected char intToProduct(final int value)
+	{
+		if (value == 1)
+			return 'I';
+		if (value == 2)
+			return 'I';
+		if (value == 4)
+			return 'I';
+		if (value == 8)
+			return 'R';
+		if (value == 16)
+			return 'R';
+		if (value == 32)
+			return 'S';
+		if (value == 64)
+			return 'B';
+		if (value == 128)
+			return 'F';
+		if (value == 256)
+			return 'U';
+		if (value == 512)
+			return 'T';
+		if (value == 1024) // Autoreisezug
+			return 'I';
+		if (value == 2048)
+			return 'P';
+
+		throw new IllegalArgumentException("cannot handle: " + value);
+	}
+
+	@Override
 	protected void setProductBits(final StringBuilder productBits, final char product)
 	{
 		if (product == 'I')
@@ -66,6 +97,7 @@ public class OebbProvider extends AbstractHafasProvider
 			productBits.setCharAt(0, '1'); // railjet/ICE
 			productBits.setCharAt(1, '1'); // ÖBB EC/ÖBB IC
 			productBits.setCharAt(2, '1'); // EC/IC
+			productBits.setCharAt(10, '1'); // Autoreisezug
 		}
 		else if (product == 'R')
 		{
@@ -198,8 +230,6 @@ public class OebbProvider extends AbstractHafasProvider
 			return 'R';
 		// if (ucType.equals("SBE")) // Zittau-Seifhennersdorf, via JSON API
 		// return 'R';
-		// if (ucType.equals("RNV")) // Rhein-Neckar-Verkehr GmbH, via JSON API
-		// return 'R';
 		if ("UAU".equals(ucType)) // Rußland
 			return 'R';
 
@@ -215,8 +245,6 @@ public class OebbProvider extends AbstractHafasProvider
 
 		if (ucType.equals("OBU")) // Connections only?
 			return 'B';
-		// if (ucType.equals("ASTSV")) // via JSON API
-		// return 'B';
 		if (ucType.equals("ICB")) // ÖBB ICBus
 			return 'B';
 		if (ucType.equals("BSV")) // Deutschland, Connections only?

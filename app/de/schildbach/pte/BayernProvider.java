@@ -17,19 +17,13 @@
 
 package de.schildbach.pte;
 
-import java.io.IOException;
-import java.util.List;
-
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.LocationType;
-
 /**
  * @author Andreas Schildbach
  */
 public class BayernProvider extends AbstractEfaProvider
 {
 	public static final NetworkId NETWORK_ID = NetworkId.BAYERN;
-	private final static String API_BASE = "http://bayern-fahrplan.defas-fgi.de:50200/standard/";
+	private final static String API_BASE = "http://vm-bayern-fahrplan03.defas-fgi.de:81/standard/";
 
 	public BayernProvider()
 	{
@@ -48,21 +42,5 @@ public class BayernProvider extends AbstractEfaProvider
 				return true;
 
 		return false;
-	}
-
-	private static final String NEARBY_STATION_URI = API_BASE
-			+ "XSLT_DM_REQUEST"
-			+ "?outputFormat=XML&coordOutputFormat=WGS84&type_dm=stop&name_dm=%s&itOptionsActive=1&ptOptionsActive=1&useProxFootSearch=1&mergeDep=1&useAllStops=1&mode=direct";
-
-	@Override
-	protected String nearbyStationUri(final int stationId)
-	{
-		return String.format(NEARBY_STATION_URI, stationId);
-	}
-
-	@Override
-	public List<Location> autocompleteStations(final CharSequence constraint) throws IOException
-	{
-		return xmlStopfinderRequest(new Location(LocationType.ANY, 0, null, constraint.toString()));
 	}
 }

@@ -138,12 +138,6 @@ public class LuProvider extends AbstractHafasProvider
 	}
 
 	@Override
-	protected String normalizeLine(final String line)
-	{
-		return parseLineAndType(line);
-	}
-
-	@Override
 	protected char normalizeType(final String type)
 	{
 		final String ucType = type.toUpperCase();

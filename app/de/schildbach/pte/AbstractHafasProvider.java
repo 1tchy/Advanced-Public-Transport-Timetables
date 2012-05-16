@@ -1,6 +1,6 @@
 /*
  * Copyright 2010, 2011 the original author or authors.
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -26,10 +26,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -345,6 +347,79 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 		}
 	}
 
+	protected final List<Location> xmlLocationList(final String uri) throws IOException
+	{
+		InputStream is = null;
+
+		try
+		{
+			is = ParserUtils.scrapeInputStream(uri);
+
+			final XmlPullParserFactory factory = XmlPullParserFactory.newInstance(System.getProperty(XmlPullParserFactory.PROPERTY_NAME), null);
+			final XmlPullParser pp = factory.newPullParser();
+			pp.setInput(is, "UTF-8");
+
+			final List<Location> results = new ArrayList<Location>();
+
+			pp.require(XmlPullParser.START_DOCUMENT, null, null);
+			pp.next();
+
+			XmlPullUtil.enter(pp, "LocationList");
+
+			if (pp.isWhitespace())
+				pp.next();
+
+			while (XmlPullUtil.test(pp, "StopLocation") || XmlPullUtil.test(pp, "CoordLocation"))
+			{
+				final String name = ParserUtils.resolveEntities(XmlPullUtil.attr(pp, "name"));
+				final int lon = XmlPullUtil.intAttr(pp, "x");
+				final int lat = XmlPullUtil.intAttr(pp, "y");
+
+				if (XmlPullUtil.test(pp, "StopLocation"))
+				{
+					final int id = XmlPullUtil.intAttr(pp, "id");
+					final String[] placeAndName = splitPlaceAndName(name);
+					results.add(new Location(LocationType.STATION, id, lat, lon, placeAndName[0], placeAndName[1]));
+				}
+				else
+				{
+					final String type = XmlPullUtil.attr(pp, "type");
+					if ("POI".equals(type))
+						results.add(new Location(LocationType.POI, 0, lat, lon, null, name));
+					else if ("ADR".equals(type))
+						results.add(new Location(LocationType.ADDRESS, 0, lat, lon, null, name));
+					else
+						throw new IllegalStateException("unknown type " + type + " on " + uri);
+				}
+
+				if (pp.isEmptyElementTag())
+				{
+					XmlPullUtil.next(pp);
+				}
+				else
+				{
+					XmlPullUtil.enter(pp);
+					XmlPullUtil.exit(pp);
+				}
+
+				if (pp.isWhitespace())
+					pp.next();
+			}
+			XmlPullUtil.exit(pp, "LocationList");
+
+			return results;
+		}
+		catch (final XmlPullParserException x)
+		{
+			throw new RuntimeException(x);
+		}
+		finally
+		{
+			if (is != null)
+				is.close();
+		}
+	}
+
 	private static final Pattern P_XML_MLC_REQ_ID = Pattern.compile(".*?@L=(\\d+)@.*?");
 	private static final Pattern P_XML_MLC_REQ_LONLAT = Pattern.compile(".*?@X=(-?\\d+)@Y=(-?\\d+)@.*?");
 
@@ -537,13 +612,13 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 
 					final String position = platform != null ? "Gl. " + ParserUtils.resolveEntities(platform) : null;
 
-					final String destination;
+					final String destinationName;
 					if (dir != null)
-						destination = dir.trim();
+						destinationName = dir.trim();
 					else if (targetLoc != null)
-						destination = targetLoc.trim();
+						destinationName = targetLoc.trim();
 					else
-						destination = null;
+						destinationName = null;
 
 					final int destinationId;
 					if (dirnr != null)
@@ -551,21 +626,24 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 					else
 						destinationId = 0;
 
-					final String lineStr;
+					final Location destination = new Location(destinationId > 0 ? LocationType.STATION : LocationType.ANY, destinationId, null,
+							destinationName);
+
+					final Line prodLine = parseLineAndType(prod);
+					final Line line;
 					if (classStr != null)
 					{
 						final char classChar = intToProduct(Integer.parseInt(classStr));
-						final Matcher m = P_NORMALIZE_LINE.matcher(prod);
-						if (m.matches())
-							lineStr = classChar + m.group(1) + m.group(2);
-						else
-							lineStr = classChar + prod;
+						if (classChar == 0)
+							throw new IllegalArgumentException();
+						// could check for type consistency here
+						final String lineStr = classChar + prodLine.label.substring(1);
+						line = new Line(null, lineStr, lineStyle(lineStr));
 					}
 					else
 					{
-						lineStr = normalizeLine(prod);
+						line = prodLine;
 					}
-					final Line line = new Line(null, lineStr, lineStr != null ? lineColors(lineStr) : null);
 
 					final int[] capacity;
 					if (capacityStr != null && !"0|0".equals(capacityStr))
@@ -590,7 +668,7 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 					}
 
 					final Departure departure = new Departure(plannedTime.getTime(), predictedTime != null ? predictedTime.getTime() : null, line,
-							position, destinationId, destination, capacity, message);
+							position, destination, capacity, message);
 					departures.add(departure);
 				}
 
@@ -623,7 +701,7 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 	}
 
 	public QueryConnectionsResult queryConnections(Location from, Location via, Location to, final Date date, final boolean dep,
-			final String products, final WalkSpeed walkSpeed) throws IOException
+			final String products, final WalkSpeed walkSpeed, final Accessibility accessibility) throws IOException
 	{
 		final ResultHeader header = new ResultHeader(SERVER_PRODUCT);
 
@@ -674,30 +752,41 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 		}
 
 		final StringBuilder request = new StringBuilder("<ConReq>");
-
 		request.append("<Start>").append(locationXml(from));
 		request.append("<Prod prod=\"").append(productsStr).append("\" bike=\"0\" couchette=\"0\" direct=\"0\" sleeper=\"0\"/>");
 		request.append("</Start>");
 		if (via != null)
-			request.append("<Via>").append(locationXml(via)).append("</Via>");
+		{
+			request.append("<Via>").append(locationXml(via));
+			request.append("<Prod prod=\"").append(productsStr).append("\" bike=\"0\" couchette=\"0\" direct=\"0\" sleeper=\"0\"/>");
+			request.append("</Via>");
+		}
 		request.append("<Dest>").append(locationXml(to)).append("</Dest>");
 		request.append("<ReqT a=\"").append(dep ? 0 : 1).append("\" date=\"")
 				.append(String.format("%04d.%02d.%02d", c.get(Calendar.YEAR), c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH)))
 				.append("\" time=\"").append(String.format("%02d:%02d", c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE)) + "\"/>");
-		request.append("<RFlags b=\"0\" chExtension=\"").append(walkSpeed == WalkSpeed.SLOW ? 50 : 0).append("\" f=\"").append(NUM_CONNECTIONS)
-				.append("\" sMode=\"N\"/>");
+		request.append("<RFlags");
+		// number of connections backwards
+		request.append(" b=\"").append(0).append("\"");
+		// number of connection forwards
+		request.append(" f=\"").append(NUM_CONNECTIONS).append("\"");
+		// percentual extension of change time
+		request.append(" chExtension=\"").append(walkSpeed == WalkSpeed.SLOW ? 50 : 0).append("\"");
+		// TODO nrChanges: max number of changes
+		request.append(" sMode=\"N\"/>");
 		request.append("</ConReq>");
 
 		return queryConnections(request.toString(), from, via, to);
 	}
 
-	public QueryConnectionsResult queryMoreConnections(final String context) throws IOException
+	public QueryConnectionsResult queryMoreConnections(final String context, final boolean next) throws IOException
 	{
-		final String request = "<ConScrReq scr=\"F\" nrCons=\"" + NUM_CONNECTIONS + "\">" //
-				+ "<ConResCtxt>" + context + "</ConResCtxt>" //
-				+ "</ConScrReq>";
+		final StringBuilder request = new StringBuilder("<ConScrReq scr=\"").append('F').append("\" nrCons=\"").append(NUM_CONNECTIONS).append("\">");
+		request.append("<ConResCtxt>").append(context).append("</ConResCtxt>");
+		request.append("</ConScrReq>");
+		// TODO handle next/prev
 
-		return queryConnections(request, null, null, null);
+		return queryConnections(request.toString(), null, null, null);
 	}
 
 	private QueryConnectionsResult queryConnections(final String request, final Location from, final Location via, final Location to)
@@ -736,14 +825,16 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 			if (XmlPullUtil.test(pp, "Err"))
 			{
 				final String code = XmlPullUtil.attr(pp, "code");
+				if (code.equals("K9260")) // Departure station does not exist
+					return new QueryConnectionsResult(header, QueryConnectionsResult.Status.UNKNOWN_FROM);
+				if (code.equals("K9300")) // Arrival station does not exist
+					return new QueryConnectionsResult(header, QueryConnectionsResult.Status.UNKNOWN_TO);
 				if (code.equals("K9380") || code.equals("K895")) // Departure/Arrival are too near
 					return new QueryConnectionsResult(header, QueryConnectionsResult.Status.TOO_CLOSE);
 				if (code.equals("K9220")) // Nearby to the given address stations could not be found
 					return new QueryConnectionsResult(header, QueryConnectionsResult.Status.UNRESOLVABLE_ADDRESS);
 				if (code.equals("K9240")) // Internal error
 					return new QueryConnectionsResult(header, QueryConnectionsResult.Status.SERVICE_DOWN);
-				if (code.equals("K9260")) // Departure station does not exist
-					return new QueryConnectionsResult(header, QueryConnectionsResult.Status.NO_CONNECTIONS);
 				if (code.equals("K890")) // No connections found
 					return new QueryConnectionsResult(header, QueryConnectionsResult.Status.NO_CONNECTIONS);
 				if (code.equals("K891")) // No route found (try entering an intermediate station)
@@ -833,8 +924,6 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 				XmlPullUtil.exit(pp, "Overview");
 
 				final List<Connection.Part> parts = new ArrayList<Connection.Part>(4);
-				Date firstDepartureTime = null;
-				Date lastArrivalTime = null;
 
 				XmlPullUtil.enter(pp, "ConSectionList");
 
@@ -875,6 +964,7 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 						while (pp.getName().equals("JHandle"))
 							XmlPullUtil.next(pp);
 						XmlPullUtil.enter(pp, "JourneyAttributeList");
+						boolean wheelchairAccess = false;
 						String name = null;
 						String category = null;
 						String shortCategory = null;
@@ -884,12 +974,17 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 							XmlPullUtil.enter(pp, "JourneyAttribute");
 							XmlPullUtil.require(pp, "Attribute");
 							final String attrName = pp.getAttributeValue(null, "type");
-							XmlPullUtil.enter(pp);
+							final String code = pp.getAttributeValue(null, "code");
+							XmlPullUtil.enter(pp, "Attribute");
 							final Map<String, String> attributeVariants = parseAttributeVariants(pp);
-							XmlPullUtil.exit(pp);
+							XmlPullUtil.exit(pp, "Attribute");
 							XmlPullUtil.exit(pp, "JourneyAttribute");
 
-							if ("NAME".equals(attrName))
+							if ("bf".equals(code))
+							{
+								wheelchairAccess = true;
+							}
+							else if ("NAME".equals(attrName))
 							{
 								name = attributeVariants.get("NORMAL");
 							}
@@ -944,7 +1039,7 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 						if (category == null)
 							category = shortCategory;
 
-						line = parseLine(category, name);
+						line = parseLine(category, name, wheelchairAccess);
 					}
 					else if (tag.equals("Walk") || tag.equals("Transfer") || tag.equals("GisRoute"))
 					{
@@ -989,8 +1084,8 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 
 					if (min == 0 || line != null)
 					{
-						parts.add(new Connection.Trip(line, destination, departureTime, departurePos, sectionDeparture, arrivalTime, arrivalPos,
-								sectionArrival, intermediateStops, null));
+						parts.add(new Connection.Trip(line, destination, departureTime, null, departurePos, sectionDeparture, arrivalTime, null,
+								arrivalPos, sectionArrival, intermediateStops, null));
 					}
 					else
 					{
@@ -1004,17 +1099,13 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 							parts.add(new Connection.Footway(min, sectionDeparture, sectionArrival, null));
 						}
 					}
-
-					if (firstDepartureTime == null)
-						firstDepartureTime = departureTime;
-					lastArrivalTime = arrivalTime;
 				}
 
 				XmlPullUtil.exit(pp, "ConSectionList");
 
 				XmlPullUtil.exit(pp, "Connection");
 
-				connections.add(new Connection(id, null, firstDepartureTime, lastArrivalTime, departure, arrival, parts, null, capacity));
+				connections.add(new Connection(id, null, departure, arrival, parts, null, capacity));
 			}
 
 			XmlPullUtil.exit(pp);
@@ -1242,27 +1333,41 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 	{
 		final CharSequence page = ParserUtils.scrape(uri, false, null, jsonEncoding, null);
 
-		final List<Location> stations = new ArrayList<Location>();
-
 		try
 		{
 			final JSONObject head = new JSONObject(page.toString());
-			final JSONArray aStops = head.getJSONArray("stops");
-
-			for (int i = 0; i < aStops.length(); i++)
+			final int error = head.getInt("error");
+			if (error == 0)
 			{
-				final JSONObject stop = aStops.optJSONObject(i);
-				final int id = stop.getInt("extId");
-				final String name = ParserUtils.resolveEntities(stop.getString("name"));
-				final int lat = stop.getInt("y");
-				final int lon = stop.getInt("x");
-				final int stopWeight = stop.optInt("stopweight", -1);
+				final JSONArray aStops = head.getJSONArray("stops");
+				final int nStops = aStops.length();
+				final List<Location> stations = new ArrayList<Location>(nStops);
 
-				if (stopWeight != 0)
+				for (int i = 0; i < nStops; i++)
 				{
-					final String[] placeAndName = splitPlaceAndName(name);
-					stations.add(new Location(LocationType.STATION, id, lat, lon, placeAndName[0], placeAndName[1]));
+					final JSONObject stop = aStops.optJSONObject(i);
+					final int id = stop.getInt("extId");
+					final String name = ParserUtils.resolveEntities(stop.getString("name"));
+					final int lat = stop.getInt("y");
+					final int lon = stop.getInt("x");
+					final int stopWeight = stop.optInt("stopweight", -1);
+
+					if (stopWeight != 0)
+					{
+						final String[] placeAndName = splitPlaceAndName(name);
+						stations.add(new Location(LocationType.STATION, id, lat, lon, placeAndName[0], placeAndName[1]));
+					}
 				}
+
+				return new NearbyStationsResult(null, stations);
+			}
+			else if (error == 2)
+			{
+				return new NearbyStationsResult(null, NearbyStationsResult.Status.SERVICE_DOWN);
+			}
+			else
+			{
+				throw new RuntimeException("unknown error: " + error);
 			}
 		}
 		catch (final JSONException x)
@@ -1270,14 +1375,12 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 			x.printStackTrace();
 			throw new RuntimeException("cannot parse: '" + page + "' on " + uri, x);
 		}
-
-		return new NearbyStationsResult(null, stations);
 	}
 
 	private final static Pattern P_NEARBY_COARSE = Pattern.compile("<tr class=\"(zebra[^\"]*)\">(.*?)</tr>", Pattern.DOTALL);
 	private final static Pattern P_NEARBY_FINE_COORDS = Pattern
 			.compile("REQMapRoute0\\.Location0\\.X=(-?\\d+)&(?:amp;)?REQMapRoute0\\.Location0\\.Y=(-?\\d+)&");
-	private final static Pattern P_NEARBY_FINE_LOCATION = Pattern.compile("[\\?&]input=(\\d+)&[^\"]*\">([^<]*)<");
+	private final static Pattern P_NEARBY_FINE_LOCATION = Pattern.compile("[\\?&;]input=(\\d+)&[^\"]*\">([^<]*)<");
 
 	protected final NearbyStationsResult htmlNearbyStations(final String uri) throws IOException
 	{
@@ -1388,6 +1491,8 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 		if ("EST".equals(ucType)) // Eurostar Frankreich
 			return 'I';
 		if ("EM".equals(ucType)) // Euromed, Barcelona-Alicante, Spanien
+			return 'I';
+		if ("A".equals(ucType)) // Spain, Highspeed
 			return 'I';
 		if ("AVE".equals(ucType)) // Alta Velocidad Española, Spanien
 			return 'I';
@@ -1517,6 +1622,8 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 			return 'R';
 		if ("SBS".equals(ucType)) // Städtebahn Sachsen
 			return 'R';
+		if ("SES".equals(ucType)) // Städtebahn Sachsen Express
+			return 'R';
 		if ("EVB".equals(ucType)) // Eisenbahnen und Verkehrsbetriebe Elbe-Weser
 			return 'R';
 		if ("STB".equals(ucType)) // Süd-Thüringen-Bahn
@@ -1524,6 +1631,8 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 		if ("AG".equals(ucType)) // Ingolstadt-Landshut
 			return 'R';
 		if ("PRE".equals(ucType)) // Pressnitztalbahn
+			return 'R';
+		if ("DBG".equals(ucType)) // Döllnitzbahn GmbH
 			return 'R';
 		if ("SHB".equals(ucType)) // Schleswig-Holstein-Bahn
 			return 'R';
@@ -1573,6 +1682,8 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 			return 'R';
 		if ("KTB".equals(ucType)) // Kandertalbahn
 			return 'R';
+		if ("ERX".equals(ucType)) // erixx
+			return 'R';
 		if ("ATZ".equals(ucType)) // Autotunnelzug
 			return 'R';
 		if ("ATB".equals(ucType)) // Autoschleuse Tauernbahn
@@ -1590,6 +1701,10 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 		if ("PCC".equals(ucType)) // PCC Rail, Polen
 			return 'R';
 		if ("ZR".equals(ucType)) // ZSR (Slovakian Republic Railways)
+			return 'R';
+		if ("WB".equals(ucType)) // WESTbahn
+			return 'R';
+		if ("RNV".equals(ucType)) // Rhein-Neckar-Verkehr GmbH
 			return 'R';
 
 		// if ("E".equals(normalizedType)) // Eilzug, stimmt wahrscheinlich nicht
@@ -1628,6 +1743,8 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 			return 'T';
 		if ("STRWLB".equals(ucType)) // Wiener Lokalbahnen
 			return 'T';
+		if ("SCHW-B".equals(ucType)) // Schwebebahn, gilt als "Straßenbahn besonderer Bauart"
+			return 'T';
 
 		// Bus
 		if (P_LINE_BUS.matcher(ucType).matches()) // Generic Bus
@@ -1644,8 +1761,6 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 			return 'B';
 		if ("TRO".equals(ucType)) // Trolleybus
 			return 'B';
-		if ("AST".equals(ucType)) // Anruf-Sammel-Taxi
-			return 'B';
 		if ("RFB".equals(ucType)) // Rufbus
 			return 'B';
 		if ("RUF".equals(ucType)) // Rufbus
@@ -1656,10 +1771,14 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 			return 'B';
 		if ("LT".equals(ucType)) // Linien-Taxi
 			return 'B';
-		if ("ALT".equals(ucType)) // Anruf-Linien-Taxi
-			return 'B';
 		// if ("N".equals(normalizedType)) // Nachtbus
 		// return "B" + normalizedName;
+
+		// Phone
+		if (ucType.startsWith("AST")) // Anruf-Sammel-Taxi
+			return 'P';
+		if (ucType.startsWith("ALT")) // Anruf-Linien-Taxi
+			return 'P';
 
 		// Ferry
 		if ("SCHIFF".equals(ucType))
@@ -1707,40 +1826,57 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 		return 0;
 	}
 
-	protected static final Pattern P_NORMALIZE_LINE = Pattern.compile("([A-Za-zßÄÅäáàâåéèêíìîÖöóòôÜüúùûØ/]+)[\\s-]*(.*)");
+	protected static final Pattern P_NORMALIZE_LINE = Pattern.compile("([A-Za-zßÄÅäáàâåéèêíìîÖöóòôÜüúùûØ/]+)[\\s-]*([^#]*).*");
+	private static final Pattern P_NORMALIZE_LINE_BUS = Pattern.compile("(?:Bus|BUS)\\s*(.*)");
+	private static final Pattern P_NORMALIZE_LINE_TRAM = Pattern.compile("(?:Tram|Str|STR)\\s*(.*)");
 
-	protected Line parseLine(final String type, final String line)
+	protected Line parseLine(final String type, final String line, final boolean wheelchairAccess)
 	{
+		final Matcher mBus = P_NORMALIZE_LINE_BUS.matcher(line);
+		if (mBus.matches())
+			return newLine('B' + mBus.group(1));
+
+		final Matcher mTram = P_NORMALIZE_LINE_TRAM.matcher(line);
+		if (mTram.matches())
+			return newLine('T' + mTram.group(1));
+
 		final char normalizedType = normalizeType(type);
+		if (normalizedType == 0)
+			throw new IllegalStateException("cannot normalize type '" + type + "' line '" + line + "'");
 
-		if (normalizedType != 0)
+		final String lineStr;
+		if (line != null)
 		{
-			final String lineStr;
+			final Matcher m = P_NORMALIZE_LINE.matcher(line);
+			final String strippedLine = m.matches() ? m.group(1) + m.group(2) : line;
 
-			if (line != null)
-			{
-				final Matcher m = P_NORMALIZE_LINE.matcher(line);
-				final String strippedLine = m.matches() ? m.group(1) + m.group(2) : line;
+			lineStr = normalizedType + strippedLine;
 
-				lineStr = normalizedType + strippedLine;
-			}
-			else
-			{
-				lineStr = Character.toString(normalizedType);
-			}
-
-			return new Line(null, lineStr, lineColors(lineStr));
+			// FIXME xxxxxxx
 		}
 		else
 		{
-			throw new IllegalStateException("cannot normalize type '" + type + "' line '" + line + "'");
+			lineStr = Character.toString(normalizedType);
 		}
+
+		if (wheelchairAccess)
+			return newLine(lineStr, Line.Attr.WHEEL_CHAIR_ACCESS);
+		else
+			return newLine(lineStr);
 	}
 
-	protected String normalizeLine(final String line)
+	protected Line parseLineWithoutType(final String line)
 	{
 		if (line == null || line.length() == 0)
 			return null;
+
+		final Matcher mBus = P_NORMALIZE_LINE_BUS.matcher(line);
+		if (mBus.matches())
+			return newLine('B' + mBus.group(1));
+
+		final Matcher mTram = P_NORMALIZE_LINE_TRAM.matcher(line);
+		if (mTram.matches())
+			return newLine('T' + mTram.group(1));
 
 		final Matcher m = P_NORMALIZE_LINE.matcher(line);
 		if (m.matches())
@@ -1750,48 +1886,79 @@ public abstract class AbstractHafasProvider extends AbstractNetworkProvider
 
 			final char normalizedType = normalizeType(type);
 			if (normalizedType != 0)
-				return normalizedType + type + number;
+				return newLine(normalizedType + type + number);
 
-			throw new IllegalStateException("cannot normalize type " + type + " number " + number + " line " + line);
+			throw new IllegalStateException("cannot normalize type '" + type + "' number '" + number + "' line '" + line + "'");
 		}
 
 		throw new IllegalStateException("cannot normalize line " + line);
 	}
 
-	private static final Pattern P_NORMALIZE_LINE_AND_TYPE = Pattern.compile("([^#]*)#(.*)");
+	protected static final Pattern P_NORMALIZE_LINE_AND_TYPE = Pattern.compile("([^#]*)#(.*)");
 	private static final Pattern P_NORMALIZE_LINE_NUMBER = Pattern.compile("\\d{2,5}");
-	// saved from RtProvider
-	private static final Pattern P_NORMALIZE_LINE_RUSSIA = Pattern.compile("(\\d{3}(BJ|FJ|IJ|MJ|NJ|OJ|TJ|SZ))");
 
-	protected final String parseLineAndType(final String lineAndType)
+	protected static final Pattern P_LINE_RUSSIA = Pattern
+			.compile("\\d{3}(?:AJ|BJ|DJ|FJ|GJ|IJ|KJ|LJ|NJ|MJ|OJ|RJ|SJ|TJ|UJ|VJ|ZJ|CH|KH|ZH|EI|JA|JI|MZ|SH|PC|Y)");
+
+	protected Line parseLineAndType(final String lineAndType)
 	{
-		final Matcher m = P_NORMALIZE_LINE_AND_TYPE.matcher(lineAndType);
-		if (m.matches())
+		final Matcher mLineAndType = P_NORMALIZE_LINE_AND_TYPE.matcher(lineAndType);
+		if (mLineAndType.matches())
 		{
-			final String number = m.group(1).replaceAll("\\s+", " ");
-			final String type = m.group(2);
+			final String number = mLineAndType.group(1);
+			final String type = mLineAndType.group(2);
 
 			if (type.length() == 0)
 			{
 				if (number.length() == 0)
-					return "?";
+					return newLine("?");
 				if (P_NORMALIZE_LINE_NUMBER.matcher(number).matches())
-					return "?" + number;
-				// saved from RtProvider
-				// if (P_NORMALIZE_LINE_RUSSIA.matcher(number).matches())
-				// return 'R' + number;
+					return newLine("?" + number);
+				if (P_LINE_RUSSIA.matcher(number).matches())
+					return newLine('R' + number);
 			}
 			else
 			{
 				final char normalizedType = normalizeType(type);
 				if (normalizedType != 0)
-					return normalizedType + number;
+				{
+					if (normalizedType == 'B')
+					{
+						final Matcher mBus = P_NORMALIZE_LINE_BUS.matcher(number);
+						if (mBus.matches())
+							return newLine('B' + mBus.group(1));
+					}
+
+					if (normalizedType == 'T')
+					{
+						final Matcher mTram = P_NORMALIZE_LINE_TRAM.matcher(number);
+						if (mTram.matches())
+							return newLine('T' + mTram.group(1));
+					}
+
+					return newLine(normalizedType + number.replaceAll("\\s+", ""));
+				}
 			}
 
-			throw new IllegalStateException("cannot normalize type " + type + " number " + number + " line#type " + lineAndType);
+			throw new IllegalStateException("cannot normalize type '" + type + "' number '" + number + "' line#type '" + lineAndType + "'");
 		}
 
-		throw new IllegalStateException("cannot normalize line#type " + lineAndType);
+		throw new IllegalStateException("cannot normalize line#type '" + lineAndType + "'");
+	}
+
+	protected final Line newLine(final String lineStr, final Line.Attr... attrs)
+	{
+		if (attrs.length == 0)
+		{
+			return new Line(null, lineStr, lineStyle(lineStr));
+		}
+		else
+		{
+			final Set<Line.Attr> attrSet = new HashSet<Line.Attr>();
+			for (final Line.Attr attr : attrs)
+				attrSet.add(attr);
+			return new Line(null, lineStr, lineStyle(lineStr), attrSet);
+		}
 	}
 
 	private static final Pattern P_CONNECTION_ID = Pattern.compile("co=(C\\d+-\\d+)&");

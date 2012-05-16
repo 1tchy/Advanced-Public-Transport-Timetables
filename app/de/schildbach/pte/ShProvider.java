@@ -44,6 +44,7 @@ public class ShProvider extends AbstractHafasProvider
 {
 	public static final NetworkId NETWORK_ID = NetworkId.SH;
 	private static final String API_BASE = "http://scout.hafas.de/bin/";
+	// http://nah.sh.hafas.de/bin/
 
 	private static final long PARSER_DAY_ROLLOVER_THRESHOLD_MS = 12 * 60 * 60 * 1000;
 
@@ -222,15 +223,16 @@ public class ShProvider extends AbstractHafasProvider
 
 					final String lineType = mDepFine.group(2);
 
-					final Line line = parseLine(lineType, ParserUtils.resolveEntities(mDepFine.group(3).trim()));
+					final Line line = parseLine(lineType, ParserUtils.resolveEntities(mDepFine.group(3).trim()), false);
 
 					final int destinationId = mDepFine.group(4) != null ? Integer.parseInt(mDepFine.group(4)) : 0;
-
-					final String destination = ParserUtils.resolveEntities(mDepFine.group(5));
+					final String destinationName = ParserUtils.resolveEntities(mDepFine.group(5));
+					final Location destination = new Location(destinationId > 0 ? LocationType.STATION : LocationType.ANY, destinationId, null,
+							destinationName);
 
 					final String position = mDepFine.group(6) != null ? "Gl. " + ParserUtils.resolveEntities(mDepFine.group(6)) : null;
 
-					final Departure dep = new Departure(plannedTime.getTime(), null, line, position, destinationId, destination, null, null);
+					final Departure dep = new Departure(plannedTime.getTime(), null, line, position, destination, null, null);
 
 					if (!departures.contains(dep))
 						departures.add(dep);

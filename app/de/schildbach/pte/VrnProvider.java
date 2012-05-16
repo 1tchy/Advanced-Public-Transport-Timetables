@@ -17,12 +17,6 @@
 
 package de.schildbach.pte;
 
-import java.io.IOException;
-import java.util.List;
-
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.LocationType;
-
 /**
  * @author Andreas Schildbach
  */
@@ -49,21 +43,5 @@ public class VrnProvider extends AbstractEfaProvider
 				return true;
 
 		return false;
-	}
-
-	private static final String NEARBY_STATION_URI = API_BASE
-			+ "XSLT_DM_REQUEST"
-			+ "?outputFormat=XML&coordOutputFormat=WGS84&type_dm=stop&name_dm=%s&itOptionsActive=1&ptOptionsActive=1&useProxFootSearch=1&mergeDep=1&useAllStops=1&mode=direct&deleteAssignedStop=0";
-
-	@Override
-	protected String nearbyStationUri(final int stationId)
-	{
-		return String.format(NEARBY_STATION_URI, stationId);
-	}
-
-	@Override
-	public List<Location> autocompleteStations(final CharSequence constraint) throws IOException
-	{
-		return xmlStopfinderRequest(new Location(LocationType.ANY, 0, null, constraint.toString()));
 	}
 }

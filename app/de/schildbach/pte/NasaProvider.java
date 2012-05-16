@@ -19,7 +19,9 @@ package de.schildbach.pte;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 
+import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.NearbyStationsResult;
@@ -88,6 +90,22 @@ public class NasaProvider extends AbstractHafasProvider
 		}
 	}
 
+	private static final String[] PLACES = { "Leipzig", "Halle (Saale)", "Halle" };
+
+	@Override
+	protected String[] splitPlaceAndName(final String name)
+	{
+		for (final String place : PLACES)
+		{
+			if (name.startsWith(place + " ") || name.startsWith(place + "-"))
+				return new String[] { place, name.substring(place.length() + 1) };
+			else if (name.startsWith(place + ", "))
+				return new String[] { place, name.substring(place.length() + 2) };
+		}
+
+		return super.splitPlaceAndName(name);
+	}
+
 	public NearbyStationsResult queryNearbyStations(final Location location, final int maxDistance, final int maxStations) throws IOException
 	{
 		final StringBuilder uri = new StringBuilder(API_BASE);
@@ -126,12 +144,31 @@ public class NasaProvider extends AbstractHafasProvider
 		return xmlMLcReq(constraint);
 	}
 
+	private static final Pattern P_LINE_NUMBER = Pattern.compile("\\d{4,}");
+
+	@Override
+	protected Line parseLineWithoutType(final String line)
+	{
+		if (P_LINE_NUMBER.matcher(line).matches())
+			return newLine('?' + line);
+
+		return super.parseLineWithoutType(line);
+	}
+
+	@Override
+	protected Line parseLineAndType(final String line)
+	{
+		return parseLineWithoutType(line);
+	}
+
 	@Override
 	protected char normalizeType(String type)
 	{
 		final String ucType = type.toUpperCase();
 
 		if ("ECW".equals(ucType))
+			return 'I';
+		if ("IXB".equals(ucType)) // ICE International
 			return 'I';
 
 		if ("DPF".equals(ucType)) // mit Dampflok bespannter Zug
@@ -142,7 +179,7 @@ public class NasaProvider extends AbstractHafasProvider
 			return 'R';
 		if ("RR".equals(ucType)) // Polen
 			return 'R';
-		if ("DBG".equals(ucType)) // Döllnitzbahn GmbH
+		if ("BAHN".equals(ucType))
 			return 'R';
 		if ("ZUGBAHN".equals(ucType))
 			return 'R';

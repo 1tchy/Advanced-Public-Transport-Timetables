@@ -158,18 +158,9 @@ public class RtProvider extends AbstractHafasProvider
 	}
 
 	@Override
-	protected String normalizeLine(final String line)
-	{
-		return parseLineAndType(line);
-	}
-
-	@Override
 	protected char normalizeType(final String type)
 	{
 		final String ucType = type.toUpperCase();
-
-		if ("A".equals(ucType)) // Spain, Highspeed
-			return 'I';
 
 		if ("E".equals(ucType)) // Romania, Croatia
 			return 'R';

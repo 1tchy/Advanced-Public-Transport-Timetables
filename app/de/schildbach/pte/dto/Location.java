@@ -121,16 +121,47 @@ public final class Location implements Serializable
 		final Location other = (Location) o;
 		if (this.type != other.type)
 			return false;
-		if (this.id != other.id)
-			return false;
-		if (this.id != 0)
+		if (this.id != 0 && this.id == other.id)
 			return true;
-		return this.name.equals(other.name);
+		if (this.lat != 0 && this.lon != 0 && this.lat == other.lat && this.lon == other.lon)
+			return true;
+		if (!nullSafeEquals(this.name, other.name)) // only discriminate by name if no ids are given
+			return false;
+		return true;
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return type.hashCode(); // FIXME not very discriminative
+		int hashCode = 0;
+		hashCode += type.hashCode();
+		hashCode *= 29;
+		if (id != 0)
+		{
+			hashCode += id;
+		}
+		else if (lat != 0 || lon != 0)
+		{
+			hashCode += lat;
+			hashCode *= 29;
+			hashCode += lon;
+		}
+		return hashCode;
+	}
+
+	private boolean nullSafeEquals(final Object o1, final Object o2)
+	{
+		if (o1 == null && o2 == null)
+			return true;
+		if (o1 != null && o1.equals(o2))
+			return true;
+		return false;
+	}
+
+	private int nullSafeHashCode(final Object o)
+	{
+		if (o == null)
+			return 0;
+		return o.hashCode();
 	}
 }

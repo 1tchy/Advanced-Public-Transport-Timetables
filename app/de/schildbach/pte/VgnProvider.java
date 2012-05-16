@@ -17,24 +17,22 @@
 
 package de.schildbach.pte;
 
-import java.io.IOException;
-import java.util.List;
+import java.util.Date;
 
 import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.LocationType;
 
 /**
  * @author Andreas Schildbach
  */
-public class BsvagProvider extends AbstractEfaProvider
+public class VgnProvider extends AbstractEfaProvider
 {
-	public static final NetworkId NETWORK_ID = NetworkId.BSVAG;
-	public static final String OLD_NETWORK_ID = "212.68.73.240";
-	private final static String API_BASE = "http://212.68.73.240/bsvag/";
+	public static final NetworkId NETWORK_ID = NetworkId.VGN;
+	private static final String DEPARTURE_MONITOR_ENDPOINT = "XML_DM_REQUEST";
+	private static final String TRIP_ENDPOINT = "XML_TRIP_REQUEST2";
 
-	public BsvagProvider()
+	public VgnProvider(final String apiBase)
 	{
-		super(API_BASE, null);
+		super(apiBase, DEPARTURE_MONITOR_ENDPOINT, TRIP_ENDPOINT, null, false, false);
 	}
 
 	public NetworkId id()
@@ -52,8 +50,9 @@ public class BsvagProvider extends AbstractEfaProvider
 	}
 
 	@Override
-	public List<Location> autocompleteStations(final CharSequence constraint) throws IOException
+	protected String xsltTripRequest2Uri(final Location from, final Location via, final Location to, final Date date, final boolean dep,
+			final String products, final WalkSpeed walkSpeed, final Accessibility accessibility)
 	{
-		return xmlStopfinderRequest(new Location(LocationType.STATION, 0, null, constraint.toString()));
+		return super.xsltTripRequest2Uri(from, via, to, date, dep, products, walkSpeed, accessibility) + "&itdLPxx_showTariffLevel=1";
 	}
 }

@@ -241,9 +241,10 @@ public class RmvProvider extends AbstractHafasProvider
 					final Matcher mDepFine = P_DEPARTURES_FINE.matcher(mDepCoarse.group(1));
 					if (mDepFine.matches())
 					{
-						final String line = normalizeLine(ParserUtils.resolveEntities(mDepFine.group(1)));
+						final Line line = parseLineWithoutType(ParserUtils.resolveEntities(mDepFine.group(1)));
 
-						final String destination = ParserUtils.resolveEntities(mDepFine.group(2));
+						final String destinationName = ParserUtils.resolveEntities(mDepFine.group(2));
+						final Location destination = new Location(LocationType.ANY, 0, null, destinationName);
 
 						final Calendar plannedTime = new GregorianCalendar(timeZone());
 						plannedTime.setTimeInMillis(currentTime.getTimeInMillis());
@@ -269,8 +270,8 @@ public class RmvProvider extends AbstractHafasProvider
 
 						final String position = ParserUtils.resolveEntities(ParserUtils.selectNotNull(mDepFine.group(5), mDepFine.group(6)));
 
-						final Departure dep = new Departure(plannedTime.getTime(), predictedTime != null ? predictedTime.getTime() : null, new Line(
-								null, line, line != null ? lineColors(line) : null), position, 0, destination, null, null);
+						final Departure dep = new Departure(plannedTime.getTime(), predictedTime != null ? predictedTime.getTime() : null, line,
+								position, destination, null, null);
 
 						if (!departures.contains(dep))
 							departures.add(dep);
@@ -308,89 +309,14 @@ public class RmvProvider extends AbstractHafasProvider
 	}
 
 	@Override
-	protected String normalizeLine(final String line)
+	protected Line parseLineWithoutType(final String line)
 	{
-		if (line == null || line.length() == 0)
-			return null;
-
-		final Matcher m = P_NORMALIZE_LINE.matcher(line);
-		if (m.matches())
-		{
-			final String type = m.group(1);
-			final String number = m.group(2).replace(" ", "");
-
-			if (type.equals("ICE")) // InterCityExpress
-				return "IICE" + number;
-			if (type.equals("IC")) // InterCity
-				return "IIC" + number;
-			if (type.equals("EC")) // EuroCity
-				return "IEC" + number;
-			if (type.equals("EN")) // EuroNight
-				return "IEN" + number;
-			if (type.equals("CNL")) // CityNightLine
-				return "ICNL" + number;
-			if (type.equals("DNZ")) // Basel-Minsk, Nacht
-				return "IDNZ" + number;
-			if (type.equals("D")) // Prag-Fulda
-				return "ID" + number;
-			if (type.equals("RB")) // RegionalBahn
-				return "RRB" + number;
-			if (type.equals("RE")) // RegionalExpress
-				return "RRE" + number;
-			if (type.equals("IRE")) // Interregio Express
-				return "RIRE" + number;
-			if (type.equals("SE")) // StadtExpress
-				return "RSE" + number;
-			if (type.equals("R"))
-				return "R" + number;
-			if (type.equals("ZUG"))
-				return "R" + number;
-			if (type.equals("S"))
-				return "SS" + number;
-			if (type.equals("U"))
-				return "UU" + number;
-			if (type.equals("Tram"))
-				return "T" + number;
-			if (type.equals("RT")) // RegioTram
-				return "TRT" + number;
-			if (type.startsWith("Bus"))
-				return "B" + type.substring(3) + number;
-			if (type.equals("B"))
-				return "B" + number;
-			if (type.equals("BN"))
-				return "BN" + number;
-			if ("BuFB".equals(type))
-				return "BBuFB" + number;
-			if ("A".equals(type))
-				return "BA" + number;
-			if (type.equals("N"))
-				return "BN" + number;
-			if (type.equals("AS")) // Anruf-Sammel-Taxi
-				return "BAS" + number;
-			if (type.equals("ASOF")) // Anruf-Sammel-Taxi
-				return "BASOF" + number;
-			if (type.startsWith("AST")) // Anruf-Sammel-Taxi
-				return "BAST" + type.substring(3) + number;
-			if (type.startsWith("ALT")) // Anruf-Linien-Taxi
-				return "BALT" + type.substring(3) + number;
-			if (type.equals("ALFB")) // Anruf-Linien-Taxi
-				return "BALFB" + number;
-			if (type.equals("LTaxi"))
-				return "BLTaxi" + number;
-			if (type.equals("AT")) // AnschlußSammelTaxi
-				return "BAT" + number;
-			if (type.equals("SCH"))
-				return "FSCH" + number;
-
-			throw new IllegalStateException("cannot normalize type " + type + " number " + number + " line " + line);
-		}
-
 		if ("11".equals(line))
-			return "T11";
+			return newLine("T11");
 		if ("12".equals(line))
-			return "T12";
+			return newLine("T12");
 
-		throw new IllegalStateException("cannot normalize line " + line);
+		return super.parseLineWithoutType(line);
 	}
 
 	@Override
@@ -401,7 +327,19 @@ public class RmvProvider extends AbstractHafasProvider
 		if ("U-BAHN".equals(ucType))
 			return 'U';
 
+		if ("B".equals(ucType))
+			return 'B';
+		if ("BUFB".equals(ucType)) // BuFB
+			return 'B';
+		if ("BUVB".equals(ucType)) // BuVB
+			return 'B';
 		if ("LTAXI".equals(ucType))
+			return 'B';
+		if ("BN".equals(ucType)) // BN Venus
+			return 'B';
+		if ("ASOF".equals(ucType))
+			return 'B';
+		if ("AT".equals(ucType)) // Anschluß Sammel Taxi, Anmeldung nicht erforderlich
 			return 'B';
 
 		final char t = super.normalizeType(type);

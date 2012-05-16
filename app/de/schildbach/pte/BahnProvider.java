@@ -48,8 +48,6 @@ public final class BahnProvider extends AbstractHafasProvider
 	public static final String OLD_NETWORK_ID = "mobile.bahn.de";
 	private static final String API_BASE = "http://mobile.bahn.de/bin/mobil/";
 
-	private static final long PARSER_DAY_ROLLOVER_THRESHOLD_MS = 12 * 60 * 60 * 1000;
-
 	public BahnProvider()
 	{
 		super("http://reiseauskunft.bahn.de/bin/extxml.exe", 14, null);
@@ -256,7 +254,7 @@ public final class BahnProvider extends AbstractHafasProvider
 
 	@Override
 	public QueryConnectionsResult queryConnections(final Location from, final Location via, final Location to, final Date date, final boolean dep,
-			final String products, final WalkSpeed walkSpeed) throws IOException
+			final String products, final WalkSpeed walkSpeed, final Accessibility accessibility) throws IOException
 	{
 		final String uri = connectionsQueryUri(from, via, to, date, dep, products);
 		final CharSequence page = ParserUtils.scrape(uri);
@@ -297,9 +295,10 @@ public final class BahnProvider extends AbstractHafasProvider
 	}
 
 	@Override
-	public QueryConnectionsResult queryMoreConnections(final String uri) throws IOException
+	public QueryConnectionsResult queryMoreConnections(final String uri, final boolean next) throws IOException
 	{
 		final CharSequence page = ParserUtils.scrape(uri);
+		// TODO handle next/prev
 		return queryConnections(uri, page);
 	}
 
@@ -353,24 +352,7 @@ public final class BahnProvider extends AbstractHafasProvider
 				if (mConFine.matches())
 				{
 					final String link = ParserUtils.resolveEntities(mConFine.group(1));
-					final Calendar departureTime = new GregorianCalendar(timeZone());
-					departureTime.setTimeInMillis(currentDate.getTimeInMillis());
-					ParserUtils.parseEuropeanTime(departureTime, mConFine.group(2));
-					if (!connections.isEmpty())
-					{
-						final long diff = departureTime.getTimeInMillis() - connections.get(connections.size() - 1).departureTime.getTime();
-						if (diff > PARSER_DAY_ROLLOVER_THRESHOLD_MS)
-							departureTime.add(Calendar.DAY_OF_YEAR, -1);
-						else if (diff < -PARSER_DAY_ROLLOVER_THRESHOLD_MS)
-							departureTime.add(Calendar.DAY_OF_YEAR, 1);
-					}
-					final Calendar arrivalTime = new GregorianCalendar(timeZone());
-					arrivalTime.setTimeInMillis(currentDate.getTimeInMillis());
-					ParserUtils.parseEuropeanTime(arrivalTime, mConFine.group(3));
-					if (departureTime.after(arrivalTime))
-						arrivalTime.add(Calendar.DAY_OF_YEAR, 1);
-					final Connection connection = new Connection(AbstractHafasProvider.extractConnectionId(link), link, departureTime.getTime(),
-							arrivalTime.getTime(), from, to, null, null, null);
+					final Connection connection = new Connection(AbstractHafasProvider.extractConnectionId(link), link, from, to, null, null, null);
 					connections.add(connection);
 				}
 				else
@@ -429,9 +411,7 @@ public final class BahnProvider extends AbstractHafasProvider
 		{
 			final List<Connection.Part> parts = new ArrayList<Connection.Part>(4);
 
-			Date firstDepartureTime = null;
 			Location firstDeparture = null;
-			Date lastArrivalTime = null;
 			Location lastArrival = null;
 
 			final Matcher mDetCoarse = P_CONNECTION_DETAILS_COARSE.matcher(mHead.group(1));
@@ -453,8 +433,7 @@ public final class BahnProvider extends AbstractHafasProvider
 
 						if (mDetFine.group(2) != null)
 						{
-							final String lineStr = normalizeLine(ParserUtils.resolveEntities(mDetFine.group(2)));
-							final Line line = new Line(null, lineStr, lineColors(lineStr));
+							final Line line = parseLineWithoutType(ParserUtils.resolveEntities(mDetFine.group(2)));
 
 							final Calendar departureTime = new GregorianCalendar(timeZone());
 							departureTime.clear();
@@ -472,14 +451,10 @@ public final class BahnProvider extends AbstractHafasProvider
 
 							final String arrivalPosition = ParserUtils.resolveEntities(mDetFine.group(8));
 
-							parts.add(new Connection.Trip(line, null, departureTime.getTime(), departurePosition, departure, arrivalTime.getTime(),
-									arrivalPosition, arrival, null, null));
-
-							if (firstDepartureTime == null)
-								firstDepartureTime = departureTime.getTime();
+							parts.add(new Connection.Trip(line, null, departureTime.getTime(), null, departurePosition, departure, arrivalTime
+									.getTime(), null, arrivalPosition, arrival, null, null));
 
 							lastArrival = arrival;
-							lastArrivalTime = arrivalTime.getTime();
 						}
 						else if (mDetFine.group(10) != null)
 						{
@@ -513,13 +488,8 @@ public final class BahnProvider extends AbstractHafasProvider
 				}
 			}
 
-			// verify
-			if (firstDepartureTime == null || lastArrivalTime == null)
-				throw new IllegalStateException("could not parse all parts of:\n" + mHead.group(1) + "\n" + parts);
-
 			return new GetConnectionDetailsResult(new GregorianCalendar(timeZone()).getTime(), new Connection(
-					AbstractHafasProvider.extractConnectionId(uri), uri, firstDepartureTime, lastArrivalTime, firstDeparture, lastArrival, parts,
-					null, null));
+					AbstractHafasProvider.extractConnectionId(uri), uri, firstDeparture, lastArrival, parts, null, null));
 		}
 		else
 		{
@@ -547,18 +517,12 @@ public final class BahnProvider extends AbstractHafasProvider
 	{
 		final String ucType = type.toUpperCase();
 
-		if ("RNV".equals(ucType))
-			return 'R';
 		if ("DZ".equals(ucType)) // Dampfzug
 			return 'R';
 
 		if ("LTT".equals(ucType))
 			return 'B';
 
-		if (ucType.startsWith("AST")) // Anruf-Sammel-Taxi
-			return 'P';
-		if (ucType.startsWith("ALT")) // Anruf-Linien-Taxi
-			return 'P';
 		if (ucType.startsWith("RFB")) // Rufbus
 			return 'P';
 
@@ -572,27 +536,23 @@ public final class BahnProvider extends AbstractHafasProvider
 		return 0;
 	}
 
-	private static final Pattern P_LINE_BUS_SPECIAL = Pattern.compile("Bus([A-Z]/[\\dA-Z]+)");
-	private static final Pattern P_LINE_RUSSIA = Pattern
-			.compile("\\d{3}(?:AJ|BJ|DJ|FJ|IJ|KJ|LJ|NJ|MJ|OJ|RJ|SJ|TJ|VJ|ZJ|CH|KH|ZH|EI|JA|JI|MZ|SH|PC|Y)");
 	private static final Pattern P_LINE_NUMBER = Pattern.compile("\\d{2,5}");
 
 	@Override
-	protected final String normalizeLine(final String line)
+	protected final Line parseLineWithoutType(final String line)
 	{
-
 		if ("Schw-B".equals(line)) // Schwebebahn, gilt als "Straßenbahn besonderer Bauart"
-			return 'T' + line;
-
-		if (P_LINE_BUS_SPECIAL.matcher(line).matches())
-			return "B" + line;
+			return newLine('T' + line);
 
 		if (P_LINE_RUSSIA.matcher(line).matches())
-			return 'R' + line;
+			return newLine('R' + line);
 
 		if (P_LINE_NUMBER.matcher(line).matches())
-			return "?" + line;
+			return newLine('?' + line);
 
-		return super.normalizeLine(line);
+		if ("---".equals(line))
+			return newLine('?' + line);
+
+		return super.parseLineWithoutType(line);
 	}
 }

@@ -15,33 +15,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.schildbach.pte;
+package de.schildbach.pte.exception;
+
+import java.io.IOException;
 
 /**
  * @author Andreas Schildbach
  */
-public class LinzProvider extends AbstractEfaProvider
+public class ProtocolException extends IOException
 {
-	public static final NetworkId NETWORK_ID = NetworkId.LINZ;
-	public static final String OLD_NETWORK_ID = "www.linzag.at";
-	public static final String API_BASE = "http://www.linzag.at/linz/"; // open data: http://www.linzag.at/static/
-
-	public LinzProvider()
+	public ProtocolException()
 	{
-		super(API_BASE, null);
+		super();
 	}
 
-	public NetworkId id()
+	public ProtocolException(final String message)
 	{
-		return NETWORK_ID;
+		super(message);
 	}
 
-	public boolean hasCapabilities(final Capability... capabilities)
+	public ProtocolException(final String message, final Throwable cause)
 	{
-		for (final Capability capability : capabilities)
-			if (capability == Capability.AUTOCOMPLETE_ONE_LINE || capability == Capability.DEPARTURES || capability == Capability.CONNECTIONS)
-				return true;
+		super(message);
+		super.initCause(cause);
+	}
 
-		return false;
+	public ProtocolException(final Throwable cause)
+	{
+		super(cause == null ? null : cause.toString());
+		super.initCause(cause);
 	}
 }

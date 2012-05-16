@@ -27,6 +27,7 @@ import de.schildbach.pte.dto.NearbyStationsResult;
 import de.schildbach.pte.dto.Point;
 import de.schildbach.pte.dto.QueryConnectionsResult;
 import de.schildbach.pte.dto.QueryDeparturesResult;
+import de.schildbach.pte.dto.Style;
 
 /**
  * Interface to be implemented by providers of transportation networks
@@ -43,6 +44,11 @@ public interface NetworkProvider
 	public enum WalkSpeed
 	{
 		SLOW, NORMAL, FAST
+	}
+
+	public enum Accessibility
+	{
+		NEUTRAL, LIMITED, BARRIER_FREE
 	}
 
 	NetworkId id();
@@ -101,26 +107,28 @@ public interface NetworkProvider
 	 * @param dep
 	 *            date is departure date? {@code true} for departure, {@code false} for arrival
 	 * @param products
-	 *            TODO
+	 *            products to take into account
 	 * @param walkSpeed
 	 *            how fast can you walk?
-	 * @param products
-	 *            products to take into account
+	 * @param accessibility
+	 *            how accessible do you need the route to be?
 	 * @return result object that can contain alternatives to clear up ambiguousnesses, or contains possible connections
 	 * @throws IOException
 	 */
-	QueryConnectionsResult queryConnections(Location from, Location via, Location to, Date date, boolean dep, String products, WalkSpeed walkSpeed)
-			throws IOException;
+	QueryConnectionsResult queryConnections(Location from, Location via, Location to, Date date, boolean dep, String products, WalkSpeed walkSpeed,
+			Accessibility accessibility) throws IOException;
 
 	/**
 	 * Query more connections (e.g. earlier or later)
 	 * 
 	 * @param context
 	 *            context to query more connections from
+	 * @param next
+	 *            {@code true} for get next connections, {@code false} for get previous connections
 	 * @return result object that contains possible connections
 	 * @throws IOException
 	 */
-	QueryConnectionsResult queryMoreConnections(String context) throws IOException;
+	QueryConnectionsResult queryMoreConnections(String context, boolean next) throws IOException;
 
 	/**
 	 * Get details about a connection
@@ -133,13 +141,13 @@ public interface NetworkProvider
 	GetConnectionDetailsResult getConnectionDetails(String connectionUri) throws IOException;
 
 	/**
-	 * Get colors of line
+	 * Get style of line
 	 * 
 	 * @param line
-	 *            line to get color of
-	 * @return array containing background, foreground and border (optional) colors
+	 *            line to get style of
+	 * @return object containing background, foreground and border (optional) colors
 	 */
-	int[] lineColors(String line);
+	Style lineStyle(String line);
 
 	/**
 	 * Gets the primary covered area of the network

@@ -29,7 +29,7 @@ import de.schildbach.pte.dto.LocationType;
 public class NvbwProvider extends AbstractEfaProvider
 {
 	public static final NetworkId NETWORK_ID = NetworkId.NVBW;
-	private final static String API_BASE = "http://www.efa-bw.de/nvbw/";
+	private final static String API_BASE = "http://www.efa-bw.de/nvbw/"; // http://www.efa-bw.de/android/
 
 	public NvbwProvider()
 	{
@@ -50,19 +50,9 @@ public class NvbwProvider extends AbstractEfaProvider
 		return false;
 	}
 
-	private static final String NEARBY_STATION_URI = API_BASE
-			+ "XSLT_DM_REQUEST"
-			+ "?outputFormat=XML&coordOutputFormat=WGS84&type_dm=stop&name_dm=%s&itOptionsActive=1&ptOptionsActive=1&useProxFootSearch=1&mergeDep=1&useAllStops=1&mode=direct";
-
-	@Override
-	protected String nearbyStationUri(final int stationId)
-	{
-		return String.format(NEARBY_STATION_URI, stationId);
-	}
-
 	@Override
 	public List<Location> autocompleteStations(final CharSequence constraint) throws IOException
 	{
-		return xmlStopfinderRequest(new Location(LocationType.ANY, 0, null, constraint.toString()));
+		return xmlStopfinderRequest(new Location(LocationType.STATION, 0, null, constraint.toString()));
 	}
 }

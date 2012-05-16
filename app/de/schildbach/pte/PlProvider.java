@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.NearbyStationsResult;
@@ -150,7 +151,7 @@ public class PlProvider extends AbstractHafasProvider
 	private static final Pattern P_NORMALIZE_LINE_NUMBER = Pattern.compile("\\d{2,5}");
 
 	@Override
-	protected String normalizeLine(String line)
+	protected Line parseLineWithoutType(String line)
 	{
 		// replace badly encoded character (stations 8530643 and 8530644)
 		if (line.equals("F\u0084hre"))
@@ -158,12 +159,12 @@ public class PlProvider extends AbstractHafasProvider
 
 		final Matcher mRussia = P_NORMALIZE_LINE_RUSSIA.matcher(line);
 		if (mRussia.matches())
-			return 'R' + mRussia.group(1);
+			return newLine('R' + mRussia.group(1));
 
 		if (P_NORMALIZE_LINE_NUMBER.matcher(line).matches())
-			return 'R' + line;
+			return newLine('R' + line);
 
-		return super.normalizeLine(line);
+		return super.parseLineWithoutType(line);
 	}
 
 	@Override
@@ -174,8 +175,6 @@ public class PlProvider extends AbstractHafasProvider
 		if ("REG".equals(ucType))
 			return 'R';
 		if ("AR".equals(ucType)) // Arriva Polaczen
-			return 'R';
-		if ("RNV".equals(ucType)) // Rhein-Neckar-Verkehr GmbH
 			return 'R';
 		if ("N".equals(ucType)) // St. Pierre des Corps - Tours
 			return 'R';

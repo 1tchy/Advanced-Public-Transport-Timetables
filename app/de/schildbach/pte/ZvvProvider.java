@@ -19,7 +19,9 @@ package de.schildbach.pte;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Matcher;
 
+import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
 import de.schildbach.pte.dto.NearbyStationsResult;
@@ -35,7 +37,7 @@ public class ZvvProvider extends AbstractHafasProvider
 
 	public ZvvProvider()
 	{
-		super(API_BASE + "query.exe/dn", 10, null);
+		super(API_BASE + "query.exe/dn", 10, null, "UTF-8", "UTF-8");
 	}
 
 	public NetworkId id()
@@ -50,6 +52,33 @@ public class ZvvProvider extends AbstractHafasProvider
 				return true;
 
 		return false;
+	}
+
+	@Override
+	protected char intToProduct(final int value)
+	{
+		if (value == 1)
+			return 'I';
+		if (value == 2)
+			return 'I';
+		if (value == 4)
+			return 'R';
+		if (value == 8)
+			return 'R';
+		if (value == 16)
+			return 'F';
+		if (value == 32)
+			return 'S';
+		if (value == 64)
+			return 'B';
+		if (value == 128)
+			return 'C';
+		if (value == 256)
+			return 'U';
+		if (value == 512)
+			return 'T';
+
+		throw new IllegalArgumentException("cannot handle: " + value);
 	}
 
 	@Override
@@ -162,9 +191,32 @@ public class ZvvProvider extends AbstractHafasProvider
 	}
 
 	@Override
-	protected String normalizeLine(final String line)
+	protected Line parseLineAndType(final String lineAndType)
 	{
-		return parseLineAndType(line);
+		final Matcher m = P_NORMALIZE_LINE_AND_TYPE.matcher(lineAndType);
+		if (m.matches())
+		{
+			final String number = m.group(1).replaceAll("\\s+", " ");
+			final String type = m.group(2);
+
+			if ("Bus-NF".equals(type))
+				return newLine('B' + number, Line.Attr.WHEEL_CHAIR_ACCESS);
+			if ("Tro-NF".equals(type))
+				return newLine('B' + number, Line.Attr.WHEEL_CHAIR_ACCESS);
+			if ("Trm-NF".equals(type))
+				return newLine('T' + number, Line.Attr.WHEEL_CHAIR_ACCESS);
+
+			if (type.length() > 0)
+			{
+				final char normalizedType = normalizeType(type);
+				if (normalizedType != 0)
+					return newLine(normalizedType + number);
+			}
+
+			throw new IllegalStateException("cannot normalize type " + type + " number " + number + " line#type " + lineAndType);
+		}
+
+		throw new IllegalStateException("cannot normalize line#type " + lineAndType);
 	}
 
 	@Override
@@ -194,6 +246,10 @@ public class ZvvProvider extends AbstractHafasProvider
 			return 'B';
 		if ("TX".equals(ucType))
 			return 'B';
+		if ("E-BUS".equals(ucType))
+			return 'B';
+		if ("TROLLEY".equals(ucType))
+			return 'B';
 
 		if ("D-SCHIFF".equals(ucType))
 			return 'F';
@@ -202,6 +258,8 @@ public class ZvvProvider extends AbstractHafasProvider
 			return 'C';
 
 		if ("UNB".equals(ucType))
+			return '?';
+		if ("???".equals(ucType))
 			return '?';
 
 		final char t = super.normalizeType(type);

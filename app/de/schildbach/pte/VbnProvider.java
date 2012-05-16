@@ -47,7 +47,7 @@ public class VbnProvider extends AbstractHafasProvider
 	public boolean hasCapabilities(Capability... capabilities)
 	{
 		for (final Capability capability : capabilities)
-			if (capability == Capability.AUTOCOMPLETE_ONE_LINE || capability == Capability.DEPARTURES || capability == Capability.CONNECTIONS)
+			if (capability == Capability.AUTOCOMPLETE_ONE_LINE || capability == Capability.DEPARTURES)
 				return true;
 
 		return false;
@@ -169,8 +169,6 @@ public class VbnProvider extends AbstractHafasProvider
 		if ("TB".equals(ucType))
 			return 'B';
 		if ("RFTAST".equals(ucType))
-			return 'B';
-		if ("ALTN".equals(ucType))
 			return 'B';
 
 		if ("BUSFÄHRE".equals(ucType)) // Blexen - Bremerhaven

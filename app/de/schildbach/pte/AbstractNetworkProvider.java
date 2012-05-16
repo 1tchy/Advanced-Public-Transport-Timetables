@@ -17,36 +17,19 @@
 
 package de.schildbach.pte;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import de.schildbach.pte.dto.Point;
-import de.schildbach.pte.util.Color;
+import de.schildbach.pte.dto.Style;
 
 /**
  * @author Andreas Schildbach
  */
 public abstract class AbstractNetworkProvider implements NetworkProvider
 {
-	private static final Map<Character, int[]> LINES = new HashMap<Character, int[]>();
-
-	static
-	{
-		LINES.put('I', new int[] { Color.WHITE, Color.RED, Color.RED });
-		LINES.put('R', new int[] { Color.GRAY, Color.WHITE });
-		LINES.put('S', new int[] { Color.parseColor("#006e34"), Color.WHITE });
-		LINES.put('U', new int[] { Color.parseColor("#003090"), Color.WHITE });
-		LINES.put('T', new int[] { Color.parseColor("#cc0000"), Color.WHITE });
-		LINES.put('B', new int[] { Color.parseColor("#993399"), Color.WHITE });
-		LINES.put('F', new int[] { Color.BLUE, Color.WHITE });
-		LINES.put('?', new int[] { Color.DKGRAY, Color.WHITE });
-	}
-
-	public int[] lineColors(final String line)
+	public Style lineStyle(final String line)
 	{
 		if (line.length() == 0)
 			return null;
-		return LINES.get(line.charAt(0));
+		return StandardColors.LINES.get(line.charAt(0));
 	}
 
 	public Point[] getArea()

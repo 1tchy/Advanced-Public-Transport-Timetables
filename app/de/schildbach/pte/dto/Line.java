@@ -27,7 +27,7 @@ public final class Line implements Serializable, Comparable<Line>
 {
 	public enum Attr
 	{
-		WHEEL_CHAIR_ACCESS
+		CIRCLE_CLOCKWISE, CIRCLE_ANTICLOCKWISE, SERVICE_REPLACEMENT, LINE_AIRPORT, WHEEL_CHAIR_ACCESS
 	}
 
 	private static final long serialVersionUID = -5642533805998375070L;
@@ -35,21 +35,21 @@ public final class Line implements Serializable, Comparable<Line>
 	final public String id;
 	final private transient char product; // TODO make true field
 	final public String label;
-	final public int[] colors;
+	final public Style style;
 	final private Set<Attr> attrs;
 
 	private static final String PRODUCT_ORDER = "IRSUTBPFC?";
 
-	public Line(final String id, final String label, final int[] colors)
+	public Line(final String id, final String label, final Style style)
 	{
-		this(id, label, colors, null);
+		this(id, label, style, null);
 	}
 
-	public Line(final String id, final String label, final int[] colors, final Set<Attr> attrs)
+	public Line(final String id, final String label, final Style style, final Set<Attr> attrs)
 	{
 		this.id = id;
 		this.label = label;
-		this.colors = colors;
+		this.style = style;
 		this.attrs = attrs;
 
 		product = label != null ? label.charAt(0) : '?';
@@ -77,13 +77,13 @@ public final class Line implements Serializable, Comparable<Line>
 		if (!(o instanceof Line))
 			return false;
 		final Line other = (Line) o;
-		return (this.label.equals(other.label));
+		return nullSafeEquals(this.label, other.label);
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return label.hashCode();
+		return nullSafeHashCode(label);
 	}
 
 	public int compareTo(final Line other)
@@ -96,6 +96,22 @@ public final class Line implements Serializable, Comparable<Line>
 		if (compareProduct != 0)
 			return compareProduct;
 
-		return label.compareTo(other.label);
+		return this.label.compareTo(other.label);
+	}
+
+	private boolean nullSafeEquals(final Object o1, final Object o2)
+	{
+		if (o1 == null && o2 == null)
+			return true;
+		if (o1 != null && o1.equals(o2))
+			return true;
+		return false;
+	}
+
+	private int nullSafeHashCode(final Object o)
+	{
+		if (o == null)
+			return 0;
+		return o.hashCode();
 	}
 }

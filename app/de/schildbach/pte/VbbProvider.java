@@ -172,10 +172,4 @@ public class VbbProvider extends AbstractHafasProvider
 
 		return jsonGetStops(uri);
 	}
-
-	@Override
-	protected String normalizeLine(final String line)
-	{
-		return parseLineAndType(line);
-	}
 }
