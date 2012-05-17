@@ -22,8 +22,7 @@
 #{/set}
 #{set "moreNavigation"}
 <a href="@{Application.index()}?${request.querystring}">Abfrage ändern</a>
-<a href="@{Application.showTimetable()}?#{my.remove '&amp;time=\\+?[0-9]{0,2}%3A[0-9]{0,2}\\+*'}${request.querystring}#{/my.remove}">...
-    zu
+<a href="@{Application.showTimetable()}?#{my.remove '&amp;time=\\+?[0-9]{0,2}%3A[0-9]{0,2}\\+*'}${request.querystring}#{/my.remove}">...zu
     aktueller Uhrzeit</a>
 #{/set}
 
