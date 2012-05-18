@@ -17,7 +17,10 @@
 package controllers;
 
 import de.schildbach.pte.NetworkProvider;
+import de.schildbach.pte.OpenDataProvider;
 import de.schildbach.pte.dto.Location;
+import de.schildbach.pte.dto.LocationType;
+import de.schildbach.pte.dto.NearbyStationsResult;
 import models.Autocomplete;
 import models.ComplexRequests;
 import models.InputChecker;
@@ -29,6 +32,7 @@ import play.libs.Mail;
 import play.mvc.Catch;
 import play.mvc.Controller;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -127,6 +131,32 @@ public class Application extends Controller {
     public static void autocompleteStation(final String term) {
         String provider = "sbb";
         renderJSON(Autocomplete.stations(provider, term));
+    }
+
+    /**
+     * Returns some stations near the given coordinates
+     *
+     * @param lat latitude
+     * @param lon longitude
+     */
+    @SuppressWarnings("unused")
+    public static void getStation(float lat, float lon) {
+        String provider_string = "sbb";
+        NearbyStationsResult stations;
+        NetworkProvider provider = InputChecker.getAndValidateProvider(provider_string);
+        try {
+            if (provider instanceof OpenDataProvider) {
+                stations = ((OpenDataProvider) provider).queryNearbyStations(lat, lon, 0, 0);
+            } else {
+                stations = provider.queryNearbyStations(new Location(LocationType.ANY, (int) lat, (int) lon), 0, 0);
+            }
+        } catch (IOException e) {
+            System.err.println("Could not find nearby stations at " + lat + "/" + lon);
+            e.printStackTrace();
+            renderJSON(new ArrayList(0));
+            return;
+        }
+        renderJSON(stations.stations);
     }
 
     /**

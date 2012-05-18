@@ -100,3 +100,26 @@ function autocomplete() {
         $input.autocomplete({ source:serverUrl });
     });
 }
+
+function localize() {
+    navigator.geolocation.getCurrentPosition(localize_by_position);
+}
+
+function localize_by_position(position) {
+    if(position != undefined) {
+        $.ajax({
+            type: "GET",
+            url: "/station?lat="+position.coords.latitude+"&lon="+position.coords.longitude,
+            async: true,
+            beforeSend: function(x) {
+                if(x && x.overrideMimeType) {
+                    x.overrideMimeType("application/j-son;charset=UTF-8");
+                }
+            },
+            dataType: "json",
+            success: function(data){
+                $("input").get(0).value=data[0].name;
+            }
+        });
+    }
+}

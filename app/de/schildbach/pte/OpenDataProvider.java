@@ -22,6 +22,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
+import com.sun.istack.internal.NotNull;
 import de.schildbach.pte.dto.*;
 import de.schildbach.pte.dto.Connection.Part;
 import de.schildbach.pte.dto.Connection.Trip;
@@ -94,7 +95,39 @@ public class OpenDataProvider extends AbstractNetworkProvider {
      * @throws IOException
      */
     public NearbyStationsResult queryNearbyStations(Location location, int maxDistance, int maxStations) throws IOException {
-        throw new NotImplementedException();
+        return queryNearbyStations(location.lat, location.lon, maxDistance, maxStations);
+    }
+
+    /**
+     * Determine stations near to given location.
+     *
+     * @param lat         latitude from where to determine nearby stations
+     * @param lon         longitude from where to determine nearby stations
+     * @param maxDistance maximum distance in meters, or {@code 0}
+     * @param maxStations maximum number of stations, or {@code 0}
+     * @return nearby stations
+     * @throws IOException
+     */
+    public NearbyStationsResult queryNearbyStations(float lat, float lon, int maxDistance, int maxStations) throws IOException {
+        JsonElement request = performRequest("locations?x=" + lat + "&y=" + lon).get("stations");
+        List<Location> stations = new LinkedList<Location>();
+        if ((request.isJsonArray())) {
+            JsonArray request_arr = (JsonArray) request;
+            for (JsonElement aStation : request_arr) {
+                if (aStation.isJsonObject()) {
+                    Location foundLocation = parseLocation((JsonObject) aStation);
+                    float lonDiff = lon - foundLocation.lon;
+                    float latDiff = lat - foundLocation.lat;
+                    if (maxDistance == 0 || latDiff * latDiff + lonDiff * lonDiff <= maxDistance * maxDistance) {
+                        stations.add(foundLocation);
+                        if (maxStations == 0 || stations.size() >= maxStations) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        return new NearbyStationsResult(new ResultHeader(SERVER_PRODUCT), stations);
     }
 
     /**
@@ -107,8 +140,7 @@ public class OpenDataProvider extends AbstractNetworkProvider {
      * @throws IOException
      */
     public QueryDeparturesResult queryDepartures(int stationId, int maxDepartures, boolean equivs) throws IOException {
-        assert false : "Not implemented yet.";
-        return null;
+        throw new NotImplementedException();
     }
 
     /**
@@ -165,7 +197,7 @@ public class OpenDataProvider extends AbstractNetworkProvider {
 
     private QueryConnectionsResult queryConnections(String request) throws IOException {
         JsonObject response = performRequest(request);
-        ResultHeader header = new ResultHeader(SERVER_PRODUCT, "v1", 0, "");
+        ResultHeader header = new ResultHeader(SERVER_PRODUCT);
         List<Connection> connections = new ArrayList<Connection>();
         Location fromx = null, tox = null;
         int connectionNumber = 0;
@@ -347,6 +379,7 @@ public class OpenDataProvider extends AbstractNetworkProvider {
         return response;
     }
 
+    @NotNull
     private JsonObject performRequest(String request, int retries) throws IOException {
         request = request.replace(" ", "+");
         try {

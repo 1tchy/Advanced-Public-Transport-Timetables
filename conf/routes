@@ -27,6 +27,7 @@ GET     /                                       Application.index
 GET     /robots.txt                             staticFile:public/robots.txt
 GET     /timetable/?                            Application.showTimetable
 GET     /autocomplete/?                         Application.autocompleteStation
+GET     /station/?                              Application.getStation
 GET     /faq/?                                  Application.showFAQ
 
 
