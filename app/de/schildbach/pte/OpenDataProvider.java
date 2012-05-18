@@ -316,7 +316,7 @@ public class OpenDataProvider extends AbstractNetworkProvider {
         String prefix;
         final String[] schnellzugStrings = {"EC", "IC", "ICN", "ICE", "CNL", "EN", "THA", "TGV"};
         final String[] busString = {"NBU", "TRO", "BUS", "NTO", "NFB"};
-        if (cat.matches("S\\d*")) { //S-Bahn
+        if (cat.matches("SN?\\d*")) { //S-Bahn
             prefix = "S";
         } else if (cat.equals("IR") | cat.startsWith("R")) { //Regionalzug
             prefix = "R";
