@@ -315,7 +315,7 @@ public class OpenDataProvider extends AbstractNetworkProvider {
         String cat = category.getAsJsonPrimitive("category").getAsString().toUpperCase();
         String prefix;
         final String[] schnellzugStrings = {"EC", "IC", "ICN", "ICE", "CNL", "EN", "THA", "TGV"};
-        final String[] busString = {"NBU", "TRO", "BUS", "NTO", "NFB"};
+        final String[] busString = {"NBU", "TRO", "BUS", "NTO", "NFB", "MID"};
         if (cat.matches("SN?\\d*")) { //S-Bahn
             prefix = "S";
         } else if (cat.equals("IR") | cat.startsWith("R")) { //Regionalzug
