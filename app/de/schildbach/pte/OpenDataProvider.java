@@ -152,7 +152,11 @@ public class OpenDataProvider extends AbstractNetworkProvider {
      */
     public List<Location> autocompleteStations(CharSequence constraint) throws IOException {
         JsonObject response = performRequest("locations?type=station&query=" + constraint);
-        JsonArray responseArray = response.getAsJsonArray("stations");
+        JsonElement responseStationsElement = response.get("stations");
+        if (!responseStationsElement.isJsonArray()) {
+            return new ArrayList<Location>(0);
+        }
+        JsonArray responseArray = (JsonArray) responseStationsElement;
         List<Location> ret = new ArrayList<Location>(responseArray.size());
         for (JsonElement onePossibleResponse : responseArray) {
             if (!(onePossibleResponse instanceof JsonObject)) continue;

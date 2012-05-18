@@ -46,7 +46,7 @@ public class GetStationTest extends UnitTest {
     }
 
     @Test
-    public void getMühlau() throws IOException {
+    public void getMuehlau() throws IOException {
         NearbyStationsResult result = provider.queryNearbyStations(47.230089f, 8.389174f, 300, 0);
         assert result.stations.get(0).name.equals("Mühlau");
     }
