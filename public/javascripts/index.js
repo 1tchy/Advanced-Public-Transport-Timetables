@@ -102,7 +102,9 @@ function autocomplete() {
 }
 
 function localize() {
-    navigator.geolocation.getCurrentPosition(localize_by_position);
+    if($("input").get(0).value=="") {
+        navigator.geolocation.getCurrentPosition(localize_by_position);
+    }
 }
 
 function localize_by_position(position) {
