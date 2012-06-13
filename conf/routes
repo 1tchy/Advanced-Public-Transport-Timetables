@@ -35,4 +35,4 @@ GET     /faq/?                                  Application.showFAQ
 GET     /public/                                staticDir:public
 
 # Catch all
-*       /{controller}/{action}                  {controller}.{action}
+#*       /{controller}/{action}                  {controller}.{action}

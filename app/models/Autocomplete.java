@@ -46,6 +46,7 @@ public class Autocomplete {
      * @return a list of stations
      */
     public static List<String> stations(final String provider, final String term) {
+        if (term == null) return new ArrayList<String>(0);
         //get the autocomplete list for the given provider from the cache
         Map<String, List<String>> providers_autocomplete = autocompleteCache.get(provider);
         Map<String, String> providers_autocomplete_level = autocompleteCacheLevel.get(provider);
