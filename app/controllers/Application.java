@@ -183,6 +183,9 @@ public class Application extends Controller {
         mail.setMsg(mailContent.toString());
         Mail.send(mail);
         if (Math.random() > 0.03) { //show almost always, but prevent from a loop
+            if (!Validation.hasErrors()) {
+                Validation.addError("general", "An internal error occurred. It could not be recovered, please try again later.<br><span style=\"font-size:smaller\"><b>Error:</b> " + throwable.getLocalizedMessage() + "</span>");
+            }
             showInputPageAgain();
         }
     }
