@@ -41,6 +41,7 @@ public class InputChecker {
      * @param defaultReturn if String is neither "true" nor "false", what to return then
      * @return the String ("true"/"false") as its equivalent boolean or the defaultReturn value if it's not clear
      */
+    @SuppressWarnings("SimplifiableIfStatement")
     public static boolean getAndValidateBoolean(String bool, boolean defaultReturn) {
         if (bool == null) {
             return defaultReturn;
@@ -137,7 +138,7 @@ public class InputChecker {
                         final String ErrorBahnanbieter = "ErrorBahnanbieter";
                         if (!shownErrors.contains(ErrorBahnanbieter)) {
                             shownErrors.add(ErrorBahnanbieter);
-                            Validation.addError(fieldName, "Konnte Bahnanbieter-API nicht finden. (" + KnownProvider.get(provider) + ")");
+                            Validation.addError(fieldName, "Konnte Bahnanbieter-API nicht finden. (" + KnownProvider.getName(provider) + ")");
                         }
                     }
                 } catch (IOException e) {
@@ -194,5 +195,41 @@ public class InputChecker {
             return null;
         }
         return provider_object;
+    }
+
+    /**
+     * Strings to a list of booleans
+     *
+     * @param direct     An array of numbers, which are true
+     * @param numEntries The length of the returned list
+     * @return A list of boolean values, having all values specified by direct true, all others false.
+     */
+    public static LinkedList<Boolean> getAndValidateDirects(String[] direct, int numEntries) {
+        LinkedList<Boolean> list = new LinkedList<Boolean>();
+        if (direct == null) {
+            while (numEntries-- > 0) {
+                list.add(false);
+            }
+            return list;
+        } else {
+            int i = 0;
+            for (String s : direct) {
+                if (s.matches("\\d+")) {
+                    int n = Integer.parseInt(s);
+                    while (i < n) {
+                        i++;
+                        list.add(false);
+                    }
+                    i++;
+                    list.add(true);
+                } else {
+                    System.out.println("Value of a direct checkbox is '" + s + "'. Cannot parse to its number.");
+                }
+            }
+            while (list.size() < numEntries) {
+                list.add(false);
+            }
+            return list;
+        }
     }
 }

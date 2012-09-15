@@ -71,9 +71,8 @@ public class KnownProvider {
     private static void initialize() {
         if (initialized) return;
         TimeZone timeZone = TimeZone.getTimeZone("Europe/Zurich");
-        new KnownProvider(new OpenDataProvider("http://transport.opendata.ch/v1/", NetworkId.SBB, timeZone),"SBB","sbb", timeZone);
+        new KnownProvider(new OpenDataProvider("http://transport.opendata.ch/v1/", NetworkId.SBB, timeZone), "SBB", "sbb", timeZone);
         initialized = true;
-//        new KnownProvider(new SbbProvider("MJXZ841ZfsmqqmSymWhBPy5dMNoqoGsHInHbWJQ5PTUZOJ1rLTkn8vVZOZDFfSe"), "SBB", "sbb", TimeZone.getTimeZone("Europe/Zurich"));
     }
 
     /**
@@ -118,7 +117,7 @@ public class KnownProvider {
      * @param provider The object for the provider
      * @return the human readable name of this provider
      */
-    public static String get(NetworkProvider provider) {
+    public static String getName(NetworkProvider provider) {
         initialize();
         for (KnownProvider kp : all.values()) {
             if (kp.provider.equals(provider)) {

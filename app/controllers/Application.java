@@ -44,10 +44,9 @@ public class Application extends Controller {
      * //@param provider the ID of the provider to get the timetable from
      */
     public static void index() {
-        String provider = "sbb";
         Validation.clear();
-        NetworkProvider networkProvider = InputChecker.getAndValidateProvider(provider);
-        if (networkProvider == null) return;
+        NetworkProvider provider = InputChecker.getAndValidateProvider("sbb");
+        if (provider == null) return;
         //prepare all input for the template. No verification done.
         Map<String, String[]> allParams = params.all();
         //if no field is already set, make sure at the beginning two fields are displayed
@@ -60,7 +59,7 @@ public class Application extends Controller {
             renderArgs.put(param.replace("[]", ""), (param.endsWith("[]") ? allParams.get(param) : allParams.get(param)[0]));
         }
         DateFormat now = new SimpleDateFormat("HH:mm");
-        now.setTimeZone(KnownProvider.getTimeZone(networkProvider));
+        now.setTimeZone(KnownProvider.getTimeZone(provider));
         renderArgs.put("now", now.format(new Date()));
         render("Application/index.html");
     }
@@ -83,6 +82,7 @@ public class Application extends Controller {
         List<Location> starts = InputChecker.getAndValidateStations(provider_object, params.getAll("start[]"), "Abfahrtshaltestelle", "start", shownErrors);
         boolean isCrossover = InputChecker.getAndValidateBoolean(params.get("crossover"), true);
         List<Location> stops = InputChecker.getAndValidateStations(provider_object, params.getAll("stop[]"), "Zielhaltestelle", "stop", shownErrors);
+        LinkedList<Boolean> direct = InputChecker.getAndValidateDirects(params.getAll("direkt[]"), Math.max(starts.size(), stops.size()));
         if (!isCrossover && (starts.size() != stops.size())) {
             Validation.addError("crossover", "Wenn nicht alle Verbindungen von <b>allen</b> Abfahrtshaltestellen zu <b>allen</b> Zielhaltestellen gesucht werden, müssen gleich viele Abfahrts- wie Zielhaltestellen angegeben werden.");
         }
@@ -99,7 +99,7 @@ public class Application extends Controller {
         } else {
             //If everything is fine, create the desired timetables and print them out
             try {
-                renderArgs.put("connections", ComplexRequests.getMultipleTimetables(provider_object, starts, isCrossover, stops, datetime, isTimeAsDeparture));
+                renderArgs.put("connections", ComplexRequests.getMultipleTimetables(provider_object, starts, isCrossover, stops, direct, datetime, isTimeAsDeparture));
             } catch (ComplexRequests.ServerNotReachableException e) {
                 Validation.addError("general", e.getLocalizedMessage());
                 showInputPageAgain();

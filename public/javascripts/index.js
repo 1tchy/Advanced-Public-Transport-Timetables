@@ -46,9 +46,18 @@ function addField(ofType) {
     document.getElementById(ofType).appendChild(field);
     autocomplete();
 }
+function addDirectCheck(number) {
+    field = document.createElement("input");
+    field.setAttribute("class", "direkt");
+    field.setAttribute("name", "direkt[]");
+    field.setAttribute("type", "checkbox");
+    field.setAttribute("value",number);
+    document.getElementById("direkt").appendChild(field);
+}
 
 function check(whatToCheck) {
     var needAlignement = document.getElementById("crossoverNo").checked;
+    var direkt = document.getElementById("direkt").getElementsByTagName("input");
     if (needAlignement) {
         var starts = document.getElementById("start").getElementsByTagName("input");
         var stops = document.getElementById("stop").getElementsByTagName("input");
@@ -67,6 +76,7 @@ function check(whatToCheck) {
                 if (starts[ii].value == "" && stops[ii].value == "" && starts[ii + 1].value == "" && stops[ii + 1].value == "" && document.getElementById("start").getElementsByTagName("input").length > 2) {
                     document.getElementById("start").removeChild(starts[ii]);
                     document.getElementById("stop").removeChild(stops[ii]);
+                    document.getElementById("direkt").removeChild(direkt[ii]);
                     doubleEmptyFieldPresent = true;
                 }
             }
@@ -74,6 +84,14 @@ function check(whatToCheck) {
                 addField("start");
                 addField("stop");
             }
+        }
+        if(direkt.length<stops.length) {
+            for(var d=direkt.length;d<stops.length;d++) {
+                addDirectCheck(d);
+            }
+        }
+        for(d=1;d<direkt.length;d++) {
+            direkt[d].style.visibility='visible';
         }
     } else {
         var inputs = document.getElementById(whatToCheck).getElementsByTagName("input");
@@ -88,6 +106,9 @@ function check(whatToCheck) {
         }
         if (emptyField == -1) {
             addField(whatToCheck);
+        }
+        for(d=1;d<direkt.length;d++) {
+            direkt[d].style.visibility='hidden';
         }
     }
     changeImage(false);

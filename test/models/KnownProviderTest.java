@@ -37,7 +37,7 @@ public class KnownProviderTest extends UnitTest {
     public void get() {
         NetworkProvider networkProvider = KnownProvider.get("sbb");
         assert networkProvider != null : "KnownProvider.get(\"sbb\") should return a NetworkProvider.";
-        String id = KnownProvider.get(networkProvider);
+        String id = KnownProvider.getName(networkProvider);
         assert id.equals("SBB") : "KnownProvider.get(networkProvider of the sbb) should return 'SBB' but returned " + id + ".";
     }
 

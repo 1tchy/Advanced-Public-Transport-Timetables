@@ -22,52 +22,62 @@
 #{/set}
 #{set "moreNavigation"}
 <a href="@{Application.index()}?${request.querystring}">Abfrage ändern</a>
-<a href="@{Application.showTimetable()}?#{my.remove '&amp;time=\\+?[0-9]{0,2}%3A[0-9]{0,2}\\+*'}${request.querystring}#{/my.remove}">...zu
-    aktueller Uhrzeit</a>
+<a href="@{Application.showTimetable()}?#{my.remove '&amp;time=\\+?[0-9]{0,2}%3A[0-9]{0,2}\\+*'}${request.querystring}#{/my.remove}">...zur
+    aktuellen Uhrzeit</a>
 #{/set}
 
 <h2>Verbindungen von ${starts?.join("&#44 ").replace(",","").raw()}
     nach ${stops?.join("&#44 ").replace(",","").raw()}</h2>
 <table id="fahrplantabelle" border="0" style="width:auto;">
-#{list items:connections, as:'connection'}
+    #{list items:connections, as:'connection'}
     <tr class="${connection_parity}">
         <td>
-        #{my.parseTime connection?.getFirstTripDepartureTime()/} - #{my.parseTime connection?.getLastTripArrivalTime()/}
+            #{my.parseTime connection?.getFirstTripDepartureTime()/} - #{my.parseTime
+            connection?.getLastTripArrivalTime()/}
         </td>
         <td>
             <span style="color:silver;">(#{my.getDuration dt:connection?.getFirstTripDepartureTime(), at:connection?.getLastTripArrivalTime()/}
                 )</span>
         </td>
         <td id="from_${connection_index}">
-        ${connection?.from?.name}
+            ${connection?.from?.name}
             #{my.isit connection?.parts[0], a:'Trip'}#{if connection?.parts[0]?.departurePosition}<span
-                    style="color:silver;">(Gleis ${connection?.parts[0]?.departurePosition})</span>#{/if}#{/my.isit}
+                style="color:silver;">(Gleis ${connection?.parts[0]?.departurePosition})</span>#{/if}#{/my.isit}
         </td>
         <td id="arr_${connection_index}">&rarr;</td>
         <td id="to_${connection_index}">
-        ${connection?.to?.name}
+            ${connection?.to?.name}
             #{my.isit connection?.parts[connection?.parts?.size-1], a:'Trip'}#{if
             connection?.parts[connection?.parts?.size-1]?.arrivalPosition}<span
-                        style="color:silver;">(Gleis ${connection?.parts[connection?.parts?.size-1]?.arrivalPosition}
+                style="color:silver;">(Gleis ${connection?.parts[connection?.parts?.size-1]?.arrivalPosition}
                     )</span>#{/if}#{/my.isit}
         </td>
         <td style="width:99%; text-align:center;">
             #{my.showDetails connection?.parts}
-                <a href="javascript:void(0);" onclick="showDetails('${connection_index}');"
-                   id="showDetails_${connection_index}">&dArr; Umsteigen <span
-                        style="color: silver;">(#{my.getAmountOfChanges connection.parts, text:"x", pl:"x"/})</span></a>
-                <a href="javascript:void(0);" onclick="hideDetails('${connection_index}');"
-                   id="hideDetails_${connection_index}" style="display: none;">&uArr; Umsteigen <span
-                        style="color: silver;">(#{my.getAmountOfChanges connection.parts, text:"x", pl:"x"/})</span></a>
+            <a href="javascript:void(0);" onclick="showDetails('${connection_index}');"
+               id="showDetails_${connection_index}">&dArr; Umsteigen <span
+                    style="color: silver;">(#{my.getAmountOfChanges connection.parts, text:"x", pl:"x"/})</span></a>
+            <a href="javascript:void(0);" onclick="hideDetails('${connection_index}');"
+               id="hideDetails_${connection_index}" style="display: none;">&uArr; Umsteigen <span
+                    style="color: silver;">(#{my.getAmountOfChanges connection.parts, text:"x", pl:"x"/})</span></a>
             #{/my.showDetails}
         </td>
     </tr>
     <tr id="details_${connection_index}" style="display:none;" class="${connection_parity}">
         <td colspan="6" align="center">
             #{my.showDetails connection?.parts}
-                #{my.getVias connection.parts/}
+            #{my.getVias connection.parts/}
             #{/my.showDetails}
         </td>
     </tr>
-#{/list}
+    #{/list}
 </table>
+#{ifErrors}
+<ul class="fplnIgnoreMessage">
+    #{errors}
+    <li>
+        ${error.raw()}
+    </li>
+    #{/errors}
+</ul>
+#{/ifErrors}

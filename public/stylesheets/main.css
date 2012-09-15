@@ -112,8 +112,8 @@ a, .likealink {
     line-height: 1 !important;
 }
 
-input.autocompleteStation {
-    width: 160px;
+input.autocompleteStation, input.direkt {
+    width: 152px;
 }
 
 #mixstraight {
@@ -123,4 +123,9 @@ input.autocompleteStation {
 
 label {
     margin-right: 5px;
+}
+
+.fplnIgnoreMessage {
+    color: silver;
+    font-size:smaller;
 }

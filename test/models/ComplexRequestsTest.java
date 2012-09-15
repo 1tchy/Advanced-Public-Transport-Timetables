@@ -69,13 +69,17 @@ public class ComplexRequestsTest extends UnitTest {
         ArrayList<HashSet<Location>> tos = new ArrayList<HashSet<Location>>(2);
         tos.add(oneLocation2);
         tos.add(threeLocations2);
+        LinkedList<Boolean> directs = new LinkedList<Boolean>();
+        directs.add(false);
+        directs.add(false);
+        directs.add(false);
         for (boolean crossover : new boolean[]{true, false}) {
             for (boolean asDeparture : new boolean[]{true, false}) {
                 for (HashSet<Location> from : froms) {
                     for (HashSet<Location> to : tos) {
                         if (crossover || (from.size() == to.size())) {
                             try {
-                                multipleConnections.add(ComplexRequests.getMultipleTimetables(sbb, from, crossover, to, new Date(), asDeparture));
+                                multipleConnections.add(ComplexRequests.getMultipleTimetables(sbb, from, crossover, to, directs, new Date(), asDeparture));
                             } catch (ComplexRequests.ServerNotReachableException e) {
                                 e.printStackTrace();
                             }

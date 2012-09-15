@@ -53,7 +53,7 @@ public class Autocomplete {
         //create a list if none exists
         if (providers_autocomplete == null || providers_autocomplete_level == null) {
             if (KnownProvider.get(provider) == null) {
-                System.out.println("Autocompleteanfrage konnte für Provider '" + provider + "' nicht durchgeführt werden. Grund: Unbekannter Provider.");
+                System.out.println("Autocompleteanfrage konnte f√ºr Provider '" + provider + "' nicht durchgef√ºhrt werden. Grund: Unbekannter Provider.");
                 return new ArrayList<String>(0);
             }
             providers_autocomplete = new HashMap<String, List<String>>();
@@ -93,7 +93,7 @@ public class Autocomplete {
                     providers_autocomplete.put(term, autocomplete_list);
                     providers_autocomplete_level.put(term, join(mostPopular));
                 } catch (IOException e) {
-                    System.out.println("Konnte vom Provider " + p.toString() + " keine Autoverfollständigung von Station (" + term + ") abfragen.");
+                    System.out.println("Konnte vom Provider " + p.toString() + " keine Autovervollst√§ndigung von Station (" + term + ") abfragen.");
                     e.printStackTrace();
                 }
             } else {
