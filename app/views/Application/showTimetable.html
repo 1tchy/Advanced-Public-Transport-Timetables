@@ -80,4 +80,9 @@
     </li>
     #{/errors}
 </ul>
+#{set 'flexible'}<a href="@{Application.showTimetable()}?${request.querystring}&flexible=true"
+                    class="fplnIgnoreMessage">Ignorierte
+    Verbindungen auch anzeigen</a>#{/set}
+#{ifError 'from'}${flexible.raw()}#{/ifError}
+#{else}#{ifError 'to'}${flexible.raw()}#{/ifError}#{/else}
 #{/ifErrors}

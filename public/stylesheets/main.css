@@ -129,3 +129,8 @@ label {
     color: silver;
     font-size:smaller;
 }
+
+.optional {
+    font-size: smaller;
+    color:#333;
+}

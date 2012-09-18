@@ -42,9 +42,10 @@ public class ComplexRequests {
      * @param directs         if the connection between start and stop must be direct
      * @param datetime        the time to for when to look up
      * @param timeAsDeparture is this time assumed as the departure-time (and not the arrival)
+     * @param flexible        if the match of the stations can be flexible or has to be exact (Luzern matches also Luzern, Bahnhof)
      * @return a list of connections for the given request arguments (will not be null)
      */
-    public static Set<Connection> getMultipleTimetables(NetworkProvider provider, Collection<Location> starts, boolean crossover, Collection<Location> stops, LinkedList<Boolean> directs, Date datetime, boolean timeAsDeparture) throws ServerNotReachableException {
+    public static Set<Connection> getMultipleTimetables(NetworkProvider provider, Collection<Location> starts, boolean crossover, Collection<Location> stops, LinkedList<Boolean> directs, Date datetime, boolean timeAsDeparture, boolean flexible) throws ServerNotReachableException {
         //assures, that none-crossover-requests have the same amount of starts and stops
         assert crossover || starts.size() == stops.size() : "Anzahl Abfahrtshaltestellen und Zielhaltestellen bei der Nicht-Crossover Verbindung müssen gleich sein.";
 
@@ -69,7 +70,7 @@ public class ComplexRequests {
                     //try to get a set of connections for one combination of starts/stops
                     QueryConnectionsResult result;
                     if (provider instanceof OpenDataProvider) {
-                        result = ((OpenDataProvider) provider).queryConnections(aStart, null, aStop, datetime, timeAsDeparture, null, direct);
+                        result = ((OpenDataProvider) provider).queryConnections(aStart, null, aStop, datetime, timeAsDeparture, null, direct, flexible);
                     } else {
                         result = provider.queryConnections(aStart, null, aStop, datetime, timeAsDeparture, null, NetworkProvider.WalkSpeed.FAST, NetworkProvider.Accessibility.NEUTRAL);
                     }

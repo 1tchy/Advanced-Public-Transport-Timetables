@@ -79,7 +79,7 @@ public class ComplexRequestsTest extends UnitTest {
                     for (HashSet<Location> to : tos) {
                         if (crossover || (from.size() == to.size())) {
                             try {
-                                multipleConnections.add(ComplexRequests.getMultipleTimetables(sbb, from, crossover, to, directs, new Date(), asDeparture));
+                                multipleConnections.add(ComplexRequests.getMultipleTimetables(sbb, from, crossover, to, directs, new Date(), asDeparture, true));
                             } catch (ComplexRequests.ServerNotReachableException e) {
                                 e.printStackTrace();
                             }

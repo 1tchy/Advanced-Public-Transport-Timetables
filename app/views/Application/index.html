@@ -89,7 +89,7 @@
                 </div>
             </td>
         </tr>
-        <tr>
+        <tr class="optional">
             <td>
                 <label for="newstop">Ohne&nbsp;Umsteigen:</label>
             </td>
@@ -113,9 +113,18 @@
                        value="#{if time?.size()>0}${time}#{/if}#{else}${now}#{/else}"
                        maxlength="5" style="width:50px;"/>
                 <input id="timeAsDeparture" type="radio" name="timeAsDeparture" value="true"#{if
-                timeAsDeparture!='false'}checked#{/if}/><label for="timeAsDeparture"> als Abfahrtszeit</label>
+                timeAsDeparture!='false'} checked#{/if}/><label for="timeAsDeparture"> als Abfahrtszeit</label>
                 <input id="timeAsArrival" type="radio" name="timeAsDeparture" value="false"#{if
-                timeAsDeparture=='false'}checked#{/if}/><label for="timeAsArrival"> als Ankunftszeit</label>
+                timeAsDeparture=='false'} checked#{/if}/><label for="timeAsArrival"> als Ankunftszeit</label>
+            </td>
+        </tr>
+        <tr class="optional">
+            <td colspan="2">
+                <span title="z.B. bei &quot;Luzern&quot; auch &quot;Luzern, Bahnhof&quot; benutzen">
+                    <input id="flexible" type="checkbox" name="flexible" value="true"#{if flexible=='true'} checked#{/if}>
+                    <label for="flexible">Verschiedene Haltestellenbezeichnungen an einem Ort als eine einzige
+                        Haltestelle betrachten</label>
+                </span>
             </td>
         </tr>
         <tr>

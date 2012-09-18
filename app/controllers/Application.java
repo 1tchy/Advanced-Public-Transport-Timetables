@@ -85,6 +85,7 @@ public class Application extends Controller {
         if (!isCrossover && (starts.size() != stops.size())) {
             Validation.addError("crossover", "Wenn nicht alle Verbindungen von <b>allen</b> Abfahrtshaltestellen zu <b>allen</b> Zielhaltestellen gesucht werden, müssen gleich viele Abfahrts- wie Zielhaltestellen angegeben werden.");
         }
+        boolean flexible = InputChecker.getAndValidateBoolean(params.get("flexible"), false);
         TimeZone timeZone = KnownProvider.getTimeZone(provider_object);
         Date datetime = InputChecker.getAndValidateTime(params.get("time"), "time", timeZone);
         if (datetime == null) {
@@ -98,7 +99,7 @@ public class Application extends Controller {
         } else {
             //If everything is fine, create the desired timetables and print them out
             try {
-                renderArgs.put("connections", ComplexRequests.getMultipleTimetables(provider_object, starts, isCrossover, stops, direct, datetime, isTimeAsDeparture));
+                renderArgs.put("connections", ComplexRequests.getMultipleTimetables(provider_object, starts, isCrossover, stops, direct, datetime, isTimeAsDeparture, flexible));
             } catch (ComplexRequests.ServerNotReachableException e) {
                 Validation.addError("general", e.getLocalizedMessage());
                 showInputPageAgain();
