@@ -25,6 +25,7 @@ import models.Autocomplete;
 import models.ComplexRequests;
 import models.InputChecker;
 import models.KnownProvider;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import play.data.validation.Validation;
@@ -48,15 +49,13 @@ public class Application extends Controller {
         NetworkProvider provider = InputChecker.getAndValidateProvider("sbb");
         if (provider == null) return;
         //prepare all input for the template. No verification done.
-        Map<String, String[]> allParams = params.all();
-        //if no field is already set, make sure at the beginning two fields are displayed
-        if (allParams.size() <= 1) {
-            allParams.put("start[]", new String[]{null});
-            allParams.put("stop[]", new String[]{null});
+        putAllParamsToRenderArgs();
+        //if no start/stop field is already set, make sure that anyhow two fields are displayed
+        if (renderArgs.get("start") == null) {
+            renderArgs.put("start", new String[]{null});
         }
-        //display all fields
-        for (String param : allParams.keySet()) {
-            renderArgs.put(param.replace("[]", ""), (param.endsWith("[]") ? allParams.get(param) : allParams.get(param)[0]));
+        if (renderArgs.get("stop") == null) {
+            renderArgs.put("stop", new String[]{null});
         }
         DateFormat now = new SimpleDateFormat("HH:mm");
         now.setTimeZone(KnownProvider.getTimeZone(provider));
@@ -79,10 +78,10 @@ public class Application extends Controller {
         }
         //checks the given parameters and creates correct Objects. On error, create error output.
         Set<String> shownErrors = new HashSet<String>(1);
-        List<Location> starts = InputChecker.getAndValidateStations(provider_object, params.getAll("start[]"), "Abfahrtshaltestelle", "start", shownErrors);
+        List<Location> starts = InputChecker.getAndValidateStations(provider_object, getArrayParams("start"), "Abfahrtshaltestelle", "start", shownErrors);
         boolean isCrossover = InputChecker.getAndValidateBoolean(params.get("crossover"), true);
-        List<Location> stops = InputChecker.getAndValidateStations(provider_object, params.getAll("stop[]"), "Zielhaltestelle", "stop", shownErrors);
-        LinkedList<Boolean> direct = InputChecker.getAndValidateDirects(params.getAll("direkt[]"), Math.max(starts.size(), stops.size()));
+        List<Location> stops = InputChecker.getAndValidateStations(provider_object, getArrayParams("stop"), "Zielhaltestelle", "stop", shownErrors);
+        LinkedList<Boolean> direct = InputChecker.getAndValidateDirects(getArrayParams("direkt"), Math.max(starts.size(), stops.size()));
         if (!isCrossover && (starts.size() != stops.size())) {
             Validation.addError("crossover", "Wenn nicht alle Verbindungen von <b>allen</b> Abfahrtshaltestellen zu <b>allen</b> Zielhaltestellen gesucht werden, müssen gleich viele Abfahrts- wie Zielhaltestellen angegeben werden.");
         }
@@ -113,12 +112,44 @@ public class Application extends Controller {
     }
 
     private static void showInputPageAgain() {
-        Map<String, String[]> allParams = params.all();
-        for (String param : allParams.keySet()) {
-            renderArgs.put(param.replace("[]", ""), (param.endsWith("[]") ? allParams.get(param) : allParams.get(param)[0]));
-        }
+        putAllParamsToRenderArgs();
         Validation.keep();
         render("Application/index.html");
+    }
+
+    /**
+     * Reads all Parameter from the URLs GET-List and puts the value(s) to the renderArgs
+     */
+    private static void putAllParamsToRenderArgs() {
+        for (String param : params.all().keySet()) {
+            if (param.matches(".*\\[\\d*\\]")) {
+                String newKey = param.replaceAll("\\[\\d*\\]", "");
+                renderArgs.put(newKey, getArrayParams(newKey));
+            } else {
+                renderArgs.put(param, params.get(param));
+            }
+        }
+    }
+
+    /**
+     * Gets a parameter of the URL that is an array.
+     *
+     * @param name The parameters name to get all values for
+     * @return All parameters
+     */
+    private static String[] getArrayParams(String name) {
+        //add all params with the format "name[]", "name[]", ...
+        String[] ret = params.getAll(name + "[]");
+        //add all params with the format "name[0]", "name[1]", ...
+        int i = 0;
+        while (params._contains(name + "[" + i + "]")) {
+            String[] additionalValues = params.getAll(name + "[" + i + "]");
+            if (!(additionalValues.length == 1 && additionalValues[0] == null)) {
+                ret = (String[]) ArrayUtils.addAll(ret, additionalValues);
+            }
+            i++;
+        }
+        return ret;
     }
 
     /**
