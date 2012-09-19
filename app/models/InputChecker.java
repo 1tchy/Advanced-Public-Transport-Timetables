@@ -72,6 +72,9 @@ public class InputChecker {
         //fix issues with only hour given
         if (time.length() == 1) time = "0" + time + ":00";
         if (time.length() == 2) time = time + ":00";
+        //fix issue with missing hours and minutes separator like "815" or "0815" (to "08:15")
+        if (time.matches("\\d{3,4}")) time = time.replaceFirst("(\\d{1,2})(\\d{2})", "$1:$2");
+        //fix issue with missing minutes like "08:" (to "08:00")
         if (time.length() == 3 && time.matches("\\d\\d[^\\d]")) time = time + "00";
         //fix issue with hours like "8:15" (to "08:15")
         if (time.length() == 4) time = "0" + time;
