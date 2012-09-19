@@ -138,7 +138,7 @@ public class InputChecker {
                         final String ErrorBahnanbieter = "ErrorBahnanbieter";
                         if (!shownErrors.contains(ErrorBahnanbieter)) {
                             shownErrors.add(ErrorBahnanbieter);
-                            Validation.addError(fieldName, "Konnte Bahnanbieter-API nicht finden. (" + KnownProvider.getName(provider) + ")");
+                            Validation.addError(fieldName, "Verbindung zur Fahrplandatenbank (" + KnownProvider.getName(provider) + ") konnte nich hergestellt werden. Bitte sp&auml;ter nochmals versuchen.");
                         }
                     }
                 } catch (IOException e) {
