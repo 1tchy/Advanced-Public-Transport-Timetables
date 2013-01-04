@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, L. Murer.
+ * Copyright 2013, L. Murer.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,18 @@
  * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
 
-package models;
+package test.models;
 
 import de.schildbach.pte.dto.Connection;
+import models.FahrplanByDeparture;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import play.test.UnitTest;
 
 import java.util.Date;
 
+import static org.fest.assertions.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -35,18 +37,31 @@ import static org.mockito.Mockito.when;
  * Time: 09:44
  */
 @RunWith(PowerMockRunner.class)
-public class FahrplanByDepartureTest extends UnitTest {
+@PrepareForTest(Connection.class)
+public class FahrplanByDepartureTest {
     @Test
     public void test1() {
         Connection c1 = mock(Connection.class);
-        when(c1.getFirstDepartureTime()).thenReturn(new Date(1322038500));
+        when(c1.getFirstTripDepartureTime()).thenReturn(new Date(1322038500));
         Connection c2a = mock(Connection.class);
-        when(c2a.getFirstDepartureTime()).thenReturn(new Date(1322039999));
+        when(c2a.getFirstTripDepartureTime()).thenReturn(new Date(1322039999));
         Connection c2b = mock(Connection.class);
-        when(c2b.getFirstDepartureTime()).thenReturn(new Date(1322039999));
+        when(c2b.getFirstTripDepartureTime()).thenReturn(new Date(1322039999));
         FahrplanByDeparture comparator = new FahrplanByDeparture();
-        assert comparator.compare(c1, c2a) < 0 : "FahrplanByDeparture should be able to compare two Connections only by their departureTime. comparator.compare(c1, c2a) returned " + comparator.compare(c1, c2a);
-        assert comparator.compare(c2a, c1) > 0 : "FahrplanByDeparture should be able to compare two Connections only by their departureTime. comparator.compare(c2a,c1) returned " + comparator.compare(c2a, c1);
-        assert comparator.compare(c2a, c2b) == 0 : "FahrplanByDeparture should be able to compare two Connections only by their departureTime. comparator.compare(c2a,c2b) returned " + comparator.compare(c2a, c2b);
+        assertThat(comparator.compare(c1, c2a)).describedAs("FahrplanByDeparture should be able to compare two Connections only by their departureTime. comparator.compare(c1, c2a) returned " + comparator.compare(c1, c2a)).isLessThan(0);
+        assertThat(comparator.compare(c2a, c1)).describedAs("FahrplanByDeparture should be able to compare two Connections only by their departureTime. comparator.compare(c2a,c1) returned " + comparator.compare(c2a, c1)).isGreaterThan(0);
+        assertThat(comparator.compare(c2a, c2b)).describedAs("FahrplanByDeparture should be able to compare two Connections only by their departureTime. comparator.compare(c2a,c2b) returned " + comparator.compare(c2a, c2b)).isEqualTo(0);
+    }
+
+    @Test
+    public void testFirstIsNull() {
+        //setup
+        Connection c1=mock(Connection.class);
+        when(c1.getFirstTripDepartureTime()).thenReturn(null);
+        Connection c2=mock(Connection.class);
+        when(c2.getFirstTripDepartureTime()).thenReturn(new Date(132200000));
+        FahrplanByDeparture comparator = new FahrplanByDeparture();
+        //test
+        assertThat(comparator.compare(c1,c2)).describedAs("The first is not set").isLessThan(0);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, L. Murer.
+ * Copyright 2013, L. Murer.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,9 @@
 package models;
 
 import de.schildbach.pte.dto.Location;
+import play.Logger;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 /**
@@ -32,9 +34,9 @@ public class PopularLocation implements Comparable<PopularLocation> {
     //The popularity this location has (the higher the better)
     private int popularity = 0;
     //The location this represents
-    private Location location;
+    private final Location location;
     //all popular Locations by Provider and by ID (First key: ID of the Provider; second Key: ID of the location
-    private static HashMap<String, Map<Integer, PopularLocation>> byID = new HashMap<String, Map<Integer, PopularLocation>>();
+    private static final HashMap<String, Map<Integer, PopularLocation>> byID = new HashMap<>();
 
     /**
      * @param provider The ID of the provider this location belongs to
@@ -65,14 +67,14 @@ public class PopularLocation implements Comparable<PopularLocation> {
      * @param location a location to find the PopularLocation-Object for
      * @return a new or an already generated PopularLocation-Object for the given location
      */
-    private static PopularLocation get(String provider, Location location) {
+    private static PopularLocation get(@NotNull String provider, @NotNull Location location) {
         Map<Integer, PopularLocation> providers_list = getProvidersList(provider);
         PopularLocation pl = providers_list.get(location.id);
         if (pl == null) {
             pl = new PopularLocation(provider, location);
         }
         if (!pl.location.name.equals(location.name)) {
-            System.out.println("Multiple locations with id " + location.id + " (" + pl.location.name + " and " + location.name + ")");
+            Logger.warn("Multiple locations with id " + location.id + " (" + pl.location.name + " and " + location.name + ")");
         }
         return pl;
     }
@@ -86,7 +88,7 @@ public class PopularLocation implements Comparable<PopularLocation> {
     private static Map<Integer, PopularLocation> getProvidersList(String provider) {
         Map<Integer, PopularLocation> providers_list = byID.get(provider);
         if (providers_list == null) {
-            providers_list = new HashMap<Integer, PopularLocation>();
+            providers_list = new HashMap<>();
             byID.put(provider, providers_list);
         }
         return providers_list;
@@ -102,16 +104,16 @@ public class PopularLocation implements Comparable<PopularLocation> {
      */
     public static List<String> getMostPopularLike(String provider, String term, int maximum) {
         if (term == null) {
-            return new ArrayList<String>(0);
+            return new ArrayList<>(0);
         }
-        TreeSet<PopularLocation> top = new TreeSet<PopularLocation>();
+        TreeSet<PopularLocation> top = new TreeSet<>();
         for (PopularLocation pl : getProvidersList(provider).values()) {
             if (pl.location.name.contains(term)) {
                 top.add(pl);
             }
         }
         int values = Math.min(maximum, top.size());
-        List<String> ret = new ArrayList<String>(values);
+        List<String> ret = new ArrayList<>(values);
         Iterator<PopularLocation> popularLocationIterator = top.iterator();
         while (values-- > 0) {
             ret.add(popularLocationIterator.next().location.name);
@@ -142,7 +144,9 @@ public class PopularLocation implements Comparable<PopularLocation> {
      */
     public static void increasePopularities(String provider, Collection<Location> ls) {
         for (Location l : ls) {
-            get(provider, l).increasePopularity();
+            if (l != null) {
+                get(provider, l).increasePopularity();
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, L. Murer.
+ * Copyright 2013, L. Murer.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,14 +12,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
+
 package models;
 
 import de.schildbach.pte.NetworkId;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.OpenDataProvider;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,9 +57,9 @@ public class KnownProvider {
     /**
      * the list of all known providers by its id
      */
-    private static Map<String, KnownProvider> all = new HashMap<String, KnownProvider>();
+    private static final Map<String, KnownProvider> all = new HashMap<>();
 
-    private KnownProvider(NetworkProvider provider, String humanName, String id, TimeZone timeZone) {
+    private KnownProvider(NetworkProvider provider, @SuppressWarnings("SameParameterValue") String humanName, @SuppressWarnings("SameParameterValue") String id, TimeZone timeZone) {
         this.provider = provider;
         this.humanName = humanName;
         this.id = id.toLowerCase();
@@ -105,7 +107,7 @@ public class KnownProvider {
      * @param id The ID of a provider (must be lowercase)
      * @return a known providers or null
      */
-    public static KnownProvider getById(String id) {
+    public static KnownProvider getById(@SuppressWarnings("SameParameterValue") String id) {
         assert id.toLowerCase().equals(id) : "The ID of a provider must be lowercase!";
         initialize();
         return all.get(id);
@@ -149,6 +151,7 @@ public class KnownProvider {
      * @param provider The object for the provider
      * @return the timezone of this provider
      */
+    @Nullable
     public static TimeZone getTimeZone(NetworkProvider provider) {
         initialize();
         for (KnownProvider kp : all.values()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, L. Murer.
+ * Copyright 2013, L. Murer.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,145 +12,116 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
 
-package models;
+package test.models;
 
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Connection;
-import de.schildbach.pte.dto.Location;
-import org.junit.Before;
+import models.ComplexRequests;
+import models.KnownProvider;
+import models.Request;
 import org.junit.Test;
-import play.test.UnitTest;
 
-import java.io.IOException;
 import java.util.*;
 
-public class ComplexRequestsTest extends UnitTest {
-    /**
-     * cached return values for getMultipleTimetables
-     * access with the extra-method (multipleConnection(...))
-     */
-    private List<Set<Connection>> multipleConnections;
+import static org.fest.assertions.Assertions.assertThat;
+
+public class ComplexRequestsTest {
 
     /**
-     * Contains exception errors that happened during setup
+     * Tests all possible complex combinations
      */
-    private Exception setUpExceptions = null;
-
-    /**
-     * Prepares some multipleConnections to perform tests with
-     */
-    @Before
-    public void setUp() {
-
-        multipleConnections = new ArrayList<Set<Connection>>();
-        final NetworkProvider sbb = KnownProvider.get("sbb");
-        HashSet<Location> oneLocation1 = new HashSet<Location>(1);
-        HashSet<Location> oneLocation2 = new HashSet<Location>(1);
-        HashSet<Location> threeLocations1 = new HashSet<Location>(3);
-        HashSet<Location> threeLocations2 = new HashSet<Location>(3);
-        try {
-            oneLocation1.add(sbb.autocompleteStations("Bern").get(0));
-            oneLocation2.add(sbb.autocompleteStations("Zug").get(0));
-            threeLocations1.add(sbb.autocompleteStations("Luzern").get(0));
-            threeLocations1.add(sbb.autocompleteStations("Basel").get(0));
-            threeLocations1.add(sbb.autocompleteStations("Zürich HB").get(0));
-            threeLocations2.add(sbb.autocompleteStations("Chur").get(0));
-            threeLocations2.add(sbb.autocompleteStations("Olten").get(0));
-            threeLocations2.add(sbb.autocompleteStations("Lugano").get(0));
-        } catch (IOException e) {
-            setUpExceptions = e;
-        }
-        ArrayList<HashSet<Location>> froms = new ArrayList<HashSet<Location>>(2);
-        froms.add(oneLocation1);
-        froms.add(threeLocations1);
-        ArrayList<HashSet<Location>> tos = new ArrayList<HashSet<Location>>(2);
-        tos.add(oneLocation2);
-        tos.add(threeLocations2);
-        LinkedList<Boolean> directs = new LinkedList<Boolean>();
-        directs.add(false);
-        directs.add(false);
-        directs.add(false);
-        for (boolean crossover : new boolean[]{true, false}) {
-            for (boolean asDeparture : new boolean[]{true, false}) {
-                for (HashSet<Location> from : froms) {
-                    for (HashSet<Location> to : tos) {
-                        if (crossover || (from.size() == to.size())) {
-                            try {
-                                multipleConnections.add(ComplexRequests.getMultipleTimetables(sbb, from, crossover, to, directs, new Date(), asDeparture, true));
-                            } catch (ComplexRequests.ServerNotReachableException e) {
-                                e.printStackTrace();
-                            }
-                        } else {
-                            multipleConnections.add(null);
-                        }
-                    }
-                }
-            }
-        }
-        System.out.println();
-    }
-
-    /**
-     * Gets one of the set up connections by parameters
-     *
-     * @param crossover   by crossover connection?
-     * @param asDeparture by time as departure?
-     * @param fromOne     with a single start location?
-     * @param toOne       with a single destination location?
-     * @return the return of getMultipleTimetables with items with these parameters
-     */
-    private Set<Connection> multipleConnection(boolean crossover, boolean asDeparture, boolean fromOne, boolean toOne) {
-        final int total = multipleConnections.size();
-        int i = 0;
-        if (!crossover) i += total / 2;
-        if (!asDeparture) i += total / 4;
-        if (!fromOne) i += 2;
-        if (!toOne) i += 1;
-        return multipleConnections.get(i);
-    }
-
     @Test
-    public void test1() {
-        assertNull(setUpExceptions);
-        final int amountOfOneConnectionMin = 4;
+    public void theComplexRequestTest() throws ComplexRequests.ServerNotReachableException {
+        //Preparations
+        Set<String> oneFromLocation = new HashSet<>(1);
+        Set<String> oneToLocation = new HashSet<>(1);
+        Set<String> threeFromLocations = new HashSet<>(3);
+        Set<String> threeToLocations = new HashSet<>(3);
+        oneFromLocation.add("Arth-Goldau");
+        oneToLocation.add("Zug");
+        threeFromLocations.add("Luzern");
+        threeFromLocations.add("Basel");
+        threeFromLocations.add("Zürich HB");
+        threeToLocations.add("Chur");
+        threeToLocations.add("Olten");
+        threeToLocations.add("Lugano");
+        final boolean CROSSOVER = true;
+        final boolean ONE_TO_ONE = false;
+        final boolean AS_ARRIVAL = false;
+        final boolean AS_DEPARTURE = true;
+        //Tests
+        doTest(CROSSOVER, AS_ARRIVAL, oneFromLocation, oneToLocation);
+        doTest(ONE_TO_ONE, AS_ARRIVAL, oneFromLocation, oneToLocation);
+        doTest(CROSSOVER, AS_DEPARTURE, threeFromLocations, threeToLocations);
+        doTest(ONE_TO_ONE, AS_DEPARTURE, threeFromLocations, threeToLocations);
+        doTest(CROSSOVER, AS_DEPARTURE, oneFromLocation, threeToLocations);
+    }
+
+    private static void doTest(boolean crossover, boolean asDeparture, Set<String> from, Set<String> to) throws ComplexRequests.ServerNotReachableException {
+        //Start the request for the given parameters
+        final List<Connection> cs = ComplexRequests.getMultipleTimetables(prepareRequest(from, crossover, to, asDeparture), new ArrayList<String>());
+        //Validate the request for the given parameters
+        validateRequest(from, crossover, to, asDeparture, cs);
+    }
+
+    private static void validateRequest(Set<String> froms, boolean crossover, Set<String> tos, boolean asDeparture, List<Connection> result) {
+        final int amountOfOneConnectionMin = 3;
         final int amountOfOneConnectionMax = 6;
-        for (boolean crossover : new boolean[]{true, false}) {
-            for (boolean asDeparture : new boolean[]{true, false}) {
-                for (boolean fromOne : new boolean[]{true, false}) {
-                    for (boolean toOne : new boolean[]{true, false}) {
-                        Set<Connection> cs = multipleConnection(crossover, asDeparture, fromOne, toOne);
-                        if (crossover) {
-                            int expected = 1;
-                            if (!fromOne) expected *= 3;
-                            if (!toOne) expected *= 3;
-                            assert cs.size() >= expected * amountOfOneConnectionMin : "Expected more than " + (expected * amountOfOneConnectionMin - 1) + " connections, but got " + cs.size() + ". (crossover=true, asDeparture=" + (asDeparture ? "true" : "false") + ", fromOne=" + (fromOne ? "true" : "false") + ", toOne=" + (toOne ? "true" : "false") + ")";
-                            assert cs.size() <= expected * amountOfOneConnectionMax : "Expected less than " + (expected * amountOfOneConnectionMax + 1) + " connections, but got " + cs.size() + ". (crossover=true, asDeparture=" + (asDeparture ? "true" : "false") + ", fromOne=" + (fromOne ? "true" : "false") + ", toOne=" + (toOne ? "true" : "false") + ")";
-                        } else {
-                            if ((fromOne && toOne) || ((!fromOne) && (!toOne))) {
-                                assert multipleConnection(crossover, asDeparture, fromOne, toOne).size() >= (fromOne ? 1 : 3) * amountOfOneConnectionMin : "Expected more than " + ((fromOne ? 1 : 3) * amountOfOneConnectionMin - 1) + " connection but found " + multipleConnection(crossover, asDeparture, fromOne, toOne).size() + ". (crossover=false, asDeparture=" + (asDeparture ? "true" : "false") + ", fromOne=" + (fromOne ? "true" : "false") + ", toOne=" + (toOne ? "true" : "false") + ")";
-                                assert multipleConnection(crossover, asDeparture, fromOne, toOne).size() <= (fromOne ? 1 : 3) * amountOfOneConnectionMax : "Expected less than " + ((fromOne ? 1 : 3) * amountOfOneConnectionMax + 1) + " connection but found " + multipleConnection(crossover, asDeparture, fromOne, toOne).size() + ". (crossover=false, asDeparture=" + (asDeparture ? "true" : "false") + ", fromOne=" + (fromOne ? "true" : "false") + ", toOne=" + (toOne ? "true" : "false") + ")";
-                            } else {
-                                assert multipleConnection(crossover, asDeparture, fromOne, toOne) == null : "Should not find any connections if not crossover and different starting/end locations. (from:" + (fromOne ? "1" : "3") + ", to:" + (toOne ? "1" : "3") + ")";
-                                continue;
-                            }
-                        }
-                        long differenceFirstDep = Math.abs(multipleConnection(crossover, asDeparture, fromOne, toOne).iterator().next().getFirstTripDepartureTime().getTime() - (new Date().getTime()));
-                        long differenceLastArr = 0;
-                        for (Connection connection : multipleConnection(crossover, asDeparture, fromOne, toOne)) {
-                            differenceLastArr = Math.abs(connection.getFirstTripDepartureTime().getTime() - (new Date().getTime()));
-                        }
-                        if (asDeparture) {
-                            assert differenceFirstDep < differenceLastArr;
-                        } else {
-                            assert differenceLastArr < differenceFirstDep;
-                        }
-                    }
-                }
-            }
+        int expected;
+        if (crossover) {
+            expected = froms.size() * tos.size();
+        } else {
+            assert froms.size() == tos.size();
+            expected = froms.size();
         }
+        assertThat(result.size()).describedAs("Ammount of connections (crossover=true, asDeparture=" + (asDeparture ? "true" : "false") + ", from=" + froms + ", to=" + tos + ")").isGreaterThanOrEqualTo(expected * amountOfOneConnectionMin).isLessThanOrEqualTo(expected * amountOfOneConnectionMax);
+        long differenceFirstDep = Math.abs(result.iterator().next().getFirstTripDepartureTime().getTime() - requestTime());
+        long differenceLastArr = 0;
+        for (Connection connection : result) {
+            differenceLastArr = Math.abs(connection.getFirstTripDepartureTime().getTime() - requestTime());
+        }
+        if (asDeparture) {
+            assertThat(differenceFirstDep).describedAs("The requested time should be nearer to the first departure time than to the last arrival time").isLessThan(differenceLastArr);
+        } else {
+            assertThat(differenceLastArr).describedAs("The requested time should be nearer to the last arrival time than to the first departure time").isLessThan(differenceFirstDep);
+        }
+    }
+
+    private static long requestTime() {
+        Calendar calendar = new GregorianCalendar();
+        if (calendar.get(Calendar.HOUR_OF_DAY) > 15) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        calendar.set(Calendar.HOUR_OF_DAY, 14);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTimeInMillis();
+    }
+
+    private static Request prepareRequest(Set<String> from, boolean crossover, Set<String> to, boolean asDeparture) {
+        Request request = new Request();
+        for (String aFrom : from) {
+            request.addFrom(aFrom);
+        }
+        NetworkProvider provider = KnownProvider.get("sbb");
+        request.from.calculateLocations(provider, "test-froms");
+        request.setCrossover(crossover ? "1" : "0");
+        for (String aTo : to) {
+            request.addTo(aTo);
+        }
+        request.to.calculateLocations(provider, "test-tos");
+        request.addDirect("0");
+        request.addDirect("0");
+        request.addDirect("0");
+        request.setTime("14:00");
+        request.setTimeAsDeparture(asDeparture ? "1" : "0");
+        request.setFlexible("1");
+        request.setProvider("sbb");
+        return request;
     }
 
 }

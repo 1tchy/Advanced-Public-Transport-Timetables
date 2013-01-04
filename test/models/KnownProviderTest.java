@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, L. Murer.
+ * Copyright 2013, L. Murer.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,13 @@
  * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
 
-package models;
+package test.models;
 
 import de.schildbach.pte.NetworkProvider;
+import models.KnownProvider;
 import org.junit.Test;
-import play.test.UnitTest;
+
+import static org.fest.assertions.Assertions.assertThat;
 
 /**
  * Created by IntelliJ IDEA.
@@ -27,10 +29,10 @@ import play.test.UnitTest;
  * Date: 23.11.11
  * Time: 11:02
  */
-public class KnownProviderTest extends UnitTest {
+public class KnownProviderTest {
     @Test
     public void all() {
-        assert KnownProvider.all().size() > 0 : "There must be at least one provider in the list of all KnownProviders.";
+        assertThat(KnownProvider.all().size()).describedAs("There must be at least one provider in the list of all KnownProviders.").isGreaterThan(0);
     }
 
     @Test

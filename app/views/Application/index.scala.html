@@ -1,0 +1,156 @@
+@*
+* Copyright 2013, L. Murer.
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see < http://www.gnu.org/licenses/ >.
+*@
+
+@(req: Request, errors: Collection[String])
+
+
+@styles={
+<!--
+  Copyright 2013, L. Murer.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see < http://www.gnu.org/licenses/ >.
+  -->
+
+<link rel="stylesheet" media="screen" href='@routes.Assets.at("/public","stylesheets/jquery-ui-1.8.13.custom.css")'>
+}
+@scripts={
+<script src='@routes.Assets.at("/public","javascripts/jquery-1.8.3.js")' type="text/javascript"
+        charset="UTF-8"></script>
+<script src='@routes.Assets.at("/public","javascripts/jquery-ui-1.9.2.custom.min.js")' type="text/javascript"
+        charset="UTF-8"></script>
+<script src='@routes.Assets.at("/public","javascripts/prettify.js")' type="text/javascript"
+        charset="UTF-8"></script>
+<script src='@routes.Assets.at("/public","javascripts/autocomplete-value.js")' type="text/javascript"
+        charset="UTF-8"></script>
+<script src='@routes.Assets.at("/public","javascripts/autocomplete.js")' type="text/javascript"
+        charset="UTF-8"></script>
+<script src='@routes.Assets.at("/public","javascripts/index.js")' type="text/javascript"
+        charset="UTF-8"></script>
+}
+
+@main(Html("Der effiziente Fahrplan"),styles,scripts) {
+
+@if(!errors.isEmpty()) {
+<h3>Fehler</h3>
+<ul>
+    @for(error <- errors) {
+    <li>
+        @Html(error)
+    </li>
+    }
+</ul>
+}
+
+<form action="@routes.Application.showTimetable()" method="GET">
+    <table border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td>
+                <label for="newfrom">Von:</label>
+            </td>
+            <td id="from">
+                @for(s <- req.from) {
+                <input class="autocompleteStation" type="text" name="from[]" value="@s" onkeyup="check('from');"
+                       data-url="@routes.Application.autocompleteStation()"/>
+                }
+            </td>
+        </tr>
+        <tr>
+            <td><label>Verbindung:</label></td>
+            <td>
+                <a href="#" onclick="changeStraight(document.getElementById('crossoverYes').checked)"
+                   onmouseover="changeImage(true);" onmouseout="changeImage(false);"><img id="mixstraight"
+                                                                                          src='@routes.Assets.at("/public","images/mix/22.png")'
+                                                                                          alt="Ob die Verbindungen gekreuzt (alle zu allen) oder nur direkt (jeweils direkt darunterligende) gesucht werden sollen."
+                                                                                          border="0"></a>
+                <input type="radio" id="crossoverYes" name="crossover" value="true"@if(req.crossover) {
+                checked} style="display: none;">
+                <input type="radio" id="crossoverNo" name="crossover" value="false"
+                @if(!req.crossover){checked} style="display: none;">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="newto">Nach:</label>
+            </td>
+            <td>
+                <div id="to">
+                    @for(s <- req.to) {
+                    <input class="autocompleteStation" type="text" name="to[]" value="@s" onkeyup="check('to');"
+                           data-url="@routes.Application.autocompleteStation()"/>
+                    }
+                </div>
+            </td>
+        </tr>
+        <tr class="optional">
+            <td>
+                <label for="direct">Ohne&nbsp;Umsteigen:</label>
+            </td>
+            <td>
+                <div>
+                    @tags.FastTags.printDirectCheckboxes(req.crossover, req.from, req.to, req.direct)
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="time">Zeit:</label>
+            </td>
+            <td>
+                <input id="time" type="time" name="time"
+                       value='@req.getTime().format("HH:mm")'
+                       maxlength="5" style="width:50px;"/>
+                <input id="timeAsDeparture" type="radio" name="timeAsDeparture" value="true"@if(
+                req.timeAsDeparture){checked}/><label for="timeAsDeparture"> als Abfahrtszeit</label>
+                <input id="timeAsArrival" type="radio" name="timeAsDeparture" value="false"@if(
+                !req.timeAsDeparture){checked}/><label for="timeAsArrival"> als Ankunftszeit</label>
+            </td>
+        </tr>
+        <tr class="optional">
+            <td colspan="2">
+                <span title="z.B. bei &quot;Luzern&quot; auch &quot;Luzern, Bahnhof&quot; benutzen">
+                    <input id="flexible" type="checkbox" name="flexible" value="true"@if(req.flexible){checked}>
+                    <label for="flexible">Verschiedene Haltestellenbezeichnungen an einem Ort als eine einzige
+                        Haltestelle betrachten</label>
+                </span>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align:center;">
+                <button type="submit">Submit</button>
+            </td>
+        </tr>
+    </table>
+
+</form>
+
+<script type="text/javascript">
+    autocomplete();
+    changeImage(false);
+    localize();
+</script>
+}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012, L. Murer.
+ * Copyright 2013, L. Murer.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,15 +15,17 @@
  * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
 
-package models;
+package test.models;
 
 import de.schildbach.pte.OpenDataProvider;
 import de.schildbach.pte.dto.NearbyStationsResult;
+import models.KnownProvider;
 import org.junit.Before;
 import org.junit.Test;
-import play.test.UnitTest;
 
 import java.io.IOException;
+
+import static org.fest.assertions.Assertions.assertThat;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,7 +33,7 @@ import java.io.IOException;
  * Date: 18.05.12
  * Time: 20:57
  */
-public class GetStationTest extends UnitTest {
+public class GetStationTest {
     OpenDataProvider provider;
 
     @Before
@@ -55,8 +57,8 @@ public class GetStationTest extends UnitTest {
     public void getMany() throws IOException {
         NearbyStationsResult result = provider.queryNearbyStations(47.372896f, 8.536863f, 300, 10);
         int size = result.stations.size();
-        assert size > 3 : "Returned really few stations. Only " + size;
-        assert size <= 10 : "Returned more than the maximum limit: " + size;
+        assertThat(size).describedAs("Returned really few stations. Only " + size).isGreaterThan(3);
+        assertThat(size).describedAs("Returned more than the maximum limit: " + size).isLessThanOrEqualTo(10);
     }
 
 }

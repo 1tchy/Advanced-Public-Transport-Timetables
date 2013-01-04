@@ -1,6 +1,6 @@
 ##########################################################################
 #
-# Copyright 2011, L. Murer.
+# Copyright 2013, L. Murer.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,19 +20,16 @@
 #
 ##########################################################################
 
-GET     /favicon.ico                            staticFile:public/images/favicon.ico
+GET     /favicon.ico       controllers.Assets.at(path="/public/images", file="favicon.ico")
 
 # Home page
-GET     /                                       Application.index
-GET     /robots.txt                             staticFile:public/robots.txt
-GET     /timetable/?                            Application.showTimetable
-GET     /autocomplete/?                         Application.autocompleteStation
-GET     /station/?                              Application.getStation
-GET     /faq/?                                  Application.showFAQ
+GET     /                  controllers.Application.index()
+GET     /faq               controllers.Application.showFAQ()
+GET     /robots.txt        controllers.Assets.at(path="/public", file="robots.txt")
+GET     /timetable       controllers.Application.showTimetable()
+GET     /autocomplete    controllers.Application.autocompleteStation()
+GET     /station         controllers.Application.getStation(lat: String, lon: String)
+GET     /*path/             controllers.Application.redirectUntrailed(path:String)
 
-
-# Map static resources from the /app/public folder to the /public path
-GET     /public/                                staticDir:public
-
-# Catch all
-#*       /{controller}/{action}                  {controller}.{action}
+# Map static resources from the /public folder to the /public URL path
+GET     /public/*file               controllers.Assets.at(path="/public", file)

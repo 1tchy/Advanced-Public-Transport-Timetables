@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, L. Murer.
+ * Copyright 2013, L. Murer.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ package models;
 
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Location;
+import play.Logger;
 
 import java.io.IOException;
 import java.util.*;
@@ -32,11 +33,11 @@ import java.util.regex.Pattern;
  */
 public class Autocomplete {
     //How many items should be returned for an autocomplete request
-    public final static int AUTOCOMPLETE_MAX = 5;
+    private final static int AUTOCOMPLETE_MAX = 5;
     //Cached data for an autocomplete request (Key of first map: Providers ID; Key of second map: Term to autocomplete
-    public static Map<String, Map<String, List<String>>> autocompleteCache = new HashMap<String, Map<String, List<String>>>();
+    private static final Map<String, Map<String, List<String>>> autocompleteCache = new HashMap<>();
     //With which items in the popular location database the result for this cached autocomplete list was generated (Keys are the same as in autocompleteCache)
-    public static Map<String, Map<String, String>> autocompleteCacheLevel = new HashMap<String, Map<String, String>>();
+    private static final Map<String, Map<String, String>> autocompleteCacheLevel = new HashMap<>();
 
     /**
      * Autocompletes a station
@@ -45,19 +46,19 @@ public class Autocomplete {
      * @param term     to autocomplete
      * @return a list of stations
      */
-    public static List<String> stations(final String provider, final String term) {
-        if (term == null) return new ArrayList<String>(0);
+    public static List<String> stations(@SuppressWarnings("SameParameterValue") final String provider, final String term) {
+        if (term == null) return new ArrayList<>(0);
         //get the autocomplete list for the given provider from the cache
         Map<String, List<String>> providers_autocomplete = autocompleteCache.get(provider);
         Map<String, String> providers_autocomplete_level = autocompleteCacheLevel.get(provider);
         //create a list if none exists
         if (providers_autocomplete == null || providers_autocomplete_level == null) {
             if (KnownProvider.get(provider) == null) {
-                System.out.println("Autocompleteanfrage konnte für Provider '" + provider + "' nicht durchgeführt werden. Grund: Unbekannter Provider.");
-                return new ArrayList<String>(0);
+                Logger.error("Autocompleteanfrage konnte für Provider '" + provider + "' nicht durchgeführt werden. Grund: Unbekannter Provider.");
+                return new ArrayList<>(0);
             }
-            providers_autocomplete = new HashMap<String, List<String>>();
-            providers_autocomplete_level = new HashMap<String, String>();
+            providers_autocomplete = new HashMap<>();
+            providers_autocomplete_level = new HashMap<>();
             autocompleteCache.put(provider, providers_autocomplete);
             autocompleteCacheLevel.put(provider, providers_autocomplete_level);
         }
@@ -71,7 +72,7 @@ public class Autocomplete {
         if (autocomplete_list == null) {
             //get the provider object
             final NetworkProvider p = KnownProvider.get(provider);
-            autocomplete_list = new ArrayList<String>(AUTOCOMPLETE_MAX);
+            autocomplete_list = new ArrayList<>(AUTOCOMPLETE_MAX);
             autocomplete_list.addAll(mostPopular);
             if (autocomplete_list.size() < AUTOCOMPLETE_MAX) {
                 try {
@@ -93,8 +94,7 @@ public class Autocomplete {
                     providers_autocomplete.put(term, autocomplete_list);
                     providers_autocomplete_level.put(term, join(mostPopular));
                 } catch (IOException e) {
-                    System.out.println("Konnte vom Provider " + p.toString() + " keine Autovervollständigung von Station (" + term + ") abfragen.");
-                    e.printStackTrace();
+                    Logger.error("Konnte vom Provider " + p.toString() + " keine Autovervollständigung von Station (" + term + ") abfragen.", e);
                 }
             } else {
                 providers_autocomplete_level.put(term, join(mostPopular));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, L. Murer.
+ * Copyright 2013, L. Murer.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,7 +112,7 @@ a, .likealink {
     line-height: 1 !important;
 }
 
-input.autocompleteStation, input.direkt {
+input.autocompleteStation, input.direct {
     width: 152px;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, L. Murer.
+ * Copyright 2013, L. Murer.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,8 +12,9 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
+
 package tags;
 
 import de.schildbach.pte.dto.Connection.Footway;
@@ -21,17 +22,17 @@ import de.schildbach.pte.dto.Connection.Part;
 import de.schildbach.pte.dto.Connection.Trip;
 import de.schildbach.pte.dto.Line;
 import de.schildbach.pte.dto.Location;
-import groovy.lang.Closure;
+import models.Directs;
 import models.KnownProvider;
-import play.mvc.Scope;
-import play.templates.GroovyTemplate.ExecutableTemplate;
-import play.templates.JavaExtensions;
+import models.Stations;
+import play.api.templates.Html;
 
-import java.io.PrintWriter;
-import java.security.InvalidParameterException;
+import javax.annotation.Nullable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
 
 /**
  * User: Laurin
@@ -39,205 +40,143 @@ import java.util.*;
  * Time: 10:41:52 AM
  * To change this template use File | Settings | File Templates.
  */
-@FastTags.Namespace("my")
-@SuppressWarnings("unused")
-public class FastTags extends play.templates.FastTags {
+//Although the IDE doesn't recognise it, the methods are used from the templates
+@SuppressWarnings("UnusedDeclaration")
+public class FastTags {
     /**
-     * This Tag verifies, that an object is an instance of a specific class. If it is, it will return the body-part of the tag
-     *
-     * @param args     the default argument (arg) must include an object; the argument 'a' must include a String with a simple Class name (e.g. 'String')
-     * @param body     displayed, if "it is"
-     * @param out      used to return the result
-     * @param template ignored
-     * @param fromLine ignored
+     * This Tag verifies, that an object is an instance of a specific class.
      */
-    public static void _isit(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-
-        Object klasse = args.get("arg");
-        Object klassenname = args.get("a");
-        if (klasse == null || klassenname == null) {
-            return;
+    public static boolean isit(Object o, Object clazz) {
+        if (!(clazz instanceof String)) {
+            clazz = clazz.getClass().getSimpleName();
         }
-        Class theClass = klasse.getClass();
-        if (theClass == null) {
-            return;
-        }
-        klasse = theClass.getSimpleName();
-        if (!(klassenname instanceof String)) {
-            klassenname = klassenname.getClass();
-            if (klassenname == null) {
-                return;
-            }
-            klassenname = klassenname.getClass().getSimpleName();
-
-        }
-        if (klasse == null) {
-            return;
-        }
-        if (klasse.equals(klassenname)) {
-            out.print(JavaExtensions.toString(body));
-        } else {
-            for (Class allClasses : theClass.getClasses()) {
-                if (allClasses.getSimpleName().equals(klassenname)) {
-                    out.print(JavaExtensions.toString(body));
-                    return;
-                }
-            }
-        }
+        return o.getClass().getSimpleName().equals(clazz);
     }
 
     /**
      * It prints out the amount of changes of a trip
      *
-     * @param args     the default argument (arg) must include an object containing a List with multiple Parts (e.g. a List of Vias); the argument 'text' must include a String to describe the amount (will also be displayed), the optional argument 'pl' can define the pluralised argument 'text'.
-     * @param body     ignored
-     * @param out      used to return the result
-     * @param template ignored
-     * @param fromLine ignored
+     * @param vias        List with multiple Parts (e.g. a List of Vias)
+     * @param text        String to describe the amount (will be displayed)
+     * @param text_plural (optional) String to describe the amount in plural
      */
-    public static void _getAmountOfChanges(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        //prepare the parameteres to use
-        Object object_via = args.get("arg");
-        assert object_via instanceof List : "First parameter must be a list object. But is " + object_via;
-        List list_vias = (List) object_via;
-        Object object_text = args.get("text");
-        assert object_text instanceof String : "Parameter text must be a String. But is " + object_text;
-        String text = (String) object_text;
+    public static String getAmountOfChanges(List<Part> vias, String text, @Nullable String text_plural) {
         int amount = -1; //the first part obviously doesn't count as a change
         //for each Part that isn't a Footway, count one up
-        for (Object via : list_vias) {
-            if (via instanceof Part) {
-                if (!(via instanceof Footway)) {
-                    amount++;
-                }
+        for (Part via : vias) {
+            if (!(via instanceof Footway)) {
+                amount++;
             }
         }
         //print the output
         if (amount == 1) {
-            out.print("1" + text);
+            return "1" + text;
         } else if (amount > 1) {
-            if (args.containsKey("pl")) {
-                out.print(amount + "" + args.get("pl"));
+            if (text_plural != null) {
+                return amount + text_plural;
             } else {
-                out.print(amount + text + "s");
+                return amount + text + "s";
             }
         }
+        return "";
     }
 
 
     /**
      * It prints out the body part, but only if there are multiple parts that need to be displayed
      *
-     * @param args     the default argument (arg) must include an object containing a List with multiple Parts (e.g. a List of Vias)
-     * @param body     displayed, if vias can be displayed
-     * @param out      used to return the result
-     * @param template ignored
-     * @param fromLine ignored
+     * @param vias List with multiple Parts (e.g. a List of Vias)
+     * @param body displayed, if vias can be displayed
      */
-    public static void _showDetails(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        //prepare the parameteres to use
-        Object object_via = args.get("arg");
-        assert object_via instanceof List : "First parameter must be a list object. But is " + object_via;
-        List list_vias = (List) object_via;
+    public static String showDetails(List<Part> vias, String body) {
+        if (hasDetails(vias)) {
+            return body;
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * If there are multiple parts that need to be displayed
+     *
+     * @param vias List with multiple Parts (e.g. a List of Vias)
+     */
+    public static boolean hasDetails(List<Part> vias) {
         int totalRealParts = 0;
-        for (Object via : list_vias) {
-            if (via instanceof Part) {
-                if (!(via instanceof Footway)) {
-                    totalRealParts++;
-                    if (totalRealParts > 1) {
-                        out.print(JavaExtensions.toString(body));
-                        return;
-                    }
+        for (Part via : vias) {
+            if (!(via instanceof Footway)) {
+                totalRealParts++;
+                if (totalRealParts > 1) {
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     /**
      * It prints out as a table containing how to change from one Part to the next Part.
      *
-     * @param args     the default argument (arg) must include an object containing a List with multiple Parts (e.g. a List of Vias)
-     * @param body     ignored
-     * @param out      used to return the result
-     * @param template ignored
-     * @param fromLine ignored
+     * @param vias     List with multiple Parts (e.g. a List of Vias)
+     * @param provider used for getting the timezone
      */
-    public static void _getVias(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    public static Html getVias(List<Part> vias, KnownProvider provider) {
         //The default argument should be a List Object containing only parts. Otherwise, there will be thrown an Exception.
-        Object object_via = args.get("arg");
-        TimeZone timeZone = getTimezone(template);
-        if (object_via instanceof List) {
-            List list_vias = (List) object_via;
-            boolean allViasPart = true;
-            for (Object via : list_vias) {
-                if (!(via instanceof Part)) {
-                    allViasPart = false;
-                    break;
-                }
-            }
-            if (allViasPart) {
-                //For all Vias, do the following
-                final Iterator via_iterator = list_vias.iterator();
-                boolean isFirstElement = true; //is it the first via?
-                boolean isWalking = false; //is this/the previous via a part to walk (Footway)
-                String lastStationName = ""; //the name of the station of the last via
-                out.println("<table>");
-                //For each via as a Part
-                while (via_iterator.hasNext()) {
-                    Object via_obj = via_iterator.next();
-                    assert via_obj instanceof Part;
-                    Part via = (Part) via_obj;
+        TimeZone timeZone = provider.timeZone;
+        //For all Vias, do the following
+        boolean isFirstElement = true; //is it the first via?
+        boolean isWalking = false; //is this/the previous via a part to walk (Footway)
+        String lastStationName = ""; //the name of the station of the last via
+        StringBuilder ret = new StringBuilder("<table>");
+        //For each via as a Part
+        for (Part via : vias) {
 
-                    if (via instanceof Footway) { // don't display this, if it's to walk but remember it.
-                        isWalking = true;
-                        continue;
-                    }
-                    //We don't want to display the departure part of the first element, as it's already in the overview.
-                    if (isFirstElement) {
-                        isFirstElement = false;
+            if (via instanceof Footway) { // don't display this, if it's to walk but remember it.
+                isWalking = true;
+                continue;
+            }
+            //We don't want to display the departure part of the first element, as it's already in the overview.
+            if (isFirstElement) {
+                isFirstElement = false;
+            } else {
+                //Write the part where to depart from this Part (second part in output view)
+                ret.append("\t\t<td style='padding:0 10px;'>");
+                //If the last station was the same as this one, no need to display its name again (as it's the second part of the line in the output view)
+                if (lastStationName.equals(getLocation(via.departure)) && (via instanceof Trip)) {
+                    //make simple output (with Track and Time only)
+                    Trip trip = (Trip) via;
+                    String gleis = trip.departurePosition;
+                    if (gleis != null && gleis.length() > 0) {
+                        ret.append("umsteigen auf</td>\n\t\t<td>Gleis ").append(gleis).append(" (").append(printTime(trip.departureTime, timeZone)).append(")");
                     } else {
-                        //Write the part where to depart from this Part (second part in output view)
-                        out.print("\t\t<td style='padding:0 10px;'>");
-                        //If the last station was the same as this one, no need to display its name again (as it's the second part of the line in the output view)
-                        if (lastStationName.equals(getLocation(via.departure)) && (via instanceof Trip)) {
-                            //make simple output (with Track and Time only)
-                            Trip trip = (Trip) via;
-                            String gleis = trip.departurePosition;
-                            if (gleis != null && gleis.length() > 0) {
-                                out.print("umsteigen auf</td>\n\t\t<td>Gleis " + gleis + " (" + printTime(trip.departureTime, timeZone) + ")");
-                            } else {
-                                out.print("Umstieg auf Anschluss</td>\n\t\t<td>" + printTime(trip.departureTime, timeZone));
-                            }
-                        } else {
-                            //if it's not simple to display...
-                            if (isWalking) { //if we walked to here
-                                isWalking = false;
-                                out.print("Fussweg nach</td>\n\t\t<td>");
-                            } else {
-                                //or use a general description
-                                out.print("umsteigen auf</td>\n\t\t<td>");
-                            }
-                            //and the target departure to change to
-                            out.print(getPartOfPart(via, true, timeZone) + "</td>");
-                        }
-                        out.println("\t</tr>");
+                        ret.append("Umstieg auf Anschluss</td>\n\t\t<td>").append(printTime(trip.departureTime, timeZone));
                     }
-                    out.println("\t<tr><td></td><td align=\"left\" colspan=\"2\">" + getPartIcon(via, false) + "</td></tr>");
-
-                    //We don't want to display the arriving part of the last element, as it's already in the overview
-//                    if (via_iterator.hasNext()) {
-                    //Write the part where to arrive at by this Part (first part in output view)
-                    out.println("\t<tr>"); //start a new line
-                    out.print("\t\t<td>" + getPartOfPart(via, false, timeZone) + "</td>"); //show the full information of this Parts arrival
-                    lastStationName = getLocation(via.arrival); //set the name of this arrival station (to not show it in the second part of the output again)
-//                    }
+                } else {
+                    //if it's not simple to display...
+                    if (isWalking) { //if we walked to here
+                        isWalking = false;
+                        ret.append("Fussweg nach</td>\n\t\t<td>");
+                    } else {
+                        //or use a general description
+                        ret.append("umsteigen auf</td>\n\t\t<td>");
+                    }
+                    //and the target departure to change to
+                    ret.append(getPartOfPart(via, true, timeZone)).append("</td>");
                 }
-                out.println("\t\t<td></td>\n\t\t<td></td>\n\t</tr>\n</table>");
-                return;
+                ret.append("\t</tr>\n");
             }
+            ret.append("\t<tr><td></td><td align=\"left\" colspan=\"2\">").append(getPartIcon(via, false)).append("</td></tr>\n");
+
+            //We don't want to display the arriving part of the last element, as it's already in the overview
+//                    if (via_iterator.hasNext()) {
+            //Write the part where to arrive at by this Part (first part in output view)
+            ret.append("\t<tr>\n"); //start a new line
+            ret.append("\t\t<td>").append(getPartOfPart(via, false, timeZone)).append("</td>"); //show the full information of this Parts arrival
+            lastStationName = getLocation(via.arrival); //set the name of this arrival station (to not show it in the second part of the output again)
+//                    }
         }
-        //If there was an error with the parameters...
-        throw new InvalidParameterException("Default argument should be a list of Connection Parts.");
+        ret.append("\t\t<td></td>\n\t\t<td></td>\n\t</tr>\n</table>\n");
+        return new Html(ret.toString());
     }
 
     /**
@@ -270,60 +209,41 @@ public class FastTags extends play.templates.FastTags {
     /**
      * It prints out the duration of a connection in hours and minutes
      *
-     * @param args     the argument 'dt' must include the departure time (as a Date), the argument 'at' must include the arrival time (as a Date)
-     * @param body     ignored
-     * @param out      used to return the result
-     * @param template ignored
-     * @param fromLine ignored
+     * @param departure departure time
+     * @param arrival   arrival time
      */
-    public static void _getDuration(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        assert args.containsKey("dt") : "Argument 'dt' must be given.";
-        assert args.get("dt") instanceof Date : "Argument 'dt' must be a Date.";
-        assert args.containsKey("at") : "Argument 'at' must be given.";
-        assert args.get("at") instanceof Date : "Argument 'at' must be a Date.";
-        Date dt = (Date) args.get("dt");
-        Date at = (Date) args.get("at");
-        long duration = (at.getTime() - dt.getTime());
+    public static String getDuration(Date departure, Date arrival) {
+        long duration = (arrival.getTime() - departure.getTime());
         duration /= 60000; //to minutes
+        StringBuilder ret = new StringBuilder();
         if (duration >= 60) {
-            out.print(duration / 60);
-            out.print("h ");
+            ret.append(duration / 60);
+            ret.append("h ");
         }
-        out.print(duration % 60);
-        out.print("min");
+        ret.append(duration % 60);
+        ret.append("min");
+        return ret.toString();
     }
 
     /**
      * Parses the time to be displayed
      *
-     * @param args     the first argument must be the time to display
-     * @param body     ignored
-     * @param out      used to return the result
-     * @param template used for getting the provider for which the time will be generated
-     * @param fromLine ignored
+     * @param date     to be displayed
+     * @param provider used for getting the timezone
      */
-    public static void _parseTime(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        out.print(printTime(args.get("arg"), getTimezone(template)));
+    public static String parseTime(Date date, KnownProvider provider) {
+        return printTime(date, provider.timeZone);
     }
 
     /**
      * It prints out the current time
      *
-     * @param args     ignored
-     * @param body     ignored
-     * @param out      used to return the result
-     * @param template used for getting the provider for which the time will be generated
-     * @param fromLine ignored
+     * @param provider The provider to get the timezone from
      */
-    public static void _getCurrentTime(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
+    public static String getCurrentTime(KnownProvider provider) {
         DateFormat now = new SimpleDateFormat("d.M.yy HH:mm");
-        try {
-            now.setTimeZone(KnownProvider.getById(((Scope.Params) template.getBinding().getVariable("params")).get("provider")).timeZone);
-        } catch (Exception e) {
-            now.setTimeZone(TimeZone.getTimeZone("CET"));
-            out.print("CET ");
-        }
-        out.print(now.format(new Date()));
+        now.setTimeZone(provider.timeZone);
+        return now.format(new Date());
     }
 
     /**
@@ -385,25 +305,13 @@ public class FastTags extends play.templates.FastTags {
     }
 
     /**
-     * Reads the timezone from the Template arguents
-     *
-     * @param template To get the timezone from
-     * @return The timezone for the template
-     */
-    private static TimeZone getTimezone(ExecutableTemplate template) {
-        Object o = template.getProperty("timezone");
-        if (o instanceof TimeZone) return (TimeZone) o;
-        return TimeZone.getDefault();
-    }
-
-    /**
      * Renders the time for display
      *
      * @param date     Which time to print
      * @param timeZone In which timezone should the time be
      * @return The time to display
      */
-    private static String printTime(Object date, TimeZone timeZone) {
+    private static String printTime(Date date, TimeZone timeZone) {
         if (timeZone == null) {
             timeZone = TimeZone.getDefault();
         }
@@ -415,20 +323,87 @@ public class FastTags extends play.templates.FastTags {
     /**
      * Removes the matching of a regular expression from the body
      *
-     * @param args     the default argument (arg) is the regular expression needle that's been removed
-     * @param body     haystack
-     * @param out      used to return the result
-     * @param template ignored
-     * @param fromLine ignored
+     * @param regex The regular expression needle that's been removed
+     * @param body  haystack
      */
-    public static void _remove(Map<?, ?> args, Closure body, PrintWriter out, ExecutableTemplate template, int fromLine) {
-        String s = JavaExtensions.toString(body);
-        if (s == null) return;
-        Object arg = args.get("arg");
-        if (arg == null) {
-            out.print(body);
+    public static String remove(String regex, String body) {
+        if (body == null) return null;
+        if (regex == null) {
+            return body;
         } else {
-            out.print(s.replaceAll(arg.toString(), ""));
+            return body.replaceAll(regex, "");
         }
+    }
+
+    /**
+     * Prints the list of the checkboxes marking direct-connections only
+     *
+     * @param isCrossover If the user filed a crossover request
+     * @param from        The list of froms to get the amount
+     * @param to          The list of tos to get the amount
+     * @param direct      The already given direct/none-direct checks to be displayed
+     * @return The HTML-Code for the direct-connection-only checkboxes
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public static Html printDirectCheckboxes(boolean isCrossover, Stations from, Stations to, Directs direct) {
+        StringBuilder sb = new StringBuilder();
+        final int repeats = Math.max(Math.max(from.size(), to.size()), 2) - 1;
+        for (int i = 0; i < repeats; i++) {
+            if (!isCrossover || i == 0) {
+                sb.append("<input id='direct' class='direct' type='checkbox' name='direct[]' value='").append(i).append("'");
+                if (i < direct.size() && direct.get(i)) {
+                    sb.append("checked");
+                }
+                sb.append("/>");
+            }
+        }
+        return new Html(sb.toString());
+    }
+
+    public static class IteratorExtender {
+        private int i = 0;
+
+        public int get() {
+            return i;
+        }
+
+        public void next() {
+            ++i;
+        }
+
+        public boolean isEven() {
+            return i % 2 == 0;
+        }
+
+        public void reset() {
+            i = 0;
+        }
+    }
+
+    public static Class getInnerClass(String outerClassName, String innerClassName) throws ClassNotFoundException {
+        for (Class innerClass : Class.forName(outerClassName).getClasses()) {
+            if (innerClass.getSimpleName().equals(innerClassName)) {
+                return innerClass;
+            }
+        }
+        return null;
+    }
+
+    public static boolean hasDeparturePosition(Part part) {
+        return part instanceof Trip && ((Trip) part).departurePosition != null;
+    }
+
+    public static String getDeparturePosition(Part part) {
+        assert hasDeparturePosition(part);
+        return ((Trip) part).departurePosition;
+    }
+
+    public static boolean hasArrivalPosition(Part part) {
+        return part instanceof Trip && ((Trip) part).arrivalPosition != null;
+    }
+
+    public static String getArrivalPosition(Part part) {
+        assert hasDeparturePosition(part);
+        return ((Trip) part).arrivalPosition;
     }
 }

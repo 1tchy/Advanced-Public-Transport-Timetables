@@ -6,5 +6,7 @@ dist/
 logs/
 test-result/
 lib/
+target/
 tmp/
+.history
 modules/

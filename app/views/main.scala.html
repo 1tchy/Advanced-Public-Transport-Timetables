@@ -1,6 +1,5 @@
-<!DOCTYPE html>
-*{
-* Copyright 2011, L. Murer.
+@*
+* Copyright 2013, L. Murer.
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -14,19 +13,38 @@
 *
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
-}*
+*@
+
+@(title: Html, styles: Html=Html(""), scripts: Html=Html(""), navigation: Html=Html(""))(content: Html)
+<!DOCTYPE html>
+
+<!--
+  Copyright 2013, L. Murer.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see < http://www.gnu.org/licenses/ >.
+  -->
 
 <html>
 <head>
-    <title>#{get 'title' /}</title>
-    <meta charset="${_response_encoding}">
+    <title>@title</title>
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="width=900">
-    <link rel="shortcut icon" href="/public/images/logo.png">
-    <link rel="apple-touch-icon" href="/public/images/apple-touch-icon.png">
-    <link rel="stylesheet" media="screen" href="@{'/public/stylesheets/main.css'}">
-#{get 'moreStyles' /}
+    <link rel="shortcut icon" href='@routes.Assets.at("/public","images/logo.png")'>
+    <link rel="apple-touch-icon" href='@routes.Assets.at("/public","images/apple-touch-icon.png")'>
+    <link rel="stylesheet" media="screen" href='@routes.Assets.at("/public","stylesheets/main.css")'>
+    @styles
     <script type="text/javascript">
         var _gaq = _gaq || [];
         _gaq.push(['_setAccount', 'UA-82988-7']);
@@ -41,24 +59,24 @@
             s.parentNode.insertBefore(ga, s);
         })();
     </script>
-#{get 'moreScripts' /}
+    @scripts
 </head>
 <body>
 <div class="navi">
-    <a href="@{Application.index()}">Neue Abfrage</a>
-#{get 'moreNavigation'/}
-    <a href="@{Application.showFAQ()}" class="faq">FAQ</a>
+    <a href="@routes.Application.index()">Neue Abfrage</a>
+    @navigation
+    <a href="@routes.Application.showFAQ()" class="faq">FAQ</a>
 </div>
 <div class="content">
     <table border="0">
         <tr>
-            <td><a href="@{Application.index()}"><img src="/public/images/logo.png" width="80" height="80"
+            <td><a href="@routes.Application.index()"><img src='@routes.Assets.at("/public","images/logo.png")' width="80" height="80"
                                                       alt="schneller-dort.ch" border="0"></a></td>
             <td><h1>Der effiziente Fahrplan</h1></td>
         </tr>
     </table>
-#{doLayout /}
+    @content
 </div>
-<div class="footer likealink">#{my.getCurrentTime /}</div>
+<div class="footer likealink">@tags.FastTags.getCurrentTime(KnownProvider.getById("sbb"))</div>
 </body>
 </html>

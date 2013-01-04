@@ -1,5 +1,5 @@
-*{
-* Copyright 2011, L. Murer.
+@*
+* Copyright 2013, L. Murer.
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -13,10 +13,26 @@
 *
 * You should have received a copy of the GNU General Public License
 * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
-}*
+*@
 
-#{extends 'main.html' /}
-#{set title:'Der effiziente Fahrplan: FAQ' /}
+@main(Html("Der effiziente Fahrplan: FAQ")) {
+
+<!--
+  Copyright 2013, L. Murer.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see < http://www.gnu.org/licenses/ >.
+  -->
 
 <h2>Frequently Asked Questions</h2>
 
@@ -43,7 +59,7 @@
         An welchen Bahnhof soll ich jetzt gehen? Mit dem offiziellen SBB Fahrplan müssten jetzt drei Anfragen gestellt
         werden. Mit dieser Seite hier ist nunmehr nur noch eine Anfrage nötig. Und ausserdem kann sie als Lesezeichen
         abgespeichert werden!<br>
-        <a href="@{Application.showTimetable()}?start[]=Mühlau&start[]=Mettmenstetten&start[]=Knonau&start[]=&crossover=true&stop[]=Luzern&stop[]=&timeAsDeparture=true">Beispielabfrage</a>
+        <a href="@routes.Application.showTimetable()?from[]=Mühlau&from[]=Mettmenstetten&from[]=Knonau&from[]=&crossover=true&to[]=Luzern&to[]=&timeAsDeparture=true">Beispielabfrage</a>
     </li>
     <li>Mehrere parallelle Verbindungen sind erdenkbar:
         <a href="http://map.search.ch/oerlikon-zuerich?x=-616m&y=-1744m&z=64&poi=zug" target="_blank"><img
@@ -54,12 +70,12 @@
         Überlegungen und damit verbundenen Abfragen nicht immer und immer wieder durchführen muss, kann ich mir einfach
         ein Lesezeichen auf die Ergebnisanzeige mit der aktuellen Uhrzeit (Link oben: "zur aktuellen Uhrzeit")
         speichern.<br>
-        <a href="@{Application.showTimetable()}?start[]=Zürich+HB&start[]=Zürich%2C+Bahnhofquai%2FHB&start[]=&crossover=false&stop[]=Zürich+Oerlikon&stop[]=Zürich%2C+Regensbergbrücke&stop[]=&direkt[]=0&direkt[]=1&timeAsDeparture=true">Beispielabfrage</a>
+        <a href="@routes.Application.showTimetable()?from[]=Zürich+HB&from[]=Zürich%2C+Bahnhofquai%2FHB&from[]=&crossover=false&to[]=Zürich+Oerlikon&to[]=Zürich%2C+Regensbergbrücke&to[]=&direct[]=0&direct[]=1&timeAsDeparture=true">Beispielabfrage</a>
     </li>
 </ol>
 
 <a name="wem"></a><h4>Von wem ist diese Seite?</h4>
-<img src="@{'/public/images/cloudbees.png'}" alt="CloudBees" style="float: right;">
+<img src='@routes.Assets.at("/public","images/cloudbees.png")' alt="CloudBees" style="float: right;">
 <p>Diese Seite wurde von <a
         href="http://www.google.com/recaptcha/mailhide/d?k=01AhtrkbDIr6bRdy2uE4kKag==&amp;c=VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs="
         onclick="window.open('http://www.google.com/recaptcha/mailhide/d?k\07501AhtrkbDIr6bRdy2uE4kKag\75\75\46c\75VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs\075', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;">Laurin
@@ -86,7 +102,7 @@
 <a name="verbessern"></a><h4>Wie kann ich die Seite verbessern?</h4>
 <p>Schreib' mir ein Mail: <a
         href="http://www.google.com/recaptcha/mailhide/d?k=01AhtrkbDIr6bRdy2uE4kKag==&amp;c=VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs="
-        onclick="window.open('http://www.google.com/recaptcha/mailhide/d?k\07501AhtrkbDIr6bRdy2uE4kKag\75\75\46c\75VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs\075', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;">schneller-dort@...</a>
+        onclick="window.open('http://www.google.com/recaptcha/mailhide/d?k\07501AhtrkbDIr6bRdy2uE4kKag\75\75\46c\75VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs\075', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;">schneller-dort@@...</a>
     oder forke das <a href="https://github.com/1tchy/Advanced-Public-Transport-Timetables" target="_blank">Projekt auf
         github</a>.
 </p>
@@ -98,6 +114,8 @@
     <li>Frag deine Geschwister/Eltern/Arbeitskollegen/... um ihre Unterstützung.</li>
     <li>Bitte mich, einen neuen Eintrag in diese FAQ aufzunehmen: <a
             href="http://www.google.com/recaptcha/mailhide/d?k=01AhtrkbDIr6bRdy2uE4kKag==&amp;c=VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs="
-            onclick="window.open('http://www.google.com/recaptcha/mailhide/d?k\07501AhtrkbDIr6bRdy2uE4kKag\75\75\46c\75VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs\075', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;">schneller-dort@...</a>.
+            onclick="window.open('http://www.google.com/recaptcha/mailhide/d?k\07501AhtrkbDIr6bRdy2uE4kKag\75\75\46c\75VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs\075', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;">schneller-dort@@...</a>.
     </li>
 </ol>
+
+        }

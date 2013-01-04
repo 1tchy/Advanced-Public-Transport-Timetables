@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, L. Murer.
+ * Copyright 2013, L. Murer.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +12,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
 
 package models;
 
-import controllers.Application;
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Location;
-import play.data.validation.Validation;
 
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -57,15 +56,15 @@ public class InputChecker {
     /**
      * String to Date
      *
-     * @param time      String to evaluate (HH:mm)
-     * @param fieldName The name of the field that's evaluated (used for error output)
-     * @param timeZone  The timezone the given time is in
+     * @param time     String to evaluate (HH:mm)
+     * @param timeZone The timezone the given time is in
      * @return a date with the given time within the last 2 and the next 22hours (or if no String got delivered, null)
      */
-    public static Date getAndValidateTime(String time, String fieldName, TimeZone timeZone) {
+    @NotNull
+    public static Date getAndValidateTime(String time, TimeZone timeZone) throws WrongParameterException {
         //if nothing got delivered, return the current time
         if (time == null || time.trim().length() == 0) {
-            return null;
+            return new Date();
         }
         //remove spaces from the input
         time = time.trim();
@@ -101,8 +100,7 @@ public class InputChecker {
                 return c.getTime();
             }
         }
-        Validation.addError(fieldName, "Falsches Zeitformat. Zeit angeben in HH:MM.");
-        return null;
+        throw new WrongParameterException("Falsches Zeitformat. Zeit angeben in HH:MM.");
     }
 
     /**
@@ -111,19 +109,19 @@ public class InputChecker {
      * @param provider    the provider of the timetable/the station names
      * @param stations    a list of station names
      * @param description The human readable name of the field that's evaluated (used for error output)
-     * @param fieldName   The internal name of the field that's evaluated (used for error output)
      * @param shownErrors a list of shown errors, that only should be shown once
+     * @param error       A list to add error messages to
      * @return a list of stations (might have 0 elements)
      */
-    public static List<Location> getAndValidateStations(NetworkProvider provider, String[] stations, String description, String fieldName, Set<String> shownErrors) {
+    public static List<Location> getAndValidateStations(NetworkProvider provider, String[] stations, String description, Set<String> shownErrors, List<String> error) {
         //check for no station given
         if (stations == null || stations.length == 0) {
-            Validation.addError(fieldName, "Sie müssen mindestens eine " + description + " angeben.");
-            return new ArrayList<Location>(0);
+            error.add("Sie müssen mindestens eine " + description + " angeben.");
+            return new ArrayList<>(0);
         }
         //will be true, if an error occurred
         boolean errorOccurred = false;
-        List<Location> stationSet = new ArrayList<Location>(stations.length);
+        List<Location> stationSet = new ArrayList<>(stations.length);
         //for each station that's not ""
         for (String station : stations) {
             if (!station.equals("")) {
@@ -134,14 +132,14 @@ public class InputChecker {
                         locationList = provider.autocompleteStations(station);
                         if (locationList == null) {
                             errorOccurred = true;
-                            Validation.addError(fieldName, "Fehler beim Finden der " + description + " '" + station + "'.");
+                            error.add("Fehler beim Finden der " + description + " '" + station + "'.");
                         }
                     } catch (UnknownHostException e) {
                         errorOccurred = true;
                         final String ErrorBahnanbieter = "ErrorBahnanbieter";
                         if (!shownErrors.contains(ErrorBahnanbieter)) {
                             shownErrors.add(ErrorBahnanbieter);
-                            Validation.addError(fieldName, "Verbindung zur Fahrplandatenbank (" + KnownProvider.getName(provider) + ") konnte nich hergestellt werden. Bitte sp&auml;ter nochmals versuchen.");
+                            error.add("Verbindung zur Fahrplandatenbank (" + KnownProvider.getName(provider) + ") konnte nicht hergestellt werden. Bitte später nochmals versuchen.");
                         }
                     }
                 } catch (IOException e) {
@@ -149,7 +147,7 @@ public class InputChecker {
                     final String ErrorDatasource = "ErrorDatasource";
                     if (!shownErrors.contains(ErrorDatasource)) {
                         shownErrors.add(ErrorDatasource);
-                        Validation.addError(fieldName, "Fehler beim Verbinden zur Datenquelle.");
+                        error.add("Fehler beim Verbinden zur Datenquelle.");
                         e.printStackTrace();
                     }
                 }
@@ -159,7 +157,7 @@ public class InputChecker {
                     stationSet.add(locationList.get(0));
                 } else if (locationList.size() == 0) { //There is no station possible -> print error
                     errorOccurred = true;
-                    Validation.addError(fieldName, description + " '" + station + "' nicht gefunden.");
+                    error.add(description + " '" + station + "' nicht gefunden.");
                 } else { //There are multiple stations possible -> check all and add the correct matching to the list (or print error)
                     Location l = null;
                     for (Location location : locationList) {
@@ -170,7 +168,7 @@ public class InputChecker {
                     }
                     if (l == null) {
                         errorOccurred = true;
-                        Validation.addError(fieldName, description + " '" + station + "' ist nicht eindeutig.");
+                        error.add(description + " '" + station + "' ist nicht eindeutig.");
                     } else {
                         stationSet.add(l);
                     }
@@ -179,7 +177,7 @@ public class InputChecker {
         }
         //if there have not yet been an error put out but still no station found, add an error.
         if (!errorOccurred && (stationSet.size() == 0)) {
-            Validation.addError(fieldName, "Sie müssen mindestens eine " + description + " angeben.");
+            error.add("Sie müssen mindestens eine " + description + " angeben.");
         }
         return stationSet;
     }
@@ -190,49 +188,12 @@ public class InputChecker {
      * @param provider id of the provider to find
      * @return the found provider or null
      */
-    public static NetworkProvider getAndValidateProvider(String provider) {
+    public static NetworkProvider getAndValidateProvider(@SuppressWarnings("SameParameterValue") String provider) throws WrongParameterException {
         NetworkProvider provider_object = KnownProvider.get(provider);
         if (provider_object == null) {
-            Validation.addError("provider", "Unbekannter Bahnanbieter (" + provider + ")");
-            Application.index();
-            return null;
+            throw new WrongParameterException("Unbekannter Bahnanbieter (" + provider + ")");
         }
         return provider_object;
     }
 
-    /**
-     * Strings to a list of booleans
-     *
-     * @param direct     An array of numbers, which are true
-     * @param numEntries The length of the returned list
-     * @return A list of boolean values, having all values specified by direct true, all others false.
-     */
-    public static LinkedList<Boolean> getAndValidateDirects(String[] direct, int numEntries) {
-        LinkedList<Boolean> list = new LinkedList<Boolean>();
-        if (direct == null) {
-            while (numEntries-- > 0) {
-                list.add(false);
-            }
-            return list;
-        } else {
-            int i = 0;
-            for (String s : direct) {
-                if (s.matches("\\d+")) {
-                    int n = Integer.parseInt(s);
-                    while (i < n) {
-                        i++;
-                        list.add(false);
-                    }
-                    i++;
-                    list.add(true);
-                } else {
-                    System.out.println("Value of a direct checkbox is '" + s + "'. Cannot parse to its number.");
-                }
-            }
-            while (list.size() < numEntries) {
-                list.add(false);
-            }
-            return list;
-        }
-    }
 }

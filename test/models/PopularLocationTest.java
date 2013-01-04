@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, L. Murer.
+ * Copyright 2013, L. Murer.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,18 @@
  * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
 
-package models;
+package test.models;
 
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
+import models.PopularLocation;
 import org.junit.Test;
-import play.test.UnitTest;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+
+import static org.fest.assertions.Assertions.assertThat;
 
 /**
  * Created by IntelliJ IDEA.
@@ -32,13 +34,13 @@ import java.util.List;
  * Date: 23.11.11
  * Time: 18:25
  */
-public class PopularLocationTest extends UnitTest {
+public class PopularLocationTest {
     @Test
     public void increasePopularities() {
         Location l1 = new Location(LocationType.STATION, 12345, "Schöner Ort 1", "Schöner Ort 1");
         Location l2 = new Location(LocationType.STATION, 23456, "Schöner Ort 2", "Schöner Ort 2");
         Location l3 = new Location(LocationType.STATION, 34567, "Schöner Ort 3", "Schöner Ort 3");
-        Collection<Location> c = new HashSet<Location>();
+        Collection<Location> c = new HashSet<>();
         c.add(l1);
         c.add(l2);
         c.add(l3);
@@ -51,16 +53,16 @@ public class PopularLocationTest extends UnitTest {
             PopularLocation.increasePopularities("sbb", c);
         }
         List<String> theOneMostPopular = PopularLocation.getMostPopularLike("sbb", "Schöner", 1);
-        assert theOneMostPopular.size() == 1 : "The one most popular should be a single one but is " + theOneMostPopular + ".";
+        assertThat(theOneMostPopular.size()).describedAs("The one most popular should be a single one but is " + theOneMostPopular + ".").isEqualTo(1);
         assert theOneMostPopular.get(0).equals(l2.name) : "The one most popular one should be l2 but is " + theOneMostPopular + ".";
         List<String> threePopular = PopularLocation.getMostPopularLike("sbb", "Schöner", 3);
-        assert threePopular.size() == 3 : "The three most popular should be three items but are " + theOneMostPopular + ".";
+        assertThat(threePopular.size()).describedAs("The three most popular should be three items but are " + theOneMostPopular + ".").isEqualTo(3);
         assert threePopular.get(0).equals(l2.name) : "The first of the three most popular one should be l2 but is " + theOneMostPopular.get(0) + ".";
         assert ((threePopular.get(1).equals(l1.name) && threePopular.get(2).equals(l3.name)) || (threePopular.get(1).equals(l3.name) && threePopular.get(2).equals(l1.name))) : "The second and third of the most popular items should be l1 and l3 but are " + threePopular.get(1) + " and " + threePopular.get(2) + ".";
-        assert PopularLocation.getMostPopularLike("sbb", "Schöner", 10).size() == 3 : "I think there should be only three matches but there are " + PopularLocation.getMostPopularLike("sbb", "Schöner", 10) + " = total " + PopularLocation.getMostPopularLike("sbb", "Schöner", 10).size() + ".";
-        assert PopularLocation.getMostPopularLike("sbb", " Ort ", 10).size() == 3 : "' Ort ' should also match three times but did " + PopularLocation.getMostPopularLike("sbb", " Ort ", 10) + ".";
-        assert PopularLocation.getMostPopularLike("asdf", " Ort ", 10).size() == 0 : "For an unknown provider, there should not be any result. But got: " + PopularLocation.getMostPopularLike("asdf", " Ort ", 10) + ".";
-        assert PopularLocation.getMostPopularLike(null, " Ort ", 10).size() == 0 : "For no provider, there should not be any result. But got: " + PopularLocation.getMostPopularLike(null, " Ort ", 10) + ".";
-        assert PopularLocation.getMostPopularLike("sbb", null, 10).size() == 0 : "No string to search should not return any result. But returned " + PopularLocation.getMostPopularLike("sbb", null, 10) + ".";
+        assertThat(PopularLocation.getMostPopularLike("sbb", "Schöner", 10).size()).describedAs("I think there should be only three matches but there are " + PopularLocation.getMostPopularLike("sbb", "Schöner", 10) + " = total " + PopularLocation.getMostPopularLike("sbb", "Schöner", 10).size() + ".").isEqualTo(3);
+        assertThat(PopularLocation.getMostPopularLike("sbb", " Ort ", 10).size()).describedAs("' Ort ' should also match three times but did " + PopularLocation.getMostPopularLike("sbb", " Ort ", 10) + ".").isEqualTo(3);
+        assertThat(PopularLocation.getMostPopularLike("asdf", " Ort ", 10).size()).describedAs("For an unknown provider, there should not be any result. But got: " + PopularLocation.getMostPopularLike("asdf", " Ort ", 10) + ".").isEqualTo(0);
+        assertThat(PopularLocation.getMostPopularLike(null, " Ort ", 10).size()).describedAs("For no provider, there should not be any result. But got: " + PopularLocation.getMostPopularLike(null, " Ort ", 10) + ".").isEqualTo(0);
+        assertThat(PopularLocation.getMostPopularLike("sbb", null, 10).size()).describedAs("No string to search should not return any result. But returned " + PopularLocation.getMostPopularLike("sbb", null, 10) + ".").isEqualTo(0);
     }
 }

@@ -1,0 +1,118 @@
+@*
+* Copyright 2013, L. Murer.
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see < http://www.gnu.org/licenses/ >.
+*@
+
+@(req: Request, connections: List[de.schildbach.pte.dto.Connection], warnings: List[String],iteratorExtender: tags.FastTags.IteratorExtender)
+
+
+@styles={
+}
+@scripts={
+<!--
+  Copyright 2013, L. Murer.
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see < http://www.gnu.org/licenses/ >.
+  -->
+
+<script src='@routes.Assets.at("/public","javascripts/timetable.js")' type="text/javascript"></script>
+}
+@navigation={
+<a href='@routes.Application.index()?@req.requestString'>Abfrage ändern</a>
+<a href='@routes.Application.showTimetable()?@tags.FastTags.remove("&time=\\+?[0-9]{0,2}%3A[0-9]{0,2}\\+*",req.requestString)'>...zur
+    aktuellen Uhrzeit</a>
+}
+
+@title={
+@req.from.join("&#44 ") &rarr; @req.to.join("&#44 ")
+}
+
+@main(title,styles,scripts,navigation) {
+
+<h2>Verbindungen von @req.from.join("&#44 ")
+    nach @req.to.join("&#44 ")</h2>
+<table id="fahrplantabelle" border="0" style="width:auto;">
+    @for(connection <- connections) {
+    <tr class="@if(iteratorExtender.isEven()) {even}else{odd}">
+        <td>
+            @req.printDate(connection.getFirstTripDepartureTime()) - @req.printDate(connection.getLastTripArrivalTime())
+        </td>
+        <td>
+            <span style="color:silver;">(@tags.FastTags.getDuration(connection.getFirstTripDepartureTime(), connection.getLastTripArrivalTime())
+                )</span>
+        </td>
+        <td id="from_@iteratorExtender.get()">
+            @connection.from.name
+            @if(tags.FastTags.isit(connection.parts.get(0),"Trip")) {
+            @if(tags.FastTags.hasDeparturePosition(connection.parts.get(0))) {
+            <span style="color:silver;">(Gleis @tags.FastTags.getDeparturePosition(connection.parts.get(0)))</span>
+            }
+            }
+        </td>
+        <td id="arr_@iteratorExtender.get()">&rarr;</td>
+        <td id="to_@iteratorExtender.get()">
+            @connection.to.name
+            @if(tags.FastTags.isit(connection.parts.get(connection.parts.size()-1), "Trip")) {
+            @if(tags.FastTags.hasArrivalPosition(connection.parts.get(connection.parts.size()-1))) {
+            <span style="color:silver;">(Gleis @tags.FastTags.getArrivalPosition(connection.parts.get(connection.parts.size()-1)))</span>
+            }
+            }
+        </td>
+        <td style="width:99%; text-align:center;">
+            @if(tags.FastTags.hasDetails(connection.parts)) {
+            <a href="javascript:void(0);" onclick="showDetails('@iteratorExtender.get()');"
+               id="showDetails_@iteratorExtender.get()">&dArr; Umsteigen <span
+                    style="color: silver;">(@tags.FastTags.getAmountOfChanges(connection.parts, "x", "x"))</span></a>
+            <a href="javascript:void(0);" onclick="hideDetails('@iteratorExtender.get()');"
+               id="hideDetails_@iteratorExtender.get()" style="display: none;">&uArr; Umsteigen <span
+                    style="color: silver;">(@tags.FastTags.getAmountOfChanges(connection.parts, "x", "x"))</span></a>
+            }
+        </td>
+    </tr>
+    <tr id="details_@iteratorExtender.get()" style="display:none;"
+        class="@if(iteratorExtender.isEven()) {even}else{odd}">
+        <td colspan="6" align="center">
+            @if(tags.FastTags.hasDetails(connection.parts)) {
+            @tags.FastTags.getVias(connection.parts,KnownProvider.getById(req.provider))
+            }
+        </td>
+    </tr>
+    @iteratorExtender.next()
+    }
+</table>
+@if(!warnings.isEmpty()) {
+<ul class="fplnIgnoreMessage">
+    @for(warning <- warnings) {
+    <li>
+        @warning
+    </li>
+    }
+</ul>
+<a href="@routes.Application.showTimetable()?@req.requestString&flexible=true" class="fplnIgnoreMessage">Ignorierte
+    Verbindungen auch anzeigen</a>
+}
+
+}

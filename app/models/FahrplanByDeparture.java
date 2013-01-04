@@ -1,5 +1,5 @@
 /*
- * Copyright 2011, L. Murer.
+ * Copyright 2013, L. Murer.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,8 +12,9 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
+
 package models;
 
 import de.schildbach.pte.dto.Connection;
@@ -30,11 +31,19 @@ import java.util.Date;
  */
 public class FahrplanByDeparture implements Comparator<Connection> {
     public int compare(Connection c1, Connection c2) {
-        Date c2start = c2.getFirstTripDepartureTime();
-        Date c1start = c1.getFirstTripDepartureTime();
-        if (c1start == null || c2start == null || c1start.equals(c2start)) {
-            return c1.hashCode() - c2.hashCode();
+        Date c1from = c1.getFirstTripDepartureTime();
+        Date c2from = c2.getFirstTripDepartureTime();
+        if (c1from == null) {
+            if (c2from == null) {
+                return 0;
+            } else {
+                return -5;
+            }
+        } else if (c2from == null) {
+            return 5;
+        } else if (c1from.equals(c2from)) {
+            return 0;
         }
-        return c1start.compareTo(c2start);
+        return c1from.compareTo(c2from);
     }
 }
