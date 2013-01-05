@@ -390,7 +390,7 @@ public class FastTags {
     }
 
     public static boolean hasDeparturePosition(Part part) {
-        return part instanceof Trip && ((Trip) part).departurePosition != null;
+        return part instanceof Trip && ((Trip) part).departurePosition != null && !((Trip) part).departurePosition.equals("");
     }
 
     public static String getDeparturePosition(Part part) {
@@ -399,11 +399,11 @@ public class FastTags {
     }
 
     public static boolean hasArrivalPosition(Part part) {
-        return part instanceof Trip && ((Trip) part).arrivalPosition != null;
+        return part instanceof Trip && ((Trip) part).arrivalPosition != null && !((Trip) part).arrivalPosition.equals("");
     }
 
     public static String getArrivalPosition(Part part) {
-        assert hasDeparturePosition(part);
+        assert hasArrivalPosition(part);
         return ((Trip) part).arrivalPosition;
     }
 }

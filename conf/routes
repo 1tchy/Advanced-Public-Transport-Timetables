@@ -21,15 +21,18 @@
 ##########################################################################
 
 GET     /favicon.ico       controllers.Assets.at(path="/public/images", file="favicon.ico")
+GET     /robots.txt                 controllers.Assets.at(path="/public", file="robots.txt")
 
-# Home page
-GET     /                  controllers.Application.index()
-GET     /faq               controllers.Application.showFAQ()
-GET     /robots.txt        controllers.Assets.at(path="/public", file="robots.txt")
-GET     /timetable       controllers.Application.showTimetable()
-GET     /autocomplete    controllers.Application.autocompleteStation()
-GET     /station         controllers.Application.getStation(lat: String, lon: String)
-GET     /*path/             controllers.Application.redirectUntrailed(path:String)
+GET     /                           controllers.Application.index()
+GET     /faq                        controllers.FAQ.show()
+GET     /timetable                  controllers.Application.showTimetable()
+GET     /autocomplete               controllers.Stations.autocomplete()
+GET     /station                    controllers.Stations.getByPosition(lat: String, lon: String)
+#GET     /x/*stations1/*stations2    controllers.FeaturedShortcuts.forward(stations1, stations2, crossover: Boolean=true)
+#GET     /1-1/*stations1/*stations2  controllers.FeaturedShortcuts.forward(stations1, stations2, crossover: Boolean=false)
+#GET     /x/*station                 controllers.FeaturedShortcuts.forward(station, stations2=null, crossover: Boolean=true)
+#GET     /1-1/*station               controllers.FeaturedShortcuts.forward(station, stations2=null, crossover: Boolean=false)
+GET     /*path/                     controllers.Application.redirectUntrailed(path)
 
 # Map static resources from the /public folder to the /public URL path
 GET     /public/*file               controllers.Assets.at(path="/public", file)

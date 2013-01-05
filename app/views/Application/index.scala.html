@@ -75,7 +75,7 @@
             <td id="from">
                 @for(s <- req.from) {
                 <input class="autocompleteStation" type="text" name="from[]" value="@s" onkeyup="check('from');"
-                       data-url="@routes.Application.autocompleteStation()"/>
+                       data-url="@routes.Stations.autocomplete()"/>
                 }
             </td>
         </tr>
@@ -101,7 +101,7 @@
                 <div id="to">
                     @for(s <- req.to) {
                     <input class="autocompleteStation" type="text" name="to[]" value="@s" onkeyup="check('to');"
-                           data-url="@routes.Application.autocompleteStation()"/>
+                           data-url="@routes.Stations.autocomplete()"/>
                     }
                 </div>
             </td>

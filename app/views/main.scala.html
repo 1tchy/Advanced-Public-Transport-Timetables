@@ -50,13 +50,13 @@
         _gaq.push(['_setAccount', 'UA-82988-7']);
         _gaq.push(['_trackPageview']);
         (function () {
-            var ga = document.createElement('script');
-            ga.type = 'text/javascript';
-            ga.async = true;
-            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
-                    '.google-analytics.com/ga.js';
-            var s = document.getElementsByTagName('script')[0];
-            s.parentNode.insertBefore(ga, s);
+        var ga = document.createElement('script');
+        ga.type = 'text/javascript';
+        ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') +
+        '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(ga, s);
         })();
     </script>
     @scripts
@@ -65,13 +65,14 @@
 <div class="navi">
     <a href="@routes.Application.index()">Neue Abfrage</a>
     @navigation
-    <a href="@routes.Application.showFAQ()" class="faq">FAQ</a>
+    <a href="@routes.FAQ.show()" class="faq">FAQ</a>
 </div>
 <div class="content">
     <table border="0">
         <tr>
-            <td><a href="@routes.Application.index()"><img src='@routes.Assets.at("/public","images/logo.png")' width="80" height="80"
-                                                      alt="schneller-dort.ch" border="0"></a></td>
+            <td><a href="@routes.Application.index()"><img src='@routes.Assets.at("/public","images/logo.png")'
+                                                           width="80" height="80"
+                                                           alt="schneller-dort.ch" border="0"></a></td>
             <td><h1>Der effiziente Fahrplan</h1></td>
         </tr>
     </table>

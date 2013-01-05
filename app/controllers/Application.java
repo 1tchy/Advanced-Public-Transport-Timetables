@@ -18,16 +18,11 @@
 package controllers;
 
 import actions.MailAction;
-import de.schildbach.pte.NetworkProvider;
-import de.schildbach.pte.OpenDataProvider;
 import de.schildbach.pte.dto.Connection;
-import de.schildbach.pte.dto.Location;
-import de.schildbach.pte.dto.LocationType;
-import de.schildbach.pte.dto.NearbyStationsResult;
-import models.*;
+import models.ComplexRequests;
+import models.Request;
 import play.Logger;
 import play.api.templates.Html;
-import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -36,7 +31,6 @@ import tags.FastTags;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -113,6 +107,10 @@ public class Application extends Controller {
                 get.put(key, value_to_put);
             }
         }
+        return processGETvalues(get, errors);
+    }
+
+    protected static Request processGETvalues(Map<String, String> get, Collection<String> errors) {
         final Request request = myBind(get, errors);
         while (request.from.size() < 2) {
             request.from.add("");
@@ -120,7 +118,7 @@ public class Application extends Controller {
         while (request.to.size() < 2) {
             request.to.add("");
         }
-        if (httpRequest.uri().length() > 1) {
+        if (request().uri().length() > 1) {
             errors.addAll(request.validate());
         }
         return request;
@@ -160,8 +158,8 @@ public class Application extends Controller {
 
     private static Result redirectOldRequests() {
         String uri = request().uri();
-        if (uri.contains("start[") || uri.contains("stop[") || uri.contains("start%5B") || uri.contains("stop%5B")) {
-            String newUri = uri.replace("start", "from").replace("stop", "to");
+        if (uri.contains("start[") || uri.contains("stop[") || uri.contains("direkt[") || uri.contains("start%5B") || uri.contains("stop%5B") || uri.contains("direkt%5B")) {
+            String newUri = uri.replace("start", "from").replace("stop", "to").replace("direkt", "direct");
             Logger.warn("Forwarded " + uri);
             Logger.warn("       to " + newUri);
             return movedPermanently(newUri);
@@ -173,9 +171,7 @@ public class Application extends Controller {
 
     /**
      * Shows a webpage with some timetables to the user, depending on the given parameters
-     * //@param provider the ID of the provider to get the timetable from
      */
-    @SuppressWarnings("UnusedDeclaration")
     @With(MailAction.class)
     public static Result showTimetable() {
         Result redirectOldRequests = redirectOldRequests();
@@ -185,6 +181,10 @@ public class Application extends Controller {
         if (!errors.isEmpty()) {
             return index(request, errors);
         }
+        return getTimetable(request, errors);
+    }
+
+    protected static Result getTimetable(Request request, Set<String> errors) {
         try {
             List<String> warnings = new ArrayList<>();
             List<Connection> connections = ComplexRequests.getMultipleTimetables(request, warnings);
@@ -196,56 +196,7 @@ public class Application extends Controller {
     }
 
     /**
-     * Answers to a autocomplete request for a station
-     */
-    @SuppressWarnings("UnusedDeclaration")
-    @With(MailAction.class)
-    public static Result autocompleteStation() {
-        String[] values = request().queryString().get("term");
-        Result re;
-        if (values == null) {
-            re = noContent();
-        } else {
-            re = ok(Json.toJson(Autocomplete.stations("sbb", values[0])));
-        }
-        return re;
-    }
-
-    /**
-     * Returns some stations near the given coordinates
-     */
-    @SuppressWarnings("UnusedDeclaration")
-    @With(MailAction.class)
-    public static Result getStation(String lat, String lon) throws WrongParameterException {
-        //todo Play 2.1: Make parameters real floats
-        float lat_f = Float.parseFloat(lat);
-        float lon_f = Float.parseFloat(lon);
-        NearbyStationsResult stations;
-        NetworkProvider provider = InputChecker.getAndValidateProvider("sbb");
-        try {
-            if (provider instanceof OpenDataProvider) {
-                stations = ((OpenDataProvider) provider).queryNearbyStations(lat_f, lon_f, 0, 0);
-            } else {
-                stations = provider.queryNearbyStations(new Location(LocationType.ANY, (int) lat_f, (int) lon_f), 0, 0);
-            }
-        } catch (IOException e) {
-            Logger.warn("Could not find nearby stations at " + lat + "/" + lon, e);
-            return ok(Json.toJson(new ArrayList(0)));
-        }
-        return ok(Json.toJson(stations.stations));
-    }
-
-    /**
-     * Shows a page to answer (all) questions a User of this page might have (frequently asked questions).
-     */
-    @SuppressWarnings("UnusedDeclaration")
-    @With(MailAction.class)
-    public static Result showFAQ() {
-        return ok(views.html.Application.faq.render());
-    }
-
-    /**
-     * Moves permanently the get into version without trailing slash
+     * "Moves permanently" the GET into a request without trailing slash
      *
      * @param path String
      * @return Result
