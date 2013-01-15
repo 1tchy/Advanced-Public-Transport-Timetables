@@ -46,7 +46,9 @@ public class Application extends Controller {
         Collection<String> errors = new HashSet<>();
         Request request = getGetRequest(errors);
         Result redirectOldRequests = redirectOldRequests();
-        if (redirectOldRequests != null) return redirectOldRequests;
+        if (redirectOldRequests != null) {
+            return redirectOldRequests;
+        }
         return index(request, errors);
     }
 
@@ -175,7 +177,9 @@ public class Application extends Controller {
     @With(MailAction.class)
     public static Result showTimetable() {
         Result redirectOldRequests = redirectOldRequests();
-        if (redirectOldRequests != null) return redirectOldRequests;
+        if (redirectOldRequests != null) {
+            return redirectOldRequests;
+        }
         Set<String> errors = new HashSet<>();
         Request request = getGetRequest(errors);
         if (!errors.isEmpty()) {
@@ -202,12 +206,12 @@ public class Application extends Controller {
      * @return Result
      */
     @With(MailAction.class)
-    public static Result redirectUntrailed(String path) {
+    public static Result redirectUntrailed(@SuppressWarnings("UnusedParameters") String path) {
         String uri = request().uri();
         if (uri.contains("/?")) {
             uri = uri.replaceFirst("/?", "?");
-        } else {
-            uri = path;
+        } else if (uri.endsWith("/")) {
+            uri = uri.substring(0, uri.length() - 1);
         }
         return movedPermanently(uri);
     }

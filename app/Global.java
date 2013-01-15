@@ -34,24 +34,30 @@ import static play.mvc.Results.*;
  */
 public class Global extends GlobalSettings {
 
-//    @Override
-//    public Result onError(Http.RequestHeader requestHeader, Throwable throwable) {
-//        Html html = workaroundProblem(requestHeader, "Error: " + throwable.getLocalizedMessage(), null);
-//        if (html == null) return internalServerError();
-//        return internalServerError(html);
-//    }
+    @Override
+    public Result onError(Http.RequestHeader requestHeader, Throwable throwable) {
+        Html html = workaroundProblem(requestHeader, "Error: " + throwable.getLocalizedMessage(), null);
+        if (html == null) {
+            return internalServerError();
+        }
+        return internalServerError(html);
+    }
 
     @Override
     public Result onHandlerNotFound(Http.RequestHeader requestHeader) {
         Html html = workaroundProblem(requestHeader, "HandlerNotFound", null);
-        if (html == null) return notFound();
+        if (html == null) {
+            return notFound();
+        }
         return notFound(html);
     }
 
     @Override
     public Result onBadRequest(Http.RequestHeader requestHeader, String s) {
         Html html = workaroundProblem(requestHeader, "BadRequest: " + s, null);
-        if (html == null) return badRequest();
+        if (html == null) {
+            return badRequest();
+        }
         return badRequest(html);
     }
 

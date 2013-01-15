@@ -19,13 +19,11 @@ package actions;
 
 import com.typesafe.plugin.MailerAPI;
 import com.typesafe.plugin.MailerPlugin;
-import controllers.Application;
-import play.api.templates.Html;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
 
-import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,7 +36,7 @@ public class MailAction extends Action.Simple {
     public Result call(Http.Context context) throws Throwable {
         Result result;
 //        try {
-            result = delegate.call(context);
+        result = delegate.call(context);
         /*} catch (Throwable e) {
             //Send mail
             sendErrorMail(e, context.request());
@@ -60,7 +58,21 @@ public class MailAction extends Action.Simple {
         mail.addRecipient(mailAddress);
         mail.addFrom(mailAddress);
         StringBuilder mailContent = new StringBuilder("Request was: http://");
-        mailContent.append(request.host()).append(request.uri()).append("\n\nStacktrace:\n");
+        mailContent.append(request.host()).append(request.uri());
+        mailContent.append("\nFrom: ").append(request.remoteAddress());
+        mailContent.append("\n\nWith headers:");
+        Map<String, String[]> headers = request.headers();
+        if (headers != null) {
+            for (String headerKey : headers.keySet()) {
+                mailContent.append("\n    ").append(headerKey).append(":");
+                for (String headerValue : headers.get(headerKey)) {
+                    mailContent.append("\n      - ").append(headerValue);
+                }
+            }
+        } else {
+            mailContent.append(" no headers found.");
+        }
+        mailContent.append("\n\nStacktrace:\n");
         for (StackTraceElement element : e.getStackTrace()) {
             mailContent.append(element).append("\n");
         }
