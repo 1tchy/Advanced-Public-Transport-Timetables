@@ -171,9 +171,9 @@ public class Stations extends ArrayList<String> {
             } else {
                 sb.append(joiner);
             }
-            sb.append(station.name);
+            sb.append(station.name.replace(",", ""));
         }
-        return new Html(sb.toString().replace(",", ""));
+        return new Html(sb.toString());
     }
 
 }

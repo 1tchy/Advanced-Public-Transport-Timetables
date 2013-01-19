@@ -52,8 +52,7 @@
 
 @main(title,styles,scripts,navigation) {
 
-<h2>Verbindungen von @req.from.join("&#44 ")
-    nach @req.to.join("&#44 ")</h2>
+<h2>Verbindungen von @req.from.join(", ") nach @req.to.join(", ")</h2>
 <table id="fahrplantabelle" border="0" style="width:auto;">
     @for(connection <- connections) {
     <tr class="@if(iteratorExtender.isEven()) {even}else{odd}">

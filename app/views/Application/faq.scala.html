@@ -41,6 +41,7 @@
     <li><a href="#wem">Von wem ist diese Seite?</a></li>
     <li><a href="#sbb">Was ist das Verhältnis zur SBB?</a></li>
     <li><a href="#disclaimer">Wie darf ich es benutzen?</a></li>
+    <li><a href="#shortcut">Wie erstelle ich einen Shortcut?</a></li>
     <li><a href="#verbessern">Wie kann ich die Seite verbessern?</a></li>
     <li><a href="#mehr">Ich tscheggs immer no nöd.</a></li>
 </ul>
@@ -99,6 +100,33 @@
     für einen bestimmten Zweck</b>. Siehe die <a href="http://www.gnu.org/licenses/" target="_blank">GNU General Public
     License</a> für weitere Details.</p>
 
+<a name="shortcut"></a><h4>Wie erstelle ich einen Shortcut?</h4>
+<p>Ein Shortcut ist einfach ein spezieller Link, nämlich einer mit folgenden Teilen:</p>
+<ol>
+    <li>Hostname <span class="example">(also @request.host)</span></li>
+    <li>Verbindungen kreuzweise (x) oder nur 1-zu-1 (1-1)
+        <div class="example">(beispielsweise @request.host/<strong>x</strong>/)</div>
+    </li>
+    <li>Start-Haltestellen (mehrere getrennt durch "&amp;")
+        <div class="example">(beispielsweise @request.host/x/<strong>Mettmenstetten&amp;Mühlau</strong>)</div>
+    </li>
+    <li>Ziel-Haltestellen (mehrere getrennt durch "&amp;")
+        <div class="example">(beispielsweise <a href="http://@request.host/x/Maschwanden/Luzern">@request.host/x/Mettmenstetten&amp;Mühlau/<strong>Luzern</strong></a>)
+        </div>
+    </li>
+    <li>Für Verbindungen zurück (also einfach in die anderer Richtung) noch "?retour=1" anhängen
+        <div class="example">(beispielsweise <a href="http://@request.host/x/Maschwanden/Luzern?retour=1">@request.host/x/Mettmenstetten&amp;Mühlau/Luzern<strong>?retour=1</strong></a>)
+        </div>
+    </li>
+</ol>
+<p>Zusätzlich gibt es noch gewisse Abkürzungen wie "Maschwanden" für "Mettmenstetten &amp; Mühlau" oder
+    "Regensbergbrücke" für beispielsweise <a href="http://@request.host/1-1/Regensbergbrücke">@request.host/1-1/Regensbergbrücke</a>.
+    Diese sind fest einprogrammiert und können wie im vorherigen Beispiel auch ein Fahrziel enthalten.
+    Um weitere solche hinzuzufügen, am besten ein Mail schreiben an <a
+            href="http://www.google.com/recaptcha/mailhide/d?k=01AhtrkbDIr6bRdy2uE4kKag==&amp;c=VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs="
+            onclick="window.open('http://www.google.com/recaptcha/mailhide/d?k\07501AhtrkbDIr6bRdy2uE4kKag\75\75\46c\75VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs\075', '', 'toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=500,height=300'); return false;">schneller-dort@@...</a>.
+</p>
+
 <a name="verbessern"></a><h4>Wie kann ich die Seite verbessern?</h4>
 <p>Schreib' mir ein Mail: <a
         href="http://www.google.com/recaptcha/mailhide/d?k=01AhtrkbDIr6bRdy2uE4kKag==&amp;c=VoeIzlB9yHo9MRAs1ldDcckECe2uJRUxhf7HEYwnVKs="
@@ -118,4 +146,4 @@
     </li>
 </ol>
 
-        }
+}

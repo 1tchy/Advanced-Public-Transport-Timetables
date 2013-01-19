@@ -130,7 +130,7 @@ label {
     font-size:smaller;
 }
 
-.optional {
+.optional, .example {
     font-size: smaller;
     color:#333;
 }
