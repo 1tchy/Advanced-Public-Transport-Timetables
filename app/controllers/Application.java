@@ -228,4 +228,8 @@ public class Application extends Controller {
         }
         return result;
     }
+
+    public static Result overlookQuery(@SuppressWarnings("UnusedParameters") String anything) {
+        return ok();
+    }
 }

@@ -36,3 +36,5 @@ GET     /*path/                     controllers.Application.redirectUntrailed(pa
 
 # Map static resources from the /public folder to the /public URL path
 GET     /public/*file               controllers.Assets.at(path="/public", file)
+
+GET     /_stax/*anything             controllers.Application.overlookQuery(anything)
