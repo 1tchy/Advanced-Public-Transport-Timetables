@@ -10,3 +10,4 @@ target/
 tmp/
 .history
 modules/
+upload-command.txt
