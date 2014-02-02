@@ -19,9 +19,10 @@ package actions;
 
 import com.typesafe.plugin.MailerAPI;
 import com.typesafe.plugin.MailerPlugin;
+import play.libs.F;
 import play.mvc.Action;
 import play.mvc.Http;
-import play.mvc.Result;
+import play.mvc.SimpleResult;
 
 import java.util.Map;
 
@@ -33,8 +34,8 @@ import java.util.Map;
  */
 public class MailAction extends Action.Simple {
     @Override
-    public Result call(Http.Context context) throws Throwable {
-        Result result;
+    public F.Promise<SimpleResult> call(Http.Context context) throws Throwable {
+        F.Promise<SimpleResult> result;
 //        try {
         result = delegate.call(context);
         /*} catch (Throwable e) {

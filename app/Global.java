@@ -19,8 +19,9 @@ import actions.MailAction;
 import controllers.Application;
 import play.GlobalSettings;
 import play.api.templates.Html;
+import play.libs.F.Promise;
 import play.mvc.Http;
-import play.mvc.Result;
+import play.mvc.SimpleResult;
 
 import javax.annotation.Nullable;
 
@@ -35,30 +36,30 @@ import static play.mvc.Results.*;
 public class Global extends GlobalSettings {
 
     @Override
-    public Result onError(Http.RequestHeader requestHeader, Throwable throwable) {
+    public Promise<SimpleResult> onError(Http.RequestHeader requestHeader, Throwable throwable) {
         Html html = workaroundProblem(requestHeader, "Error: " + throwable.getLocalizedMessage(), null);
         if (html == null) {
-            return internalServerError();
+            return Promise.<SimpleResult>pure(internalServerError());
         }
-        return internalServerError(html);
+        return Promise.<SimpleResult>pure(internalServerError(html));
     }
 
     @Override
-    public Result onHandlerNotFound(Http.RequestHeader requestHeader) {
+    public Promise<SimpleResult> onHandlerNotFound(Http.RequestHeader requestHeader) {
         Html html = workaroundProblem(requestHeader, "HandlerNotFound", null);
         if (html == null) {
-            return notFound();
+            return Promise.<SimpleResult>pure(notFound());
         }
-        return notFound(html);
+        return Promise.<SimpleResult>pure(notFound(html));
     }
 
     @Override
-    public Result onBadRequest(Http.RequestHeader requestHeader, String s) {
+    public Promise<SimpleResult> onBadRequest(Http.RequestHeader requestHeader, String s) {
         Html html = workaroundProblem(requestHeader, "BadRequest: " + s, null);
         if (html == null) {
-            return badRequest();
+            return Promise.<SimpleResult>pure(badRequest());
         }
-        return badRequest(html);
+        return Promise.<SimpleResult>pure(badRequest(html));
     }
 
     private static Html workaroundProblem(Http.RequestHeader requestHeader, String problem, @Nullable Throwable throwable) {
