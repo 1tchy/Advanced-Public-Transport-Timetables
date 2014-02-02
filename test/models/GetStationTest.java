@@ -15,11 +15,10 @@
  * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
 
-package test.models;
+package models;
 
 import de.schildbach.pte.OpenDataProvider;
 import de.schildbach.pte.dto.NearbyStationsResult;
-import models.KnownProvider;
 import org.junit.Before;
 import org.junit.Test;
 

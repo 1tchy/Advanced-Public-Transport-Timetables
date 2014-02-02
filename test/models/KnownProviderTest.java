@@ -15,10 +15,9 @@
  * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
 
-package test.models;
+package models;
 
 import de.schildbach.pte.NetworkProvider;
-import models.KnownProvider;
 import org.junit.Test;
 
 import static org.fest.assertions.Assertions.assertThat;

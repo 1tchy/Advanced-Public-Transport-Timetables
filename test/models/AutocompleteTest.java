@@ -15,7 +15,7 @@
  * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
 
-package test.models;/*
+package models;/*
  * Copyright 2013, L. Murer.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,10 +33,6 @@ package test.models;/*
  */
 
 import de.schildbach.pte.dto.Location;
-import models.Autocomplete;
-import models.InputChecker;
-import models.KnownProvider;
-import models.PopularLocation;
 import org.junit.Test;
 
 import java.util.ArrayList;

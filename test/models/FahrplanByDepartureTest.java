@@ -15,10 +15,9 @@
  * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
 
-package test.models;
+package models;
 
 import de.schildbach.pte.dto.Connection;
-import models.FahrplanByDeparture;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -56,12 +55,12 @@ public class FahrplanByDepartureTest {
     @Test
     public void testFirstIsNull() {
         //setup
-        Connection c1=mock(Connection.class);
+        Connection c1 = mock(Connection.class);
         when(c1.getFirstTripDepartureTime()).thenReturn(null);
-        Connection c2=mock(Connection.class);
+        Connection c2 = mock(Connection.class);
         when(c2.getFirstTripDepartureTime()).thenReturn(new Date(132200000));
         FahrplanByDeparture comparator = new FahrplanByDeparture();
         //test
-        assertThat(comparator.compare(c1,c2)).describedAs("The first is not set").isLessThan(0);
+        assertThat(comparator.compare(c1, c2)).describedAs("The first is not set").isLessThan(0);
     }
 }

@@ -47,12 +47,12 @@
 }
 
 @title={
-@req.from.join("&#44 ") &rarr; @req.to.join("&#44 ")
+@Html(req.from.join("&#44 ")) &rarr; @Html(req.to.join("&#44 "))
 }
 
 @main(title,styles,scripts,navigation) {
 
-<h2>Verbindungen von @req.from.join(", ") nach @req.to.join(", ")</h2>
+<h2>Verbindungen von @Html(req.from.join(", ")) nach @Html(req.to.join(", "))</h2>
 <table id="fahrplantabelle" border="0" style="width:auto;">
     @for(connection <- connections) {
     <tr class="@if(iteratorExtender.isEven()) {even}else{odd}">
@@ -95,7 +95,7 @@
         class="@if(iteratorExtender.isEven()) {even}else{odd}">
         <td colspan="6" align="center">
             @if(tags.FastTags.hasDetails(connection.parts)) {
-            @tags.FastTags.getVias(connection.parts,KnownProvider.getById(req.provider))
+            @Html(tags.FastTags.getVias(connection.parts,KnownProvider.getById(req.provider)))
             }
         </td>
     </tr>

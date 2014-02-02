@@ -15,13 +15,10 @@
  * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
 
-package test.models;
+package models;
 
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Location;
-import models.InputChecker;
-import models.KnownProvider;
-import models.WrongParameterException;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -81,9 +78,15 @@ public class InputCheckerTest {
         boolean z = false;
         for (Location l : validatedStations) {
             String l_name = l.name;
-            if (l_name.contains("Olten")) o = true;
-            if (l_name.contains("Bern")) b = true;
-            if (l_name.contains("Zürich")) z = true;
+            if (l_name.contains("Olten")) {
+                o = true;
+            }
+            if (l_name.contains("Bern")) {
+                b = true;
+            }
+            if (l_name.contains("Zürich")) {
+                z = true;
+            }
         }
         assert o : "InputChecker.getAndValidateStations(sbb, new String[]{\"Oerlikon\", \"Bern\", \"Zürich HB\"}, \"description\", \"fieldName\", new HashSet<String>()) didn't return Oerlikon.";
         assert b : "InputChecker.getAndValidateStations(sbb, new String[]{\"Oerlikon\", \"Bern\", \"Zürich HB\"}, \"description\", \"fieldName\", new HashSet<String>()) didn't return Bern.";

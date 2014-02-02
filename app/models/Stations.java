@@ -19,7 +19,6 @@ package models;
 
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Location;
-import play.api.templates.Html;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
@@ -162,7 +161,7 @@ public class Stations extends ArrayList<String> {
         return super.removeAll(objects);
     }
 
-    public Html join(String joiner) {
+    public String join(String joiner) {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         for (Location station : this.getLocations()) {
@@ -173,7 +172,7 @@ public class Stations extends ArrayList<String> {
             }
             sb.append(station.name.replace(",", ""));
         }
-        return new Html(sb.toString());
+        return sb.toString();
     }
 
 }

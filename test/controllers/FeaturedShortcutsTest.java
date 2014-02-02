@@ -15,10 +15,17 @@
  * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
 
-package test.controllers;
+package controllers;
 
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import play.mvc.Result;
+import play.test.FakeApplication;
+import play.test.Helpers;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static play.mvc.Http.Status.MOVED_PERMANENTLY;
@@ -32,37 +39,52 @@ import static play.test.Helpers.*;
  */
 public class FeaturedShortcutsTest {
 
+    private static FakeApplication app;
+
+    @BeforeClass
+    public static void startApp() throws Throwable {
+        Map<String, String> config = new HashMap<>();
+        config.put("smtp.mock", "true");
+        app = Helpers.fakeApplication(config);
+        Helpers.start(app);
+    }
+
+    @AfterClass
+    public static void stopApp() {
+        Helpers.stop(app);
+    }
+
     @Test
     public void onlyOneStationGiven_crossover() {
-        Result result = routeAndCall(fakeRequest("GET", "/x/Bern"));
+        Result result = route(fakeRequest("GET", "/x/Bern"));
         assertThat(status(result)).isEqualTo(MOVED_PERMANENTLY);
         assertThat(header("Location", result)).endsWith("/timetable?crossover=true&from[]=Bern&to[]=Luzern");
     }
 
     @Test
     public void onlyOneStationGiven_1to1_retour() {
-        Result result = routeAndCall(fakeRequest("GET", "/1-1/Bern/Olten?retour=1"));
+        Result result = route(fakeRequest("GET", "/1-1/Bern/Olten?retour=1"));
         assertThat(status(result)).isEqualTo(MOVED_PERMANENTLY);
         assertThat(header("Location", result)).endsWith("/timetable?crossover=false&from[]=Olten&to[]=Bern");
     }
 
     @Test
     public void severalStationsGiven_crossover() {
-        Result result = routeAndCall(fakeRequest("GET", "/x/Mühlau&Mettmenstetten&Knonau/Luzern"));
+        Result result = route(fakeRequest("GET", "/x/Mühlau&Mettmenstetten&Knonau/Luzern"));
         assertThat(status(result)).isEqualTo(MOVED_PERMANENTLY);
         assertThat(header("Location", result)).endsWith("/timetable?crossover=true&from[]=Mühlau&from[]=Mettmenstetten&from[]=Knonau&to[]=Luzern");
     }
 
     @Test
     public void severalStationsGiven_1to1() {
-        Result result = routeAndCall(fakeRequest("GET", "/1-1/Zürich HB&Zürich, BahnhofquaiHB/Zürich Oerlikon&Zürich, Regensbergbrücke"));
+        Result result = route(fakeRequest("GET", "/1-1/Z%C3%BCrich%20HB&Z%C3%BCrich,%20BahnhofquaiHB/Z%C3%BCrich%20Oerlikon&Z%C3%BCrich,%20Regensbergbr%C3%BCcke"));
         assertThat(status(result)).isEqualTo(MOVED_PERMANENTLY);
         assertThat(header("Location", result)).endsWith("/timetable?crossover=false&from[]=Zürich HB&from[]=Zürich, BahnhofquaiHB&to[]=Zürich Oerlikon&to[]=Zürich, Regensbergbrücke");
     }
 
     @Test
     public void checkForwardTargetExists() {
-        Result forwarding = routeAndCall(fakeRequest("GET", "/x/Luzern&Luzern, Steghof/Zürich Oerlikon&Zürich, Regensbergbrücke?retour=1"));
+        Result forwarding = route(fakeRequest("GET", "/x/Luzern&Luzern,%20Steghof/Z%C3%BCrich%20Oerlikon&Z%C3%BCrich,%20Regensbergbr%C3%BCcke?retour=1"));
         assertThat(status(forwarding)).isEqualTo(MOVED_PERMANENTLY);
         String targetURL = header("Location", forwarding).replaceFirst("http://", "");
         assertThat(targetURL).endsWith("/timetable?crossover=true&from[]=Zürich Oerlikon&from[]=Zürich, Regensbergbrücke&to[]=Luzern&to[]=Luzern, Steghof");

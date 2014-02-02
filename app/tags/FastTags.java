@@ -25,7 +25,6 @@ import de.schildbach.pte.dto.Location;
 import models.Directs;
 import models.KnownProvider;
 import models.Stations;
-import play.api.templates.Html;
 
 import javax.annotation.Nullable;
 import java.text.DateFormat;
@@ -120,7 +119,7 @@ public class FastTags {
      * @param vias     List with multiple Parts (e.g. a List of Vias)
      * @param provider used for getting the timezone
      */
-    public static Html getVias(List<Part> vias, KnownProvider provider) {
+    public static String getVias(List<Part> vias, KnownProvider provider) {
         //The default argument should be a List Object containing only parts. Otherwise, there will be thrown an Exception.
         TimeZone timeZone = provider.timeZone;
         //For all Vias, do the following
@@ -176,7 +175,7 @@ public class FastTags {
 //                    }
         }
         ret.append("\t\t<td></td>\n\t\t<td></td>\n\t</tr>\n</table>\n");
-        return new Html(ret.toString());
+        return ret.toString();
     }
 
     /**
@@ -253,9 +252,13 @@ public class FastTags {
      * @return the name of the location
      */
     private static String getLocation(Location location) {
-        if (location == null) return "";
+        if (location == null) {
+            return "";
+        }
         String out = location.name;
-        if (out == null) out = "";
+        if (out == null) {
+            out = "";
+        }
         return out;
     }
 
@@ -269,7 +272,9 @@ public class FastTags {
      */
     private static String getPartOfPart(Part via, boolean getDeparture, TimeZone timeZone) {
         //Make sure, via is not null
-        if (via == null) return "";
+        if (via == null) {
+            return "";
+        }
         //Define the output
         StringBuilder location;
         if (getDeparture) { //what should be printed (departure or arrival)
@@ -327,7 +332,9 @@ public class FastTags {
      * @param body  haystack
      */
     public static String remove(String regex, String body) {
-        if (body == null) return null;
+        if (body == null) {
+            return null;
+        }
         if (regex == null) {
             return body;
         } else {
@@ -345,7 +352,7 @@ public class FastTags {
      * @return The HTML-Code for the direct-connection-only checkboxes
      */
     @SuppressWarnings("UnusedDeclaration")
-    public static Html printDirectCheckboxes(boolean isCrossover, Stations from, Stations to, Directs direct) {
+    public static String printDirectCheckboxes(boolean isCrossover, Stations from, Stations to, Directs direct) {
         StringBuilder sb = new StringBuilder();
         final int repeats = Math.max(Math.max(from.size(), to.size()), 2) - 1;
         for (int i = 0; i < repeats; i++) {
@@ -357,7 +364,7 @@ public class FastTags {
                 sb.append("/>");
             }
         }
-        return new Html(sb.toString());
+        return sb.toString();
     }
 
     public static class IteratorExtender {

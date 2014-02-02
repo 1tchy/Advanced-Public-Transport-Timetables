@@ -15,13 +15,10 @@
  * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
 
-package test.models;
+package models;
 
 import de.schildbach.pte.NetworkProvider;
 import de.schildbach.pte.dto.Connection;
-import models.ComplexRequests;
-import models.KnownProvider;
-import models.Request;
 import org.junit.Test;
 
 import java.util.*;

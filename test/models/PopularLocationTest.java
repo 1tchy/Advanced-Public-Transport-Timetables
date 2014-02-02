@@ -15,11 +15,10 @@
  * along with this program.  If not, see < http://www.gnu.org/licenses/ >.
  */
 
-package test.models;
+package models;
 
 import de.schildbach.pte.dto.Location;
 import de.schildbach.pte.dto.LocationType;
-import models.PopularLocation;
 import org.junit.Test;
 
 import java.util.Collection;
